@@ -1,9 +1,10 @@
 %option yylineno
 digit		[0-9]
-INT		0|([1-9][0-9]*)|(0[1-7][0-7]*)|(0[xX][1-9a-fA-F][0-9a-fA-F]*)
+INT		0|([1-9][0-9]*)
 RE_FLOAT	({digit}+\.{digit}+)
 SC_FLOAT	(((\.{digit}+)|({digit}+\.)|({digit}+\.{digit}+))[eE][+-]?{digit}+)
-FLOAT		RE_FLOAT|SC_FLOAT
+FLOAT		{RE_FLOAT}|{SC_FLOAT}
+ERR_FLOAT	(((\.{digit}+)|({digit}+\.)|({digit}+\.{digit}+))[eE][+-]?)|({digit}+[eE]{digit}*)
 SEMI		;
 COMMA		,
 ASSIGNOP	=	
@@ -27,9 +28,9 @@ newline 	[\n\r]
 whitespace 	[ \t]+
 ID		[a-zA-Z_][a-zA-Z0-9_]*
 %%
-
-{INT}		{printf("INT\n");}
 {FLOAT}		{printf("FLOAT\n");}
+{ERR_FLOAT}	{printf("Error type A at Line %d: Illegal floating point number \"%s\"\n",yylineno,yytext);}
+{INT}		{printf("INT\n");}
 {SEMI}		{printf("SEMI\n");}
 {COMMA}		{printf("COMMA\n");}
 {ASSIGNOP}	{printf("ASSIGNOP\n");}
@@ -54,8 +55,8 @@ ID		[a-zA-Z_][a-zA-Z0-9_]*
 "if"		{printf("if\n");}
 "else"		{printf("else\n");}
 "while"		{printf("while\n");}
-{newline}	{printf("newline\n");}
+{newline}	{}
 {whitespace}	{}
 {ID}		{printf("ID\n");}
-.		{printf("Error type A at line %d: Mysterious characters \'%S\'\n",yylineno,yytext);}
+.		{printf("Error type A at line %d: Mysterious characters \'%s\'\n",yylineno,yytext);}
 %%
