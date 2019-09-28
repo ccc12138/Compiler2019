@@ -20,21 +20,21 @@ RELOP		>|<|(>=)|(<=)|(==)|(!=)
 PLUS		\+
 MINUS		-
 STAR		\*
-DIV		\/
-AND		&&
-OR		\|\|
-DOT		\.
-NOT		!
+DIV			\/
+AND			&&
+OR			\|\|
+DOT			\.
+NOT			!
 TYPE		int|float
-LP		\(
-RP		\)
-LB		\[
-RB		\]
-LC		\{
-RC		\}
+LP			\(
+RP			\)
+LB			\[
+RB			\]
+LC			\{
+RC			\}
 newline 	[\n\r]
 whitespace 	[ \t]+
-ID		[a-zA-Z_][a-zA-Z0-9_]*
+ID			[a-zA-Z_][a-zA-Z0-9_]*
 %%
 {FLOAT}		{	printf("FLOAT\n");
 				return FLOAT;			}

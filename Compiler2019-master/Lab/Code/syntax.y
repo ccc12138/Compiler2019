@@ -2,6 +2,9 @@
 	
 #include <stdio.h>
 #include "lex.yy.c"
+#include "syntaxTree.h"
+
+int yyerror(char *msg);
 
 %}
 
