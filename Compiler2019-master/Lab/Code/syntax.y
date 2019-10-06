@@ -60,7 +60,7 @@ Tag:			ID 							{}
 VarDec: 		ID 							{}
 			|	VarDec LB INT RB			{}
 			;
-FunDec:			ID LP INT RB				{}
+FunDec:			ID LP VarList RB			{}
 			|	ID LP RP 					{}
 			;
 VarList: 		ParamDec COMMA VarList 		{}
@@ -70,17 +70,17 @@ ParamDec: 		Specifier VarDec 			{}
 			;
 
 /* Statements */
-CompSt: 		LC DefList StmtList RC		{}
+CompSt: 		LC DefList StmtList RC						{}
 			;
-StmtList:		Stmt StmtList				{}
-			|								{}
+StmtList:		Stmt StmtList								{}
+			|												{}
 			;
-Stmt:			Exp SEMI					{}
-			|	CompSt						{}
-			|	RETURN Exp SEMI				{}
-			|	IF LP Exp RP Stmt 			{}
-			|	IF LP Exp RP ELSE Stmt 		{}
-			| 	WHILE LP Exp RP Stmt 		{}
+Stmt:			Exp SEMI									{}
+			|	CompSt										{}
+			|	RETURN Exp SEMI								{}
+			|	IF LP Exp RP Stmt %prec LOWER_THAN_ELSE		{}/* Ref: P33 */
+			|	IF LP Exp RP Stmt ELSE Stmt 				{}
+			| 	WHILE LP Exp RP Stmt 						{}
 			;
 
 /* Local Definitions */

@@ -20,8 +20,10 @@ void Build(struct Treenode **root, const char * cname , int num, ...){
 }
 
 void PrintDFS(struct Treenode *root, int t_no){
-    if(root==NULL)    return;
-    for(int i=0;i<t_no;i++)    printf("\t");// num of \t
+    if(root==NULL)
+        return;
+    for(int i=0;i<t_no;i++)
+        printf("  ");//Ref P3, Print 2 blanks
     printf("%s",root->name);
     //different types of printf
     PrintDFS(root->childp,t_no+1);

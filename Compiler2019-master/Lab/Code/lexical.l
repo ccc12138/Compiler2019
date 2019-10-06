@@ -2,6 +2,14 @@
 
 #include "syntax.tab.h"
 
+/* BUG: ‘yylloc’ undeclared (first use in this function); did you mean ‘yyalloc’? */
+/* Ref: P31 */
+int yycolumn = 1;
+#define YY_USER_ACTION \
+	yylloc.first_line = yylloc.last_line = yylineno; \
+	yylloc.first_column = yycolumn; \
+	yylloc.last_column = yycolumn + yyleng - 1; \
+	yycolumn += yyleng;
 %}
 
 
@@ -91,7 +99,8 @@ ID			[a-zA-Z_][a-zA-Z0-9_]*
 				return ELSE;			}
 "while"		{	printf("while\n");
 				return WHILE;			}
-{newline}	 {}
+{newline}	{	yycolumn = 1;			
+										}//Ref: P31
 {whitespace} {}
 {ID}		{	printf("ID\n");
 				return ID;				}
