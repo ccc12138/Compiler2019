@@ -1,4 +1,4 @@
-# 编译原理实验
+# 编译原理实验 **DO NOT COPY OUR CODE!!!!!**
 
 最新实验内容和通知请参考: https://github.com/suliuzh123/Compiler2019
 
