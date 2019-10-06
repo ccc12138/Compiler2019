@@ -26,5 +26,4 @@ void PrintDFS(struct Treenode *root, int t_no){
     //different types of printf
     PrintDFS(root->childp,t_no+1);
     PrintDFS(root->right,t_no);
-    
 }

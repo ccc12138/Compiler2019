@@ -15,3 +15,6 @@ struct Treenode{
 	int childnum;			//amount of children
 };
 //multitreenode $1,$2... need va_list
+
+void Build(struct Treenode **, const char *, int, ...);
+void PrintDFS(struct Treenode *, int);
