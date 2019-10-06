@@ -1,5 +1,9 @@
 #include "syntaxTree.h"
 
+void InitNode(char* nodeName, int lineno, enum NODE_TYPE type){
+    return;
+}
+
 void Build(struct Treenode **root, const char * cname , int num, ...){
     *root =  (struct Treenode*)malloc(sizeof(struct Treenode));
     (*root)->name = (char*)malloc(sizeof(char)*50);
