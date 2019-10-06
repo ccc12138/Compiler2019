@@ -1,3 +1,5 @@
+%locations
+
 %{
 	
 #include <stdio.h>
@@ -8,10 +10,15 @@ int yyerror(char *msg);
 
 %}
 
+/* Declared types */
+%union {
+	struct Treenode* type_node;
+}
+
 /* Declared tokens */
-%token 		ID FLOAT INT SEMI COMMA ASSIGNOP RELOP PLUS MINUS
-%token 		AND OR STAR DIV DOT NOT TYPE LP RP LB RB LC RC
-%token 		STRUCT RETURN IF ELSE WHILE 
+%token <type_node> ID FLOAT INT SEMI COMMA ASSIGNOP RELOP PLUS MINUS
+%token <type_node> AND OR STAR DIV DOT NOT TYPE LP RP LB RB LC RC
+%token <type_node> STRUCT RETURN IF ELSE WHILE 
 
 /* Ref: P121 */
 %right 		ASSIGNOP
@@ -26,6 +33,15 @@ int yyerror(char *msg);
 /* Ref: P33 */
 %nonassoc 	LOWER_THAN_ELSE
 %nonassoc 	ELSE
+
+/* Declared non-terminals */
+%type <type_node>	Program ExtDefList ExtDef ExtDecList
+					Specifier StructSpecifier OptTag Tag
+					VarDec FunDec VarList ParamDec 
+					CompSt StmtList Stmt 
+					DefList Def DecList Dec
+					Exp Args
+
 
 %%
 
