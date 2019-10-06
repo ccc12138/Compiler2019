@@ -2,7 +2,6 @@
 
 #include "syntax.tab.h"
 
-/* BUG: ‘yylloc’ undeclared (first use in this function); did you mean ‘yyalloc’? */
 /* Ref: P31 */
 int yycolumn = 1;
 #define YY_USER_ACTION \
