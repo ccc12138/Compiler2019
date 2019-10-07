@@ -6,6 +6,7 @@
 #include "lex.yy.c"
 
 int yyerror(char *msg);
+treeNode* root;
 
 %}
 
@@ -45,18 +46,38 @@ int yyerror(char *msg);
 %%
 
 /*High-level Definitions */
-Program: 		ExtDefList					{}
-	;
-ExtDefList: 	ExtDef ExtDefList 			{}
-			|								{}
-			;
-ExtDef:			Specifier ExtDecList SEMI	{}
-			| 	Specifier SEMI				{}
-			|	Specifier FunDec CompSt		{}
-			;
-ExtDecList:		VarDec						{}
-			|	VarDec COMMA ExtDecList		{}
-			;
+Program: 		ExtDefList					{
+												$$=InitNode("Program",@$.first_line);
+												InsertNode($$,1,$1);
+												root=$$;
+};
+ExtDefList: 	ExtDef ExtDefList 			{
+												$$=InitNode("ExtDefList",@$.first_line);
+												InsertNode($$,2,$1,$2);
+}
+			|								{
+												$$=InitNode("ExtDefList",@$.first_line);
+};
+ExtDef:			Specifier ExtDecList SEMI	{
+												$$=InitNode("ExtDef",@$.first_line);
+												InsertNode($$,3,$1,$2,$3);
+}
+			| 	Specifier SEMI				{
+												$$=InitNode("ExtDef",@$.first_line);
+												InsertNode($$,2,$1,$2);
+}
+			|	Specifier FunDec CompSt		{
+												$$=InitNode("ExtDef",@$.first_line);
+												InsertNode($$,3,$1,$2,$3);
+};
+ExtDecList:		VarDec						{
+												$$=InitNode("ExtDecList",@$.first_line);
+												InsertNode($$,1,$1);
+}
+			|	VarDec COMMA ExtDecList		{
+												$$=InitNode("ExtDecList",@$.first_line);
+												InsertNode($$,3,$1,$2,$3);
+};
 
 /* Specifiers */
 Specifier:		TYPE 						{}
@@ -93,7 +114,7 @@ StmtList:		Stmt StmtList								{}
 Stmt:			Exp SEMI									{}
 			|	CompSt										{}
 			|	RETURN Exp SEMI								{}
-			|	IF LP Exp RP Stmt %prec LOWER_THAN_ELSE		{}/* Ref: P33 */
+			|	IF LP Exp RP Stmt %prec LOWER_THAN_ELSE		{}// Ref: P33
 			|	IF LP Exp RP Stmt ELSE Stmt 				{}
 			| 	WHILE LP Exp RP Stmt 						{}
 			;
