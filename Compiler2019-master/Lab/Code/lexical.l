@@ -49,7 +49,7 @@ whitespace 	[ \t]+
 ID			[a-zA-Z_][a-zA-Z0-9_]*
 %%
 {FLOAT}		{	treeNode* yylval=InitNode("FLOAT",TOKENS_FLOAT,yylloc.first_line);
-				sscanf(yytext,"%f",&yylval->data.floatd);//Ref: p3
+				sscanf(yytext,"%f",&yylval->data.floatd);//Ref: P3
 				PrintInfom("FLOAT",yylloc.first_line,2,yylval);
 				return FLOAT;			}
 {ERR_FLOAT}	{	printf("Error type A at Line %d: Illegal floating point number \"%s\"\n",yylineno,yytext);
@@ -58,7 +58,7 @@ ID			[a-zA-Z_][a-zA-Z0-9_]*
 				////////////////////////////////
 				return FLOAT;			}
 {INT}		{	treeNode* yylval=InitNode("INT",TOKENS_INT,yylloc.first_line);
-				sscanf(yytext,"%d",&yylval->data.intd);//Ref: p3
+				sscanf(yytext,"%d",&yylval->data.intd);//Ref: P3
 				PrintInfom("INT",yylloc.first_line,1,yylval);
 				return INT;				}
 {SEMI}		{	treeNode* yylval=InitNode("SEMI",TOKENS_SEMI,yylloc.first_line);
@@ -98,7 +98,7 @@ ID			[a-zA-Z_][a-zA-Z0-9_]*
 				PrintInfol("NOT",yylloc.first_line);
 				return NOT;				}
 {TYPE}		{	treeNode* yylval=InitNode("TYPE",TOKENS_TYPE,yylloc.first_line);
-				sscanf(yytext,"%s",&yylval->data.strd);
+				sscanf(yytext,"%s",&yylval->data.strd);//Ref: P3
 				PrintInfom("TYPE",yylloc.first_line,3,yylval);
 				return TYPE;			}
 {LP}		{	treeNode* yylval=InitNode("LP",TOKENS_LP,yylloc.first_line);
@@ -138,7 +138,7 @@ ID			[a-zA-Z_][a-zA-Z0-9_]*
 										}//Ref: P31
 {whitespace} {}
 {ID}		{	treeNode* yylval=InitNode("ID",TOKENS_ID,yylloc.first_line);
-				sscanf(yytext,"%s",&yylval->data.strd);
+				sscanf(yytext,"%s",&yylval->data.strd);//Ref: P3
 				PrintInfom("ID",yylloc.first_line,3,yylval);
 				return ID;				}
 .			{	printf("Error type A at line %d: Mysterious characters \'%s\'\n",yylineno,yytext);}
