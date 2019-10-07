@@ -4,7 +4,6 @@
 	
 #include <stdio.h>
 #include "lex.yy.c"
-#include "syntaxTree.h"
 
 int yyerror(char *msg);
 
@@ -12,7 +11,7 @@ int yyerror(char *msg);
 
 /* Declared types */
 %union {
-	struct Treenode* type_node;
+	struct treeNode* type_node;
 }
 
 /* Declared tokens */

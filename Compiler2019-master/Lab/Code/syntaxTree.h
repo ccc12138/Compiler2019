@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <string.h>
 
-enum NODE_TYPE{
+typedef enum NODE_TYPE{
 	TOKENS_INT,
 	TOKENS_FLOAT,
 	TOKENS_ID,
@@ -32,11 +32,10 @@ enum NODE_TYPE{
 	TOKENS_ELSE,
 	TOKENS_WHILE,
 	TOKENS_NEWLINE,
-	TOKENS_WHITESPACE,
-	//TOKENS_. ? Confused
-};
+	TOKENS_WHITESPACE
+}NODE_TYPE;
 
-struct Treenode{
+typedef struct treeNode{
 	char* name;
 	int childnum;					//amount of children
 	int lineno;
@@ -44,13 +43,13 @@ struct Treenode{
 	union {
 		int intd;
 		float floatd;
-		char* strd;
+		char strd[32];
 	}data;							//数据
-	struct Treenode* right;
-	struct Treenode* childp;		//第一个子节点
-};
-//multitreenode $1,$2... need va_list
+	struct treeNode* right;
+	struct treeNode* childp;		//第一个子节点
+}treeNode;
+//multitreeNode $1,$2... need va_list
 
-void InitNode(char*, int, enum NODE_TYPE);
-void Build(struct Treenode **, const char *, int, ...);
-void PrintDFS(struct Treenode *, int);
+treeNode* InitNode(char*, NODE_TYPE, int);
+void InsertTree(treeNode **, const char *, int, ...);
+void PrintDFS(treeNode *, int);

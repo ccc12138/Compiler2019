@@ -1,21 +1,28 @@
 #include "syntaxTree.h"
 
-void InitNode(char* nodeName, int lineno, enum NODE_TYPE type){
-    return;
+treeNode* InitNode(char* nodeName, NODE_TYPE type, int lineno){
+    treeNode* node=(treeNode *)malloc(sizeof(treeNode));
+    node->name=nodeName;
+    node->childnum=0;
+    node->lineno=lineno;
+    node->type=type;
+    node->right=NULL;
+    node->childp=NULL;
+    return node;
 }
 
-void Build(struct Treenode **root, const char * cname , int num, ...){
-    *root =  (struct Treenode*)malloc(sizeof(struct Treenode));
+void InsertTree(treeNode **root, const char * cname , int num, ...){
+    *root =  (treeNode*)malloc(sizeof(treeNode));
     (*root)->name = (char*)malloc(sizeof(char)*50);
     strcpy((*root)->name,cname);
     (*root)->childnum = num;
     //link all children using va_list
     va_list ap;
     va_start(ap, num);
-    (*root)->childp = va_arg(ap,struct Treenode*);
-    struct Treenode* pre = (*root)->childp;
+    (*root)->childp = va_arg(ap,treeNode*);
+    treeNode* pre = (*root)->childp;
     for( int i=1 ; i < num ; i++ ){
-        struct Treenode* next = va_arg(ap,struct Treenode*);
+        treeNode* next = va_arg(ap,treeNode*);
         pre->right = next;
         pre = next;
     }
@@ -23,7 +30,7 @@ void Build(struct Treenode **root, const char * cname , int num, ...){
     va_end(ap);
 }
 
-void PrintDFS(struct Treenode *root, int t_no){
+void PrintDFS(treeNode *root, int t_no){
     if(root==NULL)
         return;
     for(int i=0;i<t_no;i++)
