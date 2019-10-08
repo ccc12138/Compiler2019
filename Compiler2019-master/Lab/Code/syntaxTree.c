@@ -3,6 +3,7 @@
 treeNode* InitNode(char* nodeName, int lineno){
     treeNode* node=(treeNode *)malloc(sizeof(treeNode));
     node->name=nodeName;
+    //printf("initate:%s\n",nodeName);
     node->childnum=0;
     node->lineno=lineno;
     node->right=NULL;
@@ -24,11 +25,10 @@ void InsertNode(treeNode *root, int num, ...){
     va_start(ap, num);
     root->childnum = num;
     root->childp = va_arg(ap,treeNode*);
-    treeNode* pre = (treeNode *)malloc(sizeof(treeNode));
-    pre = root->childp;
-    for( int i=1 ; i < num ; i++ ){
-        treeNode* next = (treeNode *)malloc(sizeof(treeNode));
-        next = va_arg(ap,treeNode*);
+    treeNode* pre = root->childp;
+    int i=1;
+    for( ; i < num ; i++ ){
+        treeNode* next = va_arg(ap,treeNode*);	
         pre->right = next;
         pre = next;
     }
@@ -40,9 +40,10 @@ void InsertNode(treeNode *root, int num, ...){
 void PrintDFS(treeNode *root, int t_no){
     if(root==NULL)
         return;
-    for(int i=0;i<t_no;i++)
+    int i=0;
+    for(;i<t_no;i++)
         printf("  ");//Ref P3, Print 2 blanks
-    printf("%s",root->name);
+    printf("%s\n",root->name);
     //different types of printf
     PrintDFS(root->childp,t_no+1);
     PrintDFS(root->right,t_no);
