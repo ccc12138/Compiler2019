@@ -171,6 +171,7 @@ Args: 			Exp COMMA Args 				{$$=InitNode("Args",@$.first_line);$2=InitNode("COMM
 			;
 %%
 int yyerror(char *msg){
+	printf("syntax error\n");
     return 0;
 }
 

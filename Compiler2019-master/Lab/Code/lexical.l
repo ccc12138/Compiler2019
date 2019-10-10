@@ -48,98 +48,98 @@ newline 	[\n\r]
 whitespace 	[ \t]+
 ID			[a-zA-Z_][a-zA-Z0-9_]*
 %%
-{FLOAT}		{	treeNode* yylval=InitNode("FLOAT",yylloc.first_line);
-				sscanf(yytext,"%f",&yylval->data.floatd);//Ref: P3
-				PrintInfom("FLOAT",yylloc.first_line,2,yylval);
+{FLOAT}		{	yylval.type_node=InitNode("FLOAT",yylloc.first_line);
+				sscanf(yytext,"%f",&yylval.type_node->data.floatd);//Ref: P3
+				PrintInfom("FLOAT",yylloc.first_line,2,yylval.type_node);
 				return FLOAT;			}
 {ERR_FLOAT}	{	printf("Error type A at Line %d: Illegal floating point number \"%s\"\n",yylineno,yytext);
 				////////////////////////////////
 				//we need some error hint here//
 				////////////////////////////////
 				return FLOAT;			}
-{INT}		{	treeNode* yylval=InitNode("INT",yylloc.first_line);
-				sscanf(yytext,"%d",&yylval->data.intd);//Ref: P3
-				PrintInfom("INT",yylloc.first_line,1,yylval);
+{INT}		{	yylval.type_node=InitNode("INT",yylloc.first_line);
+				sscanf(yytext,"%d",&yylval.type_node->data.intd);//Ref: P3
+				PrintInfom("INT",yylloc.first_line,1,yylval.type_node);
 				return INT;				}
-{SEMI}		{	treeNode* yylval=InitNode("SEMI",yylloc.first_line);
+{SEMI}		{	yylval.type_node=InitNode("SEMI",yylloc.first_line);
 				PrintInfol("SEMI",yylloc.first_line);
 				return SEMI;			}
-{COMMA}		{	treeNode* yylval=InitNode("COMMA",yylloc.first_line);
+{COMMA}		{	yylval.type_node=InitNode("COMMA",yylloc.first_line);
 				PrintInfol("COMMA",yylloc.first_line);
 				return COMMA;			}
-{ASSIGNOP}	{	treeNode* yylval=InitNode("ASSIGNOP",yylloc.first_line);
+{ASSIGNOP}	{	yylval.type_node=InitNode("ASSIGNOP",yylloc.first_line);
 				PrintInfol("ASSIGNOP",yylloc.first_line);
 				return ASSIGNOP;		}
-{RELOP}		{	treeNode* yylval=InitNode("RELOP",yylloc.first_line);
+{RELOP}		{	yylval.type_node=InitNode("RELOP",yylloc.first_line);
 				PrintInfol("RELOP",yylloc.first_line);
 				return RELOP;			}
-{PLUS}		{	treeNode* yylval=InitNode("PLUS",yylloc.first_line);
+{PLUS}		{	yylval.type_node=InitNode("PLUS",yylloc.first_line);
 				PrintInfol("OR",yylloc.first_line);
 				return PLUS;			}
-{MINUS}		{	treeNode* yylval=InitNode("MINUS",yylloc.first_line);
+{MINUS}		{	yylval.type_node=InitNode("MINUS",yylloc.first_line);
 				PrintInfol("MINUS",yylloc.first_line);
 				return MINUS;			}
-{AND}		{	treeNode* yylval=InitNode("AND",yylloc.first_line);
+{AND}		{	yylval.type_node=InitNode("AND",yylloc.first_line);
 				PrintInfol("AND",yylloc.first_line);
 				return AND;				}
-{OR}		{	treeNode* yylval=InitNode("OR",yylloc.first_line);
+{OR}		{	yylval.type_node=InitNode("OR",yylloc.first_line);
 				PrintInfol("OR",yylloc.first_line);
 				return OR;				}
-{STAR}		{	treeNode* yylval=InitNode("STAR",yylloc.first_line);
+{STAR}		{	yylval.type_node=InitNode("STAR",yylloc.first_line);
 				PrintInfol("STAR",yylloc.first_line);
 				return STAR;			}
-{DIV}		{	treeNode* yylval=InitNode("DIV",yylloc.first_line);
+{DIV}		{	yylval.type_node=InitNode("DIV",yylloc.first_line);
 				PrintInfol("DIV",yylloc.first_line);
 				return DIV;				}
-{DOT}		{	treeNode* yylval=InitNode("DOT",yylloc.first_line);
+{DOT}		{	yylval.type_node=InitNode("DOT",yylloc.first_line);
 				PrintInfol("DOT",yylloc.first_line);
 				return DOT;				}
-{NOT}		{	treeNode* yylval=InitNode("NOT",yylloc.first_line);
+{NOT}		{	yylval.type_node=InitNode("NOT",yylloc.first_line);
 				PrintInfol("NOT",yylloc.first_line);
 				return NOT;				}
-{TYPE}		{	treeNode* yylval=InitNode("TYPE",yylloc.first_line);
-				sscanf(yytext,"%s",&yylval->data.strd);//Ref: P3
-				PrintInfom("TYPE",yylloc.first_line,3,yylval);
+{TYPE}		{	yylval.type_node=InitNode("TYPE",yylloc.first_line);
+				sscanf(yytext,"%s",&yylval.type_node->data.strd);//Ref: P3
+				PrintInfom("TYPE",yylloc.first_line,3,yylval.type_node);
 				return TYPE;			}
-{LP}		{	treeNode* yylval=InitNode("LP",yylloc.first_line);
+{LP}		{	yylval.type_node=InitNode("LP",yylloc.first_line);
 				PrintInfol("LP",yylloc.first_line);
 				return LP;				}
-{RP}		{	treeNode* yylval=InitNode("RP",yylloc.first_line);
+{RP}		{	yylval.type_node=InitNode("RP",yylloc.first_line);
 				PrintInfol("RP",yylloc.first_line);
 				return RP;				}
-{LB}		{	treeNode* yylval=InitNode("LB",yylloc.first_line);
+{LB}		{	yylval.type_node=InitNode("LB",yylloc.first_line);
 				PrintInfol("LB",yylloc.first_line);
 				return LB;				}
-{RB}		{	treeNode* yylval=InitNode("RB",yylloc.first_line);
+{RB}		{	yylval.type_node=InitNode("RB",yylloc.first_line);
 				PrintInfol("RB",yylloc.first_line);
 				return RB;				}
-{LC}		{	treeNode* yylval=InitNode("LC",yylloc.first_line);
+{LC}		{	yylval.type_node=InitNode("LC",yylloc.first_line);
 				PrintInfol("LC",yylloc.first_line);
 				return LC;				}
-{RC}		{	treeNode* yylval=InitNode("RC",yylloc.first_line);
+{RC}		{	yylval.type_node=InitNode("RC",yylloc.first_line);
 				PrintInfol("RC",yylloc.first_line);
 				return RC;				}
-"struct"	{	treeNode* yylval=InitNode("STRUCT",yylloc.first_line);
+"struct"	{	yylval.type_node=InitNode("STRUCT",yylloc.first_line);
 				PrintInfol("STRUCT",yylloc.first_line);
 				return STRUCT;			}
-"return"	{	treeNode* yylval=InitNode("RETURN",yylloc.first_line);
+"return"	{	yylval.type_node=InitNode("RETURN",yylloc.first_line);
 				PrintInfol("RETURN",yylloc.first_line);
 				return RETURN;			}
-"if"		{	treeNode* yylval=InitNode("IF",yylloc.first_line);
+"if"		{	yylval.type_node=InitNode("IF",yylloc.first_line);
 				PrintInfol("IF",yylloc.first_line);
 				return IF;				}
-"else"		{	treeNode* yylval=InitNode("ELSE",yylloc.first_line);
+"else"		{	yylval.type_node=InitNode("ELSE",yylloc.first_line);
 				PrintInfol("ELSE",yylloc.first_line);
 				return ELSE;			}
-"while"		{	treeNode* yylval=InitNode("WHILE",yylloc.first_line);
+"while"		{	yylval.type_node=InitNode("WHILE",yylloc.first_line);
 				PrintInfol("WHILE",yylloc.first_line);
 				return WHILE;			}
 {newline}	{	yycolumn = 1;			
 										}//Ref: P31
 {whitespace} {}
-{ID}		{	treeNode* yylval=InitNode("ID",yylloc.first_line);
-				sscanf(yytext,"%s",&yylval->data.strd);//Ref: P3
-				PrintInfom("ID",yylloc.first_line,3,yylval);
+{ID}		{	yylval.type_node=InitNode("ID",yylloc.first_line);
+				sscanf(yytext,"%s",&yylval.type_node->data.strd);//Ref: P3
+				PrintInfom("ID",yylloc.first_line,3,yylval.type_node);
 				return ID;				}
 .			{	printf("Error type A at line %d: Mysterious characters \'%s\'\n",yylineno,yytext);}
 

@@ -37,14 +37,36 @@ void InsertNode(treeNode *root, int num, ...){
     ////////////////////////////////////////////////
 }
 
-void PrintDFS(treeNode *root, int t_no){
-    if(root==NULL)
+void PrintDFS(treeNode *node, int t_no){
+    if(node==NULL)
         return;
     int i=0;
     for(;i<t_no;i++)
         printf("  ");//Ref P3, Print 2 blanks
-    printf("%s\n",root->name);
+    if(node->childp==NULL){//token
+        if(strcmp(node->name,"ID")==0){
+            printf("%s: %s\n",node->name,node->data.strd);
+        }
+        else if(strcmp(node->name,"TYPE")==0){
+            printf("%s: %s\n",node->name,node->data.strd);
+        }
+        else if(strcmp(node->name,"INT")==0){
+            printf("%s: %d\n",node->name,node->data.intd);
+        }
+        else if(strcmp(node->name,"FLOAT")==0){
+            printf("%s: %f\n",node->name,node->data.floatd);
+        }
+        else{
+            printf("%s\n",node->name);
+        }
+    }
+    else{//syntax unit
+        if(node->childnum!=0){//not epsilon, have children
+            printf("%s (%d)\n",node->name,node->lineno);
+        }
+        //epsilon skip
+    }
     //different types of printf
-    PrintDFS(root->childp,t_no+1);
-    PrintDFS(root->right,t_no);
+    PrintDFS(node->childp,t_no+1);
+    PrintDFS(node->right,t_no);
 }
