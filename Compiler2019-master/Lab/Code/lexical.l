@@ -4,6 +4,8 @@
 #include "syntaxTree.h"
 #include <assert.h>
 
+extern int lexErrNum;
+
 /* Ref: P31 */
 int yycolumn = 1;
 #define YY_USER_ACTION \
@@ -52,10 +54,8 @@ ID			[a-zA-Z_][a-zA-Z0-9_]*
 				sscanf(yytext,"%f",&yylval.type_node->data.floatd);//Ref: P3
 				PrintInfom("FLOAT",yylloc.first_line,2,yylval.type_node);
 				return FLOAT;			}
-{ERR_FLOAT}	{	printf("Error type A at Line %d: Illegal floating point number \"%s\"\n",yylineno,yytext);
-				////////////////////////////////
-				//we need some error hint here//
-				////////////////////////////////
+{ERR_FLOAT}	{	printf("Error type A at Line %d: Illegal floating point number \"%s\".\n",yylineno,yytext);
+				++lexErrNum;
 				return FLOAT;			}
 {INT}		{	yylval.type_node=InitNode("INT",yylloc.first_line);
 				sscanf(yytext,"%d",&yylval.type_node->data.intd);//Ref: P3
@@ -141,22 +141,23 @@ ID			[a-zA-Z_][a-zA-Z0-9_]*
 				sscanf(yytext,"%s",&yylval.type_node->data.strd);//Ref: P3
 				PrintInfom("ID",yylloc.first_line,3,yylval.type_node);
 				return ID;				}
-.			{	printf("Error type A at line %d: Mysterious characters \'%s\'\n",yylineno,yytext);}
+.			{	printf("Error type A at Line %d: Mysterious character \"%s\".\n",yylineno,yytext);
+				++lexErrNum;}
 
 %%
 
 /* Just for debug */
 //";" is to make sure that there is no unexpected whitespaces or newline
 void PrintInfol(char *s,int lineno){//Print less info
-	printf("%s(line %d);\n",s,lineno);
-	return;
+	//printf("%s(line %d);\n",s,lineno);
+	//return;
 }
 void PrintInfom(char *s,int lineno,int type,treeNode* node){//Print more info
-	switch(type){
-		case 1: printf("%s(line %d): %d;\n",s,lineno,node->data.intd); break;
-		case 2: printf("%s(line %d): %f;\n",s,lineno,node->data.floatd); break;
-		case 3: printf("%s(line %d): %s;\n",s,lineno,node->data.strd); break;
-		default: assert(0);
-	}
-	return;
+	//switch(type){
+	//	case 1: printf("%s(line %d): %d;\n",s,lineno,node->data.intd); break;
+	//	case 2: printf("%s(line %d): %f;\n",s,lineno,node->data.floatd); break;
+	//	case 3: printf("%s(line %d): %s;\n",s,lineno,node->data.strd); break;
+	//	default: assert(0);
+	//}
+	//return;
 }

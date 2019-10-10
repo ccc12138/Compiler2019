@@ -38,33 +38,32 @@ void InsertNode(treeNode *root, int num, ...){
 }
 
 void PrintDFS(treeNode *node, int t_no){
-    if(node==NULL)
+    if(node==NULL||node->name=="NULL")
         return;
     int i=0;
-    for(;i<t_no;i++)
-        printf("  ");//Ref P3, Print 2 blanks
-    if(node->childp==NULL){//token
-        if(strcmp(node->name,"ID")==0){
-            printf("%s: %s\n",node->name,node->data.strd);
+    if(strcmp(node->name,"EPSILON")!=0){//NOT EPSILON
+        for(;i<t_no;i++)
+            printf("  ");//Ref P3, Print 2 blanks
+        if(node->childp==NULL){//token
+            if(strcmp(node->name,"ID")==0){
+                printf("%s: %s\n",node->name,node->data.strd);
+            }
+            else if(strcmp(node->name,"TYPE")==0){
+                printf("%s: %s\n",node->name,node->data.strd);
+            }
+            else if(strcmp(node->name,"INT")==0){
+                printf("%s: %d\n",node->name,node->data.intd);
+            }
+            else if(strcmp(node->name,"FLOAT")==0){
+                printf("%s: %f\n",node->name,node->data.floatd);
+            }
+            else{
+                printf("%s\n",node->name);
+            }
         }
-        else if(strcmp(node->name,"TYPE")==0){
-            printf("%s: %s\n",node->name,node->data.strd);
-        }
-        else if(strcmp(node->name,"INT")==0){
-            printf("%s: %d\n",node->name,node->data.intd);
-        }
-        else if(strcmp(node->name,"FLOAT")==0){
-            printf("%s: %f\n",node->name,node->data.floatd);
-        }
-        else{
-            printf("%s\n",node->name);
-        }
-    }
-    else{//syntax unit
-        if(node->childnum!=0){//not epsilon, have children
+        else{//syntax unit
             printf("%s (%d)\n",node->name,node->lineno);
         }
-        //epsilon skip
     }
     //different types of printf
     PrintDFS(node->childp,t_no+1);
