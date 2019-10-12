@@ -88,7 +88,8 @@ ExtDef:			Specifier ExtDecList SEMI	{
 			|	error SEMI					{
 												++synErrNum;
 												prevRow=PrintSynErr(@$.first_line,";",prevRow);
-};
+}
+;
 ExtDecList:		VarDec						{
 												$$=InitNode("ExtDecList",@$.first_line);
 												InsertNode($$,1,$1);
@@ -113,7 +114,8 @@ StructSpecifier:STRUCT OptTag LC DefList RC	{
 			|	STRUCT OptTag LC error RC	{
 												++synErrNum;
 												prevRow=PrintSynErr(@$.first_line,"}",prevRow);
-}			|	STRUCT error LC DefList RC	{
+}
+			|	STRUCT error LC DefList RC	{
 												++synErrNum;
 												prevRow=PrintSynErr(@$.first_line,"}",prevRow);
 }
@@ -130,13 +132,15 @@ VarDec: 		ID 							{$$=InitNode("VarDec",@$.first_line);InsertNode($$,1,$1);}
 			|	VarDec LB error RB			{
 												++synErrNum;
 												prevRow=PrintSynErr(@$.first_line,"]",prevRow);
-};
+}
+;
 FunDec:			ID LP VarList RP			{$$=InitNode("FunDec",@$.first_line);InsertNode($$,4,$1,$2,$3,$4);}
 			|	ID LP RP 					{$$=InitNode("FunDec",@$.first_line);InsertNode($$,3,$1,$2,$3);}
 			|	error RP 					{
 												++synErrNum;
 												prevRow=PrintSynErr(@$.first_line,")",prevRow);
-};
+}
+;
 VarList: 		ParamDec COMMA VarList 		{$$=InitNode("VarList",@$.first_line);InsertNode($$,3,$1,$2,$3);}
 			| 	ParamDec					{$$=InitNode("VarList",@$.first_line);InsertNode($$,1,$1);}
 			;
@@ -168,6 +172,10 @@ Stmt:			Exp SEMI									{
 																++synErrNum;
 																prevRow=PrintSynErr(@$.first_line,";",prevRow);
 }
+			| 	Exp error 									{
+																++synErrNum;
+																prevRow=PrintSynErr(@$.first_line,";",prevRow);
+}
 			|	CompSt										{	
 																$$=InitNode("Stmt",@$.first_line);
 																InsertNode($$,1,$1);
@@ -185,9 +193,13 @@ Stmt:			Exp SEMI									{
 																$$=InitNode("Stmt",@$.first_line);
 																InsertNode($$,7,$1,$2,$3,$4,$5,$6,$7);
 }
+			|	IF LP Exp RP error ELSE Stmt 				{
+																++synErrNum;
+																prevRow=PrintSynErr(@$.first_line,";",prevRow);
+}
 			| 	WHILE LP Exp RP Stmt 						{	
 																$$=InitNode("Stmt",@$.first_line);
-																InsertNode($$,4,$1,$2,$3,$4,$5);
+																InsertNode($$,5,$1,$2,$3,$4,$5);
 }
 ;
 
@@ -197,6 +209,10 @@ DefList: 		Def DefList 				{$$=InitNode("DefList",@$.first_line);InsertNode($$,2
 			;
 Def: 			Specifier DecList SEMI		{$$=InitNode("Def",@$.first_line);InsertNode($$,3,$1,$2,$3);}
 			|	Specifier error SEMI		{
+												++synErrNum;
+												prevRow=PrintSynErr(@$.first_line,";",prevRow);
+}
+			|	Specifier DecList error 	{
 												++synErrNum;
 												prevRow=PrintSynErr(@$.first_line,";",prevRow);
 }
@@ -227,6 +243,22 @@ Exp: 			Exp ASSIGNOP Exp 			{$$=InitNode("Exp",@$.first_line);InsertNode($$,3,$1
 			|	ID 							{$$=InitNode("Exp",@$.first_line);InsertNode($$,1,$1);}
 			| 	INT 						{$$=InitNode("Exp",@$.first_line);InsertNode($$,1,$1);}
 			| 	FLOAT 						{$$=InitNode("Exp",@$.first_line);InsertNode($$,1,$1);}
+			| 	LP error RP 				{
+												++synErrNum;
+												prevRow=PrintSynErr(@$.first_line,")",prevRow);
+}
+			| 	ID LP error RP 				{
+												++synErrNum;
+												prevRow=PrintSynErr(@$.first_line,")",prevRow);
+}
+			| 	Exp LB error RB 			{
+												++synErrNum;
+												prevRow=PrintSynErr(@$.first_line,"]",prevRow);
+}
+			| 	error LB Exp RB 			{
+												++synErrNum;
+												prevRow=PrintSynErr(@$.first_line,"]",prevRow);
+}
 ;
 Args: 			Exp COMMA Args 				{$$=InitNode("Args",@$.first_line);InsertNode($$,3,$1,$2,$3);}
 			| 	Exp 						{$$=InitNode("Args",@$.first_line);InsertNode($$,1,$1);}

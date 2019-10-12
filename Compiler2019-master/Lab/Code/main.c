@@ -25,5 +25,8 @@ int main(int argc, char** argv){
     if(lexErrNum==0&&synErrNum==0){
         PrintDFS(root,0);
     }
+    // else{
+    //     printf("lexErrNum=%d, synErrNum=%d\n", lexErrNum, synErrNum);
+    // }
     return 0;
 }

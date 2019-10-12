@@ -17,10 +17,6 @@ void InsertNode(treeNode *root, int num, ...){
     // strcpy((*root)->name,cname);
     //link all children using va_list
 
-
-    /////////////////////////////////////////////////
-    ////WRONG HERE!!!!!!Cause Segmentation Fault!////
-    /////////////////////////////////////////////////
     va_list ap;
     va_start(ap, num);
     root->childnum = num;
@@ -34,7 +30,6 @@ void InsertNode(treeNode *root, int num, ...){
     }
     pre->right = NULL;
     va_end(ap);
-    ////////////////////////////////////////////////
 }
 
 void PrintDFS(treeNode *node, int t_no){
