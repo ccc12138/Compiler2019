@@ -2,6 +2,7 @@
 #define _SEMANTIC_H_
 
 #define tablesize 0x3fff
+#endif
 
 typedef struct Type_* Type;
 typedef struct FieldList_* FieldList;
@@ -13,7 +14,7 @@ struct Type_
 		//Basic type
 		int basic;
 		//array info contains elem type and array size
-		stuct { Type elem; int size;} array;
+		struct { Type elem; int size;} array;
 		//for a struct info		
 		FieldList structure;		
 	} u;
@@ -29,7 +30,7 @@ struct FieldList_
 
 struct item{
 	struct item* next; // deal with collision
-	Type_ var_type;
+	Type var_type;
 	char* var_name;
 };
 
