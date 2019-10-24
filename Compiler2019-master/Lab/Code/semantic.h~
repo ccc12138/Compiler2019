@@ -35,7 +35,6 @@ struct item{
 	struct item* next; // deal with collision
 	Type var_type;
 	char* var_name;
-	// some data
 };
 
 

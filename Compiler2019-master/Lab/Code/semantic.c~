@@ -206,19 +206,19 @@ void DefList(treeNode* root){
 		treeNode * specifierp = Def->childp;
 		/* DecList -> Dec | Dec COMMA DecList */
 		while( DecList != NULL ){
-			struct item* add_new = (struct item*)malloc(sizeof(struct item));
-			FieldList f = (FieldList)malloc(sizeof(FieldList_));
-			treeNode * Dec = DecList->childp;
-			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
-			// the later one is error type 15
-			f = VarDec(Dec->childp,Specifier(specifierp));
-			add_new->var_type = f->type;
-			strcpy(add_new->var_name,f->name);
-			add_item(add_new);
 			if( DecList -> childnum == 1 ){
+				struct item* add_new = (struct item*)malloc(sizeof(struct item));
+				treeNode * Dec = DecList->childp;
+				/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
+				// the later one is error type 15
+				add_struct_new = VarDec(Dec->childp,Specifier(specifierp));
 				DecList = NULL;
 			}
 			else if( DecList -> childnum == 3 ){
+				treeNode * Dec = DecList->childp;
+				/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp*/
+				add_struct_new = VarDec(Dec->childp,Specifier(specifierp));
+				// the later one is error type 15
 				DecList = DecList->childp->right->right;
 			}
 			else{
