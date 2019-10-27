@@ -55,14 +55,14 @@ void print_table(){
 Type MultiArray(treeNode *root,int i,Type b){
 	treeNode *tp = root;
 	Type p = NULL;
-	Type Array = (Type)malloc(sizeof(Type_));
+	Type Array = (Type)malloc(sizeof(struct Type_));
 	p = Array;
 	int j=0;
 	for(;j<i;j++){
 		p->kind=ARRAY;
 		p->u.array.size = tp->childp->right->right->data.intd;
-		p->u.array.Type = (Type)malloc(sizeof(Type_));
-		p = p->u.array.Type;
+		p->u.array.elem = (Type)malloc(sizeof(struct Type_));
+		p = p->u.array.elem;
 		tp = tp->childp;
 	}
 	p = b;
@@ -83,7 +83,7 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	
 	/* root->childp->name == ID      ->     VarDec -> ID*/
 	if(i==0){
-        add_var->type=basictype;
+        add_var->type->kind=BASIC;
         return add_var;
     }
 	else if(i>=1){
@@ -96,11 +96,11 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 
 Type StructSpecifier(treeNode *root){
 	treeNode *p=root;
-	Type add_type = (Type)malloc(sizeof(Type_));// return
+	Type add_type = (Type)malloc(sizeof(struct Type_));// return
 	/* StructSpecifier -> STRUCT OptTag LC DefList RC | STRUCT Tag */
 	if(strcmp(p->childp->name,"STRUCT")==0){
 		if(p->childnum==5){
-			FieldList add_struct = (FieldList)malloc(sizeof(FieldList_));
+			FieldList add_struct = (FieldList)malloc(sizeof(struct FieldList_));
 			// add_type->u.structure = add_struct   point to the head (for example struct a{})
 			add_type->kind = STRUCTURE;
 			/* OptTag -> ID |  */
@@ -109,7 +109,7 @@ Type StructSpecifier(treeNode *root){
 				add_struct -> name = NULL;
 			else
 				strcpy(add_struct -> name,OptTag->childp->data.strd);
-			add_struct -> kind = STRUCTURE;
+			add_struct ->type-> kind = STRUCTURE;
 			//next deal with add_struct->tail point to all var of the struct
 			/* DefList -> Def DefList | */
 			treeNode* DefList = p->childp->right->right->right;
@@ -123,7 +123,7 @@ Type StructSpecifier(treeNode *root){
 					treeNode * specifierp = Def->childp;
 					/* DecList -> Dec | Dec COMMA DecList */
 					while( DecList != NULL ){
-						FieldList add_struct_new = (FieldList)malloc(sizeof(FieldList_));
+						FieldList add_struct_new = (FieldList)malloc(sizeof(struct FieldList_));
 						if( DecList -> childnum == 1 ){
 							treeNode * Dec = DecList->childp;
 							/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
@@ -139,7 +139,7 @@ Type StructSpecifier(treeNode *root){
 							DecList = DecList->childp->right->right;
 						}
 						else{
-							print("error!");
+							printf("error!");
 						}
 						add_struct->tail = add_struct_new;
 						add_struct = add_struct_new;
@@ -152,21 +152,21 @@ Type StructSpecifier(treeNode *root){
 			return add_type;
 		}
 		else if(p->childnum==2){/* declaration */
-			struct item* p = find_item(p->childp->right->childp->data.strd);
-			if(p==NULL){
+			struct item* q = find_item(p->childp->right->childp->data.strd);
+			if(q==NULL){
 			/* error ouput */	
 			}
 			else{
-				add_type = p->var_type;
+				add_type = q->var_type;
 				return add_type;
 			}
 		}
 		else{
-			print("error!");		
+			printf("error!");		
 		}
 	}
 	else{
-		print("error!");	
+		printf("error!");	
 	}
 }
 
@@ -174,7 +174,7 @@ Type StructSpecifier(treeNode *root){
 Type Specifier(treeNode *root){
 	treeNode *p=root;
 	/* Specifier -> TYPE | StructSpecifier */
-	Type add_type = (Type)malloc(sizeof(Type_));
+	Type add_type = (Type)malloc(sizeof(struct Type_));
 	if(strcmp(p->childp->name,"TYPE")==0){
         add_type->kind = BASIC;
 		if(strcmp(p->childp->data.strd,"int")==0)
@@ -182,14 +182,14 @@ Type Specifier(treeNode *root){
 		else if(strcmp(p->childp->data.strd,"float")==0)
 			add_type->u.basic = FLOAT;
 		else
-			print("error");
+			printf("error");
 		return add_type;
     }
 	else if(strcmp(p->childp->name,"StructSpecifier")==0){
 		add_type = StructSpecifier(p->childp);
 	}
 	else{
-		print("error!");	
+		printf("error!");	
 	}
 }
 
@@ -206,7 +206,7 @@ void DefList(treeNode* root){
 		/* DecList -> Dec | Dec COMMA DecList */
 		while( DecList != NULL ){
 			struct item* add_new = (struct item*)malloc(sizeof(struct item));
-			FieldList f = (FieldList)malloc(sizeof(FieldList_));
+			FieldList f = (FieldList)malloc(sizeof(struct FieldList_));
 			treeNode * Dec = DecList->childp;
 			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
 			// the later one is error type 15
@@ -221,10 +221,8 @@ void DefList(treeNode* root){
 				DecList = DecList->childp->right->right;
 			}
 			else{
-					print("error!");
+					printf("error!");
 			}
-			add_struct->tail = add_struct_new;
-			add_struct = add_struct_new;
 		}
 		DefList = Def->right;
 	}
