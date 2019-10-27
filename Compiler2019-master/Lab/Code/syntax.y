@@ -84,6 +84,10 @@ ExtDef:			Specifier ExtDecList SEMI	{
 												//$2=InitNode("FunDec",@$.first_line);
 												//$3=InitNode("CompSt",@$.first_line);
 												InsertNode($$,3,$1,$2,$3);
+}
+			|	Specifier FunDec SEMI		{
+												$$=InitNode("ExtDef",@$.first_line);
+												InsertNode($$,2,$1,$2);
 }			
 			|	error SEMI					{
 												++synErrNum;

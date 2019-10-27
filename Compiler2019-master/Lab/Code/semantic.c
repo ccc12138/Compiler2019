@@ -1,14 +1,13 @@
 #include "semantic.h"
 
-struct item* table[tablesize]={NULL};
-
 unsigned int hash_pjw(char* name){
 	unsigned int val = 0, i;
 	for(; *name; ++name)
 	{
 		val = (val<<2) + *name;
-		if (i=val&~tablesize) val = (val^(i>>12))&tablesize;
+		if (i=val&~TABLE_SIZE) val = (val^(i>>12))&TABLE_SIZE;
 	}
+	return val;
 }
 
 struct item * find_item(char *name)
@@ -43,18 +42,18 @@ void add_item(struct item* p){
 }
 
 void print_table(){
-	for(int i=0;i<tablesize;i++)
+	for(int i=0;i<TABLE_SIZE;i++)
 		if(table[i]!=NULL){
-			struct *item p = table[i];
+			struct item* p = table[i];
 			while(p!=NULL){
-				print("name:%s\n",p->var_name)			
+				printf("name:%s\n",p->var_name);
 			}
 		}
 
 }
 
 Type MultiArray(treeNode *root,int i,Type b){
-	treeNode tp = root;
+	treeNode *tp = root;
 	Type p = NULL;
 	Type Array = (Type)malloc(sizeof(Type_));
 	p = Array;

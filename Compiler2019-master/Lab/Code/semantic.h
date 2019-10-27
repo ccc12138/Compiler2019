@@ -1,7 +1,10 @@
+#include <stdlib.h>
+#include "syntaxTree.h"
+
 #ifndef _SEMANTIC_H_
 #define _SEMANTIC_H_
 
-#define tablesize 0x3fff
+#define TABLE_SIZE 0x3fff
 #endif
 
 #define INT 0
@@ -38,6 +41,7 @@ struct item{
 	// some data
 };
 
+struct item* table[TABLE_SIZE]={NULL};
 
 // all functions
 unsigned int hash_pjw(char* name);
@@ -46,10 +50,10 @@ void add_item(struct item* p);
 void print_table();
 
 Type Specifier(treeNode* root);
-Type MultiArray(treeNode *root,int i);
-FieldList VarDec(treeNode* root,Type var_type);
-Type Specifier(treeNode *root);
+Type MultiArray(treeNode *root, int i, Type b);
+FieldList VarDec(treeNode* root, Type var_type);
 Type StructSpecifier(treeNode *root);
+void DefList(treeNode* root);
 
 
 
