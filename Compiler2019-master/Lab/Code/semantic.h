@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "syntaxTree.h"
+#include <assert.h>
 
 #ifndef _SEMANTIC_H_
 #define _SEMANTIC_H_
@@ -10,20 +11,36 @@
 #define INT 0
 #define FLOAT 1
 
+// just define some little functions
+#define cnEq(num)\
+	(root->childnum==num)
+#define printErr(str)\
+	printf("Wrong in %s\n",str);\
+	assert(0);
+#define firc()\
+	root->childp->name
+#define secc()\
+	root->childp->right->name
+#define thic()\
+	root->childp->right->right->name
+
 typedef struct Type_* Type;
 typedef struct FieldList_* FieldList;
+typedef struct Function * Function;
 
 struct Type_
 {
-	enum { BASIC, ARRAY, STRUCTURE} kind;
+	enum { BASIC, ARRAY, STRUCTURE, FUNCTION} kind;
 	union{
 		//Basic type
 		int basic;
 		//array info contains elem type and array size
 		struct { Type elem; int size;} array;
 		//for a struct info		
-		FieldList structure;		
-	} u;
+		FieldList structure;
+		
+		Function function;
+	}u;
 };
 
 struct FieldList_
@@ -34,6 +51,13 @@ struct FieldList_
 };
 
 
+// Is it correct?
+struct Function{
+	char *name;
+	int isDef;//to allign and to be simple
+	FieldList para;
+};
+
 struct item{
 	struct item* next; // deal with collision
 	Type var_type;
@@ -41,19 +65,46 @@ struct item{
 	// some data
 };
 
-struct item* table[TABLE_SIZE]={NULL};
+/* hash table */
+extern struct item* table[TABLE_SIZE];
 
-// all functions
+/********************************************
+ *hash table api, implemented in hashTable.c
+ ********************************************/
 unsigned int hash_pjw(char* name);
 struct item * find_item(char *name);
 void add_item(struct item* p);
 void print_table();
 
+/*****************************************************
+ *semantic non-terminal api, implemented in semantic.c
+ *****************************************************/
+// High Level Definitions
+void Program(treeNode* root);
+void ExtDefList(treeNode* root);
+void ExtDef(treeNode* root);
+void ExtDecList(treeNode* root, Type type);
+
+// Specifiers
 Type Specifier(treeNode* root);
-Type MultiArray(treeNode *root, int i, Type b);
-FieldList VarDec(treeNode* root, Type var_type);
 Type StructSpecifier(treeNode *root);
+
+//Declarators
+FieldList VarDec(treeNode* root, Type var_type);
+
+// Declarators
+
+
+// Statements
+
+
+// Local Definitions
 void DefList(treeNode* root);
+
+// Experssions
+
+
+Type MultiArray(treeNode *root, int i, Type b);
 
 
 

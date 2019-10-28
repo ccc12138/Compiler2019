@@ -124,32 +124,44 @@ StructSpecifier:STRUCT OptTag LC DefList RC	{
 												prevRow=PrintSynErr(@$.first_line,"}",prevRow);
 }
 ;
-OptTag: 		ID 							{$$=InitNode("OptTage",@$.first_line);InsertNode($$,1,$1);}
+OptTag: 		ID 							{$$=InitNode("OptTag",@$.first_line);InsertNode($$,1,$1);}
 			|								{$$=InitNode("EPSILON",@$.first_line);}
 			;
 Tag:			ID 							{$$=InitNode("Tag",@$.first_line);InsertNode($$,1,$1);}
 			;
 
 /* Declarators */
-VarDec: 		ID 							{$$=InitNode("VarDec",@$.first_line);InsertNode($$,1,$1);}
-			|	VarDec LB INT RB			{$$=InitNode("VarDec",@$.first_line);InsertNode($$,4,$1,$2,$3,$4);}
+VarDec: 		ID 							{
+												$$=InitNode("VarDec",@$.first_line);InsertNode($$,1,$1);
+}
+			|	VarDec LB INT RB			{
+												$$=InitNode("VarDec",@$.first_line);InsertNode($$,4,$1,$2,$3,$4);
+}
 			|	VarDec LB error RB			{
 												++synErrNum;
 												prevRow=PrintSynErr(@$.first_line,"]",prevRow);
+};
+FunDec:			ID LP VarList RP			{
+												$$=InitNode("FunDec",@$.first_line);InsertNode($$,4,$1,$2,$3,$4);
 }
-;
-FunDec:			ID LP VarList RP			{$$=InitNode("FunDec",@$.first_line);InsertNode($$,4,$1,$2,$3,$4);}
-			|	ID LP RP 					{$$=InitNode("FunDec",@$.first_line);InsertNode($$,3,$1,$2,$3);}
+			|	ID LP RP 					{
+												$$=InitNode("FunDec",@$.first_line);InsertNode($$,3,$1,$2,$3);
+}
 			|	error RP 					{
 												++synErrNum;
 												prevRow=PrintSynErr(@$.first_line,")",prevRow);
+};
+
+VarList: 		ParamDec COMMA VarList 		{
+												$$=InitNode("VarList",@$.first_line);InsertNode($$,3,$1,$2,$3);
 }
-;
-VarList: 		ParamDec COMMA VarList 		{$$=InitNode("VarList",@$.first_line);InsertNode($$,3,$1,$2,$3);}
-			| 	ParamDec					{$$=InitNode("VarList",@$.first_line);InsertNode($$,1,$1);}
-			;
-ParamDec: 		Specifier VarDec 			{$$=InitNode("ParamDec",@$.first_line);InsertNode($$,2,$1,$2);}
-			;
+			| 	ParamDec					{
+												$$=InitNode("VarList",@$.first_line);InsertNode($$,1,$1);
+};
+
+ParamDec: 		Specifier VarDec 			{
+												$$=InitNode("ParamDec",@$.first_line);InsertNode($$,2,$1,$2);
+};
 
 /* Statements */
 CompSt: 		LC DefList StmtList RC						{

@@ -1,98 +1,95 @@
 #include "semantic.h"
 
-unsigned int hash_pjw(char* name){
-	unsigned int val = 0, i;
-	for(; *name; ++name)
-	{
-		val = (val<<2) + *name;
-		if (i=val&~TABLE_SIZE) val = (val^(i>>12))&TABLE_SIZE;
+// High Level Definitions
+void Program(treeNode* root){
+	if(cnEq(1)&&strcmp(firc(),"ExtDef")==0){
+		ExtDefList(root);
 	}
-	return val;
-}
-
-struct item * find_item(char *name)
-{
-	unsigned int index = hash_pjw(name);
-	if(table[index] == NULL)
-		return NULL;
-	else
-	{
-		struct item* p = table[index];
-		while(p != NULL)
-		{
-			if(strcmp(p->var_name,name)==0)
-				break;				
-			p = p->next;
-		}
-		return p;
+	else{
+		printErr("Program");
 	}
+	return;
 }
 
-void add_item(struct item* p){
-	int index = hash_pjw(p->var_name);
-	if(table[index] == NULL)
-		table[index]=p;
-	else
-	{
-		//insert to the head
-		struct item *head = table[index];
-		p->next = head;
-		table[index]= p;
+void ExtDefList(treeNode* root){
+	if(cnEq(2)&&strcmp(firc(),"ExtDef")==0&&strcmp(secc(),"ExtDefList")==0){
+		ExtDef(root->childp);
+		ExtDefList(root->childp->right);
 	}
-}
-
-void print_table(){
-	for(int i=0;i<TABLE_SIZE;i++)
-		if(table[i]!=NULL){
-			struct item* p = table[i];
-			while(p!=NULL){
-				printf("name:%s\n",p->var_name);
-			}
-		}
-
-}
-
-Type MultiArray(treeNode *root,int i,Type b){
-	treeNode *tp = root;
-	Type p = NULL;
-	Type Array = (Type)malloc(sizeof(struct Type_));
-	p = Array;
-	int j=0;
-	for(;j<i;j++){
-		p->kind=ARRAY;
-		p->u.array.size = tp->childp->right->right->data.intd;
-		p->u.array.elem = (Type)malloc(sizeof(struct Type_));
-		p = p->u.array.elem;
-		tp = tp->childp;
+	else if(cnEq(0)){//epsilon
+		return;
 	}
-	p = b;
-	return Array;
+	else{
+		printErr("ExtDefList");
+	}
+	return;
 }
 
-FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
+void ExtDef(treeNode* root){
+	if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"ExtDecList")==0
+	&&strcmp(thic(),"SEMI")==0){
+		Type specType=Specifier(root->childp);
+		// ExtDecList(root->childp->right,specType);
+	}
+	else if(cnEq(2)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"SEMI")==0){
+		Specifier(root->childp);
+	}
+	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
+	&&strcmp(thic(),"CompSt")==0){
+		// FunType funType=Specifier(root->childp);
+		// FunDec(root->childp->right,funType);
+		// CompSt(root->childp->right->right);
+		// To implement
+	}
+	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
+	&&strcmp(thic(),"SEMI")==0){// elective
+		// FunType funType=Specifier(root->childp);
+		// FunDec(root->childp->right,funType);
+		// TO implement
+	}
+	else{
+		printErr(ExtDef);
+	}
+	return;
+}
+
+void ExtDecList(treeNode* root, Type type){
+	if(cnEq(1)&&strcmp(firc(),"VarDec")==0){
+		// VarDecList(root->childp,type);
+	}
+	else if(cnEq(3)&&strcmp(firc(),"VarDec")==0&&strcmp(secc(),"COMMA")==0
+	&&strcmp(thic(),"ExtDecList")==0){
+		// VarDecList(root->childp,type);
+		ExtDecList(root->childp->right->right,type);
+	}
+	else{
+		printErr("ExtDecList");
+	}
+	return;
+}
+
+// Specifiers
+Type Specifier(treeNode *root){
 	treeNode *p=root;
-	int i=0;
-	/* VarDec -> ID | VarDEc LB INT RB */
-	while(strcmp(p->childp->name,"ID")!=0){
-        p=p->childp;
-        i++;
+	/* Specifier -> TYPE | StructSpecifier */
+	Type add_type = (Type)malloc(sizeof(struct Type_));
+	if(strcmp(p->childp->name,"TYPE")==0){
+        add_type->kind = BASIC;
+		if(strcmp(p->childp->data.strd,"int")==0)
+			add_type->u.basic = INT;
+		else if(strcmp(p->childp->data.strd,"float")==0)
+			add_type->u.basic = FLOAT;
+		else
+			printf("error");
+		return add_type;
     }
-
-	FieldList add_var = (FieldList)malloc(sizeof(struct FieldList_));
-	strcpy(add_var->name, p->childp->data.strd); 
-	
-	/* root->childp->name == ID      ->     VarDec -> ID*/
-	if(i==0){
-        add_var->type->kind=BASIC;
-        return add_var;
-    }
-	else if(i>=1){
-	/* i-dimension array */
-		add_var->type = MultiArray(root,i,var_type);
-		return add_var;
+	else if(strcmp(p->childp->name,"StructSpecifier")==0){
+		add_type = StructSpecifier(p->childp);
+	}
+	else{
+		printf("error!");	
 	}
 }
-
 
 Type StructSpecifier(treeNode *root){
 	treeNode *p=root;
@@ -170,29 +167,35 @@ Type StructSpecifier(treeNode *root){
 	}
 }
 
-
-Type Specifier(treeNode *root){
+// Declarators
+FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	treeNode *p=root;
-	/* Specifier -> TYPE | StructSpecifier */
-	Type add_type = (Type)malloc(sizeof(struct Type_));
-	if(strcmp(p->childp->name,"TYPE")==0){
-        add_type->kind = BASIC;
-		if(strcmp(p->childp->data.strd,"int")==0)
-			add_type->u.basic = INT;
-		else if(strcmp(p->childp->data.strd,"float")==0)
-			add_type->u.basic = FLOAT;
-		else
-			printf("error");
-		return add_type;
+	int i=0;
+	/* VarDec -> ID | VarDEc LB INT RB */
+	while(strcmp(p->childp->name,"ID")!=0){
+        p=p->childp;
+        i++;
     }
-	else if(strcmp(p->childp->name,"StructSpecifier")==0){
-		add_type = StructSpecifier(p->childp);
-	}
-	else{
-		printf("error!");	
+
+	FieldList add_var = (FieldList)malloc(sizeof(struct FieldList_));
+	strcpy(add_var->name, p->childp->data.strd); 
+	
+	/* root->childp->name == ID      ->     VarDec -> ID*/
+	if(i==0){
+        add_var->type->kind=BASIC;
+        return add_var;
+    }
+	else if(i>=1){
+	/* i-dimension array */
+		add_var->type = MultiArray(root,i,var_type);
+		return add_var;
 	}
 }
 
+// Statements
+
+
+// Local Definitions
 /* add to the symbol table when defining */
 void DefList(treeNode* root){
 	/* like below */
@@ -228,5 +231,21 @@ void DefList(treeNode* root){
 	}
 }
 
+// Experssions
 
-
+Type MultiArray(treeNode *root,int i,Type b){
+	treeNode *tp = root;
+	Type p = NULL;
+	Type Array = (Type)malloc(sizeof(struct Type_));
+	p = Array;
+	int j=0;
+	for(;j<i;j++){
+		p->kind=ARRAY;
+		p->u.array.size = tp->childp->right->right->data.intd;
+		p->u.array.elem = (Type)malloc(sizeof(struct Type_));
+		p = p->u.array.elem;
+		tp = tp->childp;
+	}
+	p = b;
+	return Array;
+}

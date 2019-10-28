@@ -1,6 +1,6 @@
 /* Ref P25 */
 #include <stdio.h>
-#include "syntaxTree.h"
+#include "semantic.h"
 extern FILE* yyin;
 int lexErrNum;
 int synErrNum;
@@ -23,7 +23,10 @@ int main(int argc, char** argv){
     yyrestart(f);
     yyparse();
     if(lexErrNum==0&&synErrNum==0){
-        PrintDFS(root,0);
+        //PrintDFS(root,0);
+
+        //Here we have complete tree and we can do semantic analysis
+        Program(root);
     }
     // else{
     //     printf("lexErrNum=%d, synErrNum=%d\n", lexErrNum, synErrNum);
