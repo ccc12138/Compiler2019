@@ -246,6 +246,7 @@ Type MultiArray(treeNode *root,int i,Type b){
 
 // FunDec -> ID LP VarList RP | ID LP RP
 Function FunDec(treeNode* root, Type fun_type){
+	printf("1\n");
 	Function func=(Function)malloc(sizeof(struct Function_));
 	strcpy(func->name,root->childp->data.strd);
 	func->isDef=0;
@@ -434,8 +435,113 @@ void DefList(treeNode* root){
 
 // Experssions
 Type Exp(treeNode* root){
-	// if(cnEq(3)){
+	Type type;
+	// Exp <sth.> Exp
+	if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(thic(),"Exp")==0){
+		// Exp ASSIGNOP Exp
+		if(strcmp(secc(),"ASSIGNOP")==0){
 
-	// }
-	// return 
+		}
+		// Exp AND Exp
+		else if(strcmp(secc(),"AND")==0){
+
+		}
+		// Exp OR Exp
+		else if(strcmp(secc(),"OR")==0){
+
+		}
+		// Exp RELOP Exp
+		else if(strcmp(secc(),"RELOP")==0){
+
+		}
+		// Exp PLUS Exp
+		else if(strcmp(secc(),"PLUS")==0){
+
+		}
+		// Exp MINUS Exp
+		else if(strcmp(secc(),"MINUS")==0){
+
+		}
+		// Exp STAR Exp
+		else if(strcmp(secc(),"STAR")==0){
+
+		}
+		// Exp DIV Exp
+		else if(strcmp(secc(),"DIV")==0){
+
+		}
+		else{
+			printErr("Exp OP Exp");
+		}
+	}
+	// LP Exp RP
+	else if(cnEq(3)&&strcmp(firc(),"LP")==0&&strcmp(secc(),"Exp")==0
+		&&strcmp(thic(),"RP")){
+
+	}
+	// <sth.> Exp
+	else if(cnEq(2)&&strcmp(secc(),"Exp")==0){
+		// MINUS Exp
+		if(strcmp(firc(),"MINUS")==0){
+
+		}
+		// NOT Exp
+		else if(strcmp(firc(),"NOT")==0){
+
+		}
+		else{
+			printErr("OP Exp");
+		}
+	}
+	// ID LP Args RP
+	else if(cnEq(4)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
+		&&strcmp(thic(),"Args")==0&&strcmp(fouc(),"RP")==0){
+
+	}
+	// ID LP RP
+	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
+		&&strcmp(thic(),"RP")==0){
+
+	}
+	// Exp LB Exp RB
+	else if(cnEq(4)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"LB")==0
+		&&strcmp(thic(),"Exp")==0&&strcmp(fouc(),"RB")==0){
+
+	}
+	// Exp DOT ID
+	else if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"DOT")==0
+		&&strcmp(thic(),"ID")==0){
+
+	}
+	// <sth.>
+	else if(cnEq(1)){
+		// ID
+		if(strcmp(firc(),"ID")==0){
+
+		}
+		// INT
+		else if(strcmp(firc(),"INT")==0){
+
+		}
+		// FLOAT
+		else if(strcmp(firc(),"FLOAT")==0){
+
+		}
+		else{
+			printErr("Exp->OP");
+		}
+	}
+	else{
+		printErr("Exp");
+	}
+	type=NULL;
+	return type;
+}
+
+/*
+ * Args Func can compare whether cur_para_type=symtable.func.para_type
+ * Return 0 means equal, otherwise unequal
+ */
+int Args(treeNode* root, FieldList para){
+	return 0;
 }

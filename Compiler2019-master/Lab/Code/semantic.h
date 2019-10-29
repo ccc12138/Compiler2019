@@ -114,6 +114,7 @@ void DefList(treeNode* root);
 
 // Experssions
 Type Exp(treeNode* root);
+int Args(treeNode* root, FieldList para);
 
 
 
