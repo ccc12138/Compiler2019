@@ -96,7 +96,7 @@ Type Specifier(treeNode *root){
 		add_type = StructSpecifier(p->childp);
 	}
 	else{
-		printErr("Specifier")
+		printErr("Specifier");
 	}
 }
 
@@ -112,6 +112,11 @@ Type StructSpecifier(treeNode *root){
 			/* OptTag -> ID |  */
 			treeNode *OptTag = p->childp->right;//deal with the name of struct
 			if( OptTag == NULL )
+
+				/**********************
+				*****NULL OR ""?*******
+				***********************/
+
 				add_struct -> name = NULL;
 			else
 				strcpy(add_struct -> name,OptTag->childp->data.strd);
@@ -199,6 +204,35 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 		add_var->type = MultiArray(root,i,var_type);
 		return add_var;
 	}
+}
+
+Function FunDec(treeNode* root, Type fun_type){
+	Function func=(Function)malloc(sizeof(struct Function_));
+	func->name=root->childp->name;
+	func->isDef=0;
+	func->para=NULL;
+	func->fun_type=fun_type;
+	// ID RP VarList RP
+	if(cnEq(4)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
+	&&strcmp(thic(),"VarList")==0&&strcmp(fouc(),"RP")==0){
+		// func->para=VarList(root->child);
+		// to add func into symbol table
+	}
+	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
+	&&strcmp(thic(),"RP")==0){
+		// func->isDef=1;
+		// to add func into symbol table
+	}
+	else{
+		printErr("FunDec");
+	}
+	return func;
+}
+
+FieldList VarList(treeNode* root){
+	FieldList fieldl=(FieldList)malloc(sizeof(struct FieldList_));
+	//to implement
+	return fieldl;
 }
 
 // Statements

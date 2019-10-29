@@ -23,10 +23,12 @@
 	root->childp->right->name
 #define thic()\
 	root->childp->right->right->name
+#define fouc()\
+	root->childp->right->right->right->name
 
 typedef struct Type_* Type;
 typedef struct FieldList_* FieldList;
-typedef struct Function * Function;
+typedef struct Function_* Function;
 
 struct Type_
 {
@@ -52,8 +54,9 @@ struct FieldList_
 
 
 // Is it correct?
-struct Function{
+struct Function_{
 	char *name;
+	Type fun_type;
 	int isDef;//to allign and to be simple
 	FieldList para;
 };
@@ -91,6 +94,8 @@ Type StructSpecifier(treeNode *root);
 
 //Declarators
 FieldList VarDec(treeNode* root, Type var_type);
+Function FunDec(treeNode* root, Type fun_type);
+FieldList VarList(treeNode* root);
 
 // Declarators
 
