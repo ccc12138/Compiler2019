@@ -13,7 +13,7 @@ unsigned int hash_pjw(char* name){
 	return val;
 }
 
-struct item * find_item(char *name){
+struct item * find_item(char *name, Type item_type){
 	unsigned int index = hash_pjw(name);
 	if(table[index] == NULL)
 		return NULL;
@@ -22,8 +22,14 @@ struct item * find_item(char *name){
 		struct item* p = table[index];
 		while(p != NULL)
 		{
-			if(strcmp(p->var_name,name)==0)
-				break;				
+			if(item_type->kind == FUNCTION){
+				if(p->var_type->kind == FUNCTION && strcmp(p->var_name,name)==0)
+					break;
+			}
+			if(item_type->kind != FUNCTION){
+				if(p->var_type->kind != FUNCTION && strcmp(p->var_name,name)==0)
+					break;
+			}
 			p = p->next;
 		}
 		return p;

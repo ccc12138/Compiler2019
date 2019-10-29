@@ -59,6 +59,7 @@ struct Function_{
 	Type fun_type;
 	int isDef;//to allign and to be simple
 	FieldList para;
+	int para_num;
 };
 
 struct item{
@@ -75,7 +76,7 @@ extern struct item* table[TABLE_SIZE];
  *hash table api, implemented in hashTable.c
  ********************************************/
 unsigned int hash_pjw(char* name);
-struct item * find_item(char *name);
+struct item * find_item(char *name, Type item_type);
 void add_item(struct item* p);
 void print_table();
 

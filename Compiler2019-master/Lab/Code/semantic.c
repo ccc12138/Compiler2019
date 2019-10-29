@@ -4,7 +4,7 @@
 void Program(treeNode* root){
 	// ExtDefList
 	if(cnEq(1)&&strcmp(firc(),"ExtDefList")==0){
-		ExtDefList(root);
+		ExtDefList(root->childp);
 	}
 	else{
 		printErr("Program");
@@ -33,25 +33,26 @@ void ExtDef(treeNode* root){
 	if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"ExtDecList")==0
 	&&strcmp(thic(),"SEMI")==0){
 		Type specType=Specifier(root->childp);
-		// ExtDecList(root->childp->right,specType);
+		ExtDecList(root->childp->right,specType);
 	}
 	// Specifier SEMI
-	else if(cnEq(2)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"SEMI")==0){
+	else if(cnEq(2)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"SEMI")==0)
+	{
 		Specifier(root->childp);
 	}
 	// Specifier FunDec CompSt
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"CompSt")==0){
-		// FunType funType=Specifier(root->childp);
-		// FunDec(root->childp->right,funType);
+		Type funType=Specifier(root->childp);
+		FunDec(root->childp->right,funType);
 		// CompSt(root->childp->right->right);
 		// To implement
 	}
 	// Specifier FunDec SEMI
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"SEMI")==0){// elective
-		// FunType funType=Specifier(root->childp);
-		// FunDec(root->childp->right,funType);
+		Type funType=Specifier(root->childp);
+		FunDec(root->childp->right,funType);
 		// TO implement
 	}
 	else{
@@ -77,7 +78,7 @@ void ExtDecList(treeNode* root, Type type){
 	return;
 }
 
-// Specifiers
+// A.1.3 Specifiers
 Type Specifier(treeNode *root){
 	treeNode *p=root;
 	/* Specifier -> TYPE | StructSpecifier */
@@ -99,7 +100,7 @@ Type Specifier(treeNode *root){
 		printErr("Specifier");
 	}
 }
-
+// StructSpecifier
 Type StructSpecifier(treeNode *root){
 	treeNode *p=root;
 	Type add_type = (Type)malloc(sizeof(struct Type_));// return
@@ -117,7 +118,7 @@ Type StructSpecifier(treeNode *root){
 				*****NULL OR ""?*******
 				***********************/
 
-				add_struct -> name = NULL;
+				add_struct -> name = "";
 			else
 				strcpy(add_struct -> name,OptTag->childp->data.strd);
 			add_struct ->type-> kind = STRUCTURE;
@@ -163,14 +164,16 @@ Type StructSpecifier(treeNode *root){
 			return add_type;
 		}
 		else if(p->childnum==2){/* declaration */
+			/*
 			struct item* q = find_item(p->childp->right->childp->data.strd);
 			if(q==NULL){
-			/* error ouput */	
-			}
+			*/
+				/* error ouput */	
+			/*}
 			else{
 				add_type = q->var_type;
 				return add_type;
-			}
+			}*/
 		}
 		else{
 			printf("error!");		
@@ -181,7 +184,8 @@ Type StructSpecifier(treeNode *root){
 	}
 }
 
-// Declarators
+// A.1.4 Declarators
+// VarDec -> ID | VarDec LB INT RB
 FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	treeNode *p=root;
 	int i=0;
@@ -205,21 +209,34 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 		return add_var;
 	}
 }
-
+// FunDec -> ID LP VarList RP | ID LP RP
 Function FunDec(treeNode* root, Type fun_type){
 	Function func=(Function)malloc(sizeof(struct Function_));
-	func->name=root->childp->name;
+	strcpy(func->name,root->childp->data.strd);
 	func->isDef=0;
 	func->para=NULL;
 	func->fun_type=fun_type;
 	// ID RP VarList RP
 	if(cnEq(4)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 	&&strcmp(thic(),"VarList")==0&&strcmp(fouc(),"RP")==0){
-		// func->para=VarList(root->child);
+		func->para=VarList(root->childp->right->right);
+		struct item* add_new = (struct item*)malloc(sizeof(struct item));
+		add_new -> next = NULL;
+		add_new -> var_type -> kind = FUNCTION;
+		add_new -> var_type -> u.function = func;
+		strcpy(add_new -> var_name,func->name);
+		add_item(add_new);
 		// to add func into symbol table
 	}
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 	&&strcmp(thic(),"RP")==0){
+		func->para=NULL;
+		struct item* add_new = (struct item*)malloc(sizeof(struct item));
+		add_new -> next = NULL;
+		add_new -> var_type -> kind = FUNCTION;
+		add_new -> var_type -> u.function = func;
+		strcpy(add_new -> var_name,func->name);
+		add_item(add_new);
 		// func->isDef=1;
 		// to add func into symbol table
 	}
@@ -228,10 +245,31 @@ Function FunDec(treeNode* root, Type fun_type){
 	}
 	return func;
 }
-
+// VarList -> ParamDec COMMA VarList | ParamDec 		+ ParamDec
 FieldList VarList(treeNode* root){
 	FieldList fieldl=(FieldList)malloc(sizeof(struct FieldList_));
+	FieldList p = fieldl;
 	//to implement
+	treeNode* VarList = root;
+	while( VarList->childnum == 3 ){
+		/* each step deal with one ParamDec */
+		treeNode* Param = VarList-> childp;
+		treeNode * specifierp = Param->childp;
+		treeNode * VarDecp = Param->childp->right;
+		/* ParamDec -> Specifier VarDec */
+		p->tail = VarDec(VarDecp,Specifier(specifierp));
+		VarList = VarList->right->right->right;
+	}
+	if(VarList->childnum == 1)
+	{
+		/* each step deal with one ParamDec */
+		treeNode* Param = VarList-> childp;
+		treeNode * specifierp = Param->childp;
+		treeNode * VarDecp = Param->childp->right;
+		/* ParamDec -> Specifier VarDec */
+		p->tail = VarDec(VarDecp,Specifier(specifierp));
+		VarList = VarList->right->right->right;
+	}
 	return fieldl;
 }
 
@@ -252,6 +290,7 @@ void DefList(treeNode* root){
 		/* DecList -> Dec | Dec COMMA DecList */
 		while( DecList != NULL ){
 			struct item* add_new = (struct item*)malloc(sizeof(struct item));
+			add_new -> next = NULL;			
 			FieldList f = (FieldList)malloc(sizeof(struct FieldList_));
 			treeNode * Dec = DecList->childp;
 			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
