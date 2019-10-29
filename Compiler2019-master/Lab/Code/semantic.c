@@ -55,7 +55,7 @@ void ExtDef(treeNode* root){
 		// TO implement
 	}
 	else{
-		printErr(ExtDef);
+		printErr("ExtDef");
 	}
 	return;
 }
@@ -82,7 +82,7 @@ Type Specifier(treeNode *root){
 	treeNode *p=root;
 	/* Specifier -> TYPE | StructSpecifier */
 	Type add_type = (Type)malloc(sizeof(struct Type_));
-	if(strcmp(p->childp->name,"TYPE")==0){
+	if(cnEq(1)&&strcmp(p->childp->name,"TYPE")==0){
         add_type->kind = BASIC;
 		if(strcmp(p->childp->data.strd,"int")==0)
 			add_type->u.basic = INT;
@@ -92,11 +92,11 @@ Type Specifier(treeNode *root){
 			printf("error");
 		return add_type;
     }
-	else if(strcmp(p->childp->name,"StructSpecifier")==0){
+	else if(cnEq(1)&&strcmp(p->childp->name,"StructSpecifier")==0){
 		add_type = StructSpecifier(p->childp);
 	}
 	else{
-		printf("error!");	
+		printErr("Specifier")
 	}
 }
 
