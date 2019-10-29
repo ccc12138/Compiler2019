@@ -244,11 +244,24 @@ Type MultiArray(treeNode *root,int i,Type b){
 	return Array;
 }
 
+
+// malloc a new item
+struct item* create_new(){
+	struct item* add_new = (struct item*)malloc(sizeof(struct item));
+	add_new -> var_type = (Type)malloc(sizeof(struct Type_));
+	add_new -> var_name = (char*)malloc(sizeof(char)*32);
+	return add_new;
+}
+
 // FunDec -> ID LP VarList RP | ID LP RP
 Function FunDec(treeNode* root, Type fun_type){
-	printf("1\n");
-	Function func=(Function)malloc(sizeof(struct Function_));
+	Function func= (Function)malloc(sizeof(struct Function_));
+	//PrintDFS(root->childp,0);
+	if(func->name == NULL){
+		func->name = (char*)malloc(sizeof(char)*32);
+	}
 	strcpy(func->name,root->childp->data.strd);
+	// printf("%s\n",func->name);
 	func->isDef=0;
 	func->para=NULL;
 	func->fun_type=fun_type;
@@ -256,7 +269,7 @@ Function FunDec(treeNode* root, Type fun_type){
 	if(cnEq(4)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 	&&strcmp(thic(),"VarList")==0&&strcmp(fouc(),"RP")==0){
 		func->para=VarList(root->childp->right->right);
-		struct item* add_new = (struct item*)malloc(sizeof(struct item));
+		struct item* add_new = create_new();
 		add_new -> next = NULL;
 		add_new -> var_type -> kind = FUNCTION;
 		add_new -> var_type -> u.function = func;
@@ -267,10 +280,11 @@ Function FunDec(treeNode* root, Type fun_type){
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 	&&strcmp(thic(),"RP")==0){
 		func->para=NULL;
-		struct item* add_new = (struct item*)malloc(sizeof(struct item));
+		struct item* add_new = create_new();
 		add_new -> next = NULL;
 		add_new -> var_type -> kind = FUNCTION;
 		add_new -> var_type -> u.function = func;
+		
 		strcpy(add_new -> var_name,func->name);
 		add_item(add_new);
 		// func->isDef=1;
