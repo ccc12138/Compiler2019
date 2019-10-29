@@ -23,7 +23,7 @@ int main(int argc, char** argv){
     yyrestart(f);
     yyparse();
     if(lexErrNum==0&&synErrNum==0){
-        //PrintDFS(root,0);
+        PrintDFS(root,0);
 
         //Here we have complete tree and we can do semantic analysis
         Program(root);

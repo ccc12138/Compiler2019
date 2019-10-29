@@ -48,7 +48,7 @@ void add_item(struct item* p){
 		table[index]= p;
 	}
 }
-
+//debug
 void print_table(){
 	for(int i=0;i<TABLE_SIZE;i++)
 		if(table[i]!=NULL){

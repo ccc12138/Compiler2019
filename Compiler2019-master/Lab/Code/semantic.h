@@ -25,6 +25,13 @@
 	root->childp->right->right->name
 #define fouc()\
 	root->childp->right->right->right->name
+#define fifc()\
+	root->childp->right->right->right->right->name
+#define sixc()\
+	root->childp->right->right->right->right->right->name
+#define sevc()\
+	root->childp->right->right->right->right->right->right->name
+
 
 typedef struct Type_* Type;
 typedef struct FieldList_* FieldList;
@@ -52,8 +59,6 @@ struct FieldList_
 	FieldList tail;
 };
 
-
-// Is it correct?
 struct Function_{
 	char *name;
 	Type fun_type;
@@ -95,22 +100,20 @@ Type StructSpecifier(treeNode *root);
 
 //Declarators
 FieldList VarDec(treeNode* root, Type var_type);
+Type MultiArray(treeNode *root, int i, Type b);
 Function FunDec(treeNode* root, Type fun_type);
 FieldList VarList(treeNode* root);
 
-// Declarators
-
-
 // Statements
-
+void CompSt(treeNode* root);
+void StmtList(treeNode* root);
+void Stmt(treeNode* root);
 
 // Local Definitions
 void DefList(treeNode* root);
 
 // Experssions
-
-
-Type MultiArray(treeNode *root, int i, Type b);
+Type Exp(treeNode* root);
 
 
 
