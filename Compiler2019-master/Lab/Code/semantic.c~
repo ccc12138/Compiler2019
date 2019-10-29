@@ -247,24 +247,35 @@ FieldList VarList(treeNode* root){
 	FieldList p = fieldl;
 	//to implement
 	treeNode* VarList = root;
-	while( VarList->childnum == 3 ){
+	while( VarList->childp != NULL ){
 		/* each step deal with one ParamDec */
 		treeNode* Param = DefList-> childp;
 		treeNode * specifierp = Param->childp;
 		treeNode * VarDec = Param->childp->right;
 		/* ParamDec -> Specifier VarDec */
 		p->tail = VarDec(VarDec,Specifier(specifierp));
-		VarList = VarList->right->right->right;
-	}
-	if(VarList->childnum == 1)
-	{
-		/* each step deal with one ParamDec */
-		treeNode* Param = DefList-> childp;
-		treeNode * specifierp = Param->childp;
-		treeNode * VarDec = Param->childp->right;
-		/* ParamDec -> Specifier VarDec */
-		p->tail = VarDec(VarDec,Specifier(specifierp));
-		VarList = VarList->right->right->right;
+		while( DecList != NULL ){
+			struct item* add_new = (struct item*)malloc(sizeof(struct item));
+			add_new -> next = NULL;			
+			FieldList f = (FieldList)malloc(sizeof(struct FieldList_));
+			treeNode * Dec = DecList->childp;
+			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
+			// the later one is error type 15
+			f = VarDec(Dec->childp,Specifier(specifierp));
+			add_new->var_type = f->type;
+			strcpy(add_new->var_name,f->name);
+			add_item(add_new);
+			if( DecList -> childnum == 1 ){
+				DecList = NULL;
+			}
+			else if( DecList -> childnum == 3 ){
+				DecList = DecList->childp->right->right;
+			}
+			else{
+					printf("error!");
+			}
+		}
+		DefList = Def->right;
 	}
 	return fieldl;
 }
