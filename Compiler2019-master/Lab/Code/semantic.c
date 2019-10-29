@@ -2,7 +2,8 @@
 
 // High Level Definitions
 void Program(treeNode* root){
-	if(cnEq(1)&&strcmp(firc(),"ExtDef")==0){
+	// ExtDefList
+	if(cnEq(1)&&strcmp(firc(),"ExtDefList")==0){
 		ExtDefList(root);
 	}
 	else{
@@ -12,11 +13,13 @@ void Program(treeNode* root){
 }
 
 void ExtDefList(treeNode* root){
+	// ExtDef ExtDefList
 	if(cnEq(2)&&strcmp(firc(),"ExtDef")==0&&strcmp(secc(),"ExtDefList")==0){
 		ExtDef(root->childp);
 		ExtDefList(root->childp->right);
 	}
-	else if(cnEq(0)){//epsilon
+	// epsilon
+	else if(cnEq(0)){
 		return;
 	}
 	else{
@@ -26,14 +29,17 @@ void ExtDefList(treeNode* root){
 }
 
 void ExtDef(treeNode* root){
+	// Specifier ExtDecList SEMI
 	if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"ExtDecList")==0
 	&&strcmp(thic(),"SEMI")==0){
 		Type specType=Specifier(root->childp);
 		// ExtDecList(root->childp->right,specType);
 	}
+	// Specifier SEMI
 	else if(cnEq(2)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"SEMI")==0){
 		Specifier(root->childp);
 	}
+	// Specifier FunDec CompSt
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"CompSt")==0){
 		// FunType funType=Specifier(root->childp);
@@ -41,6 +47,7 @@ void ExtDef(treeNode* root){
 		// CompSt(root->childp->right->right);
 		// To implement
 	}
+	// Specifier FunDec SEMI
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"SEMI")==0){// elective
 		// FunType funType=Specifier(root->childp);
@@ -54,9 +61,11 @@ void ExtDef(treeNode* root){
 }
 
 void ExtDecList(treeNode* root, Type type){
+	// VarDec
 	if(cnEq(1)&&strcmp(firc(),"VarDec")==0){
 		// VarDecList(root->childp,type);
 	}
+	// VarDec COMMA ExtDecList
 	else if(cnEq(3)&&strcmp(firc(),"VarDec")==0&&strcmp(secc(),"COMMA")==0
 	&&strcmp(thic(),"ExtDecList")==0){
 		// VarDecList(root->childp,type);
