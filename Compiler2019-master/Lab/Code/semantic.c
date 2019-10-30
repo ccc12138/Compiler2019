@@ -469,35 +469,45 @@ Type Exp(treeNode* root){
 	if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(thic(),"Exp")==0){
 		// Exp ASSIGNOP Exp
 		if(strcmp(secc(),"ASSIGNOP")==0){
-			
+			Type ltype=Exp(root->childp);
+			Type rtype=Exp(root->childp->right->right);
+			if(ltype==NULL||rtype==NULL){
+				return NULL;
+			}
+			else if(ltype->value==R_VALUE){
+				printf("Error type 6 at Line %d: The left-hand side of an assignment must be a variable.\n"
+					, root->childp->lineno);
+				return NULL;
+			}
+			else if(!typeEqual(ltype,rtype)){
+				printf("Error type 5 at Line %d: Type mismatched for assignment.\n"
+					, root->childp->lineno);
+				return NULL;	
+			}
+			else{
+				return ltype;
+			}
 		}
-		// Exp AND Exp
-		else if(strcmp(secc(),"AND")==0){
 
-		}
-		// Exp OR Exp
-		else if(strcmp(secc(),"OR")==0){
+		/*
+		 * Question: Does FLOAT/ARRAY/STRUCTURE sup AND/OR calculation?
+		 */
 
-		}
-		// Exp RELOP Exp
-		else if(strcmp(secc(),"RELOP")==0){
-
-		}
-		// Exp PLUS Exp
-		else if(strcmp(secc(),"PLUS")==0){
-
-		}
-		// Exp MINUS Exp
-		else if(strcmp(secc(),"MINUS")==0){
-
-		}
-		// Exp STAR Exp
-		else if(strcmp(secc(),"STAR")==0){
-
-		}
-		// Exp DIV Exp
-		else if(strcmp(secc(),"DIV")==0){
-
+		// Exp AND/OR/RELOP/PLUS/MINUS/STAR/DIV Exp
+		else if(strcmp(secc(),"AND")==0||strcmp(secc(),"OR")==0
+			||strcmp(secc(),"RELOP")==0||strcmp(secc(),"PLUS")==0
+			||strcmp(secc(),"MINUS")==0||strcmp(secc(),"STAR")==0
+			||strcmp(secc(),"DIV")==0){
+			Type ltype=Exp(root->childp);
+			Type rtype=Exp(root->childp->right->right);
+			if(ltype==NULL||rtype==NULL){
+				return NULL;
+			}
+			if(!typeEqual(ltype,rtype)||ltype->kind!=BASIC){
+				return NULL;
+			}
+			return ltype;
+			//else if(!typeEqual(ltype,rtype)||ltype->)
 		}
 		else{
 			printErr("Exp OP Exp");
@@ -506,17 +516,22 @@ Type Exp(treeNode* root){
 	// LP Exp RP
 	else if(cnEq(3)&&strcmp(firc(),"LP")==0&&strcmp(secc(),"Exp")==0
 		&&strcmp(thic(),"RP")){
-
+		return Exp(root->childp->right);
 	}
 	// <sth.> Exp
 	else if(cnEq(2)&&strcmp(secc(),"Exp")==0){
-		// MINUS Exp
-		if(strcmp(firc(),"MINUS")==0){
-
-		}
-		// NOT Exp
-		else if(strcmp(firc(),"NOT")==0){
-
+		// MINUS/NOT Exp
+		if(strcmp(firc(),"MINUS")==0||strcmp(firc(),"NOT")==0){
+			Type exp_type=Exp(root->childp->right);
+			if(exp_type==NULL){
+				return NULL;
+			}
+			else if(exp_type->kind!=BASIC){
+				printf("Error type 7 at Line %d: Operands type mismatched\n", root->childp->lineno);
+				return NULL;
+			}
+			exp_type->value=R_VALUE;
+			return exp_type;
 		}
 		else{
 			printErr("OP Exp");

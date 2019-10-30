@@ -50,6 +50,7 @@ struct Type_
 		
 		Function function;
 	}u;
+	enum { L_VALUE, R_VALUE, LR_VALUE} value;// used for exp only
 };
 
 struct FieldList_
@@ -84,6 +85,12 @@ unsigned int hash_pjw(char* name);
 struct item * find_item(char *name, Type item_type);
 void add_item(struct item* p);
 void print_table();
+
+/********************************************
+ *equal judge api, implemented in equalJudge.c
+ ********************************************/
+int typeEqual(Type ltype, Type rtype);
+
 
 /*****************************************************
  *semantic non-terminal api, implemented in semantic.c
