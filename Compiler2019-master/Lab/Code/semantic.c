@@ -4,7 +4,7 @@
 void Program(treeNode* root){
 	// ExtDefList
 	if(cnEq(1)&&strcmp(firc(),"ExtDefList")==0){
-		printf("Program branch1\n");
+		// printf("Program branch1\n");
 		ExtDefList(root->childp);
 	}
 	else{
@@ -17,13 +17,13 @@ void ExtDefList(treeNode* root){
 	// ExtDef ExtDefList
 	if(cnEq(2)&&strcmp(firc(),"ExtDef")==0
 		&&(strcmp(secc(),"ExtDefList")==0||strcmp(secc(),"EPSILON")==0)){
-		printf("ExtDefList branch1\n");
+		// printf("ExtDefList branch1\n");
 		ExtDef(root->childp);
 		ExtDefList(root->childp->right);
 	}
 	// epsilon
 	else if(cnEq(0)){
-		printf("ExtDefList branch2\n");
+		// printf("ExtDefList branch2\n");
 		return;
 	}
 	else{
@@ -36,24 +36,24 @@ void ExtDef(treeNode* root){
 	// Specifier ExtDecList SEMI
 	if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"ExtDecList")==0
 	&&strcmp(thic(),"SEMI")==0){
-		printf("ExtDef branch1\n");
+		// printf("ExtDef branch1\n");
 		Type spec_type=Specifier(root->childp);
 		ExtDecList(root->childp->right,spec_type);
 	}
 	// Specifier SEMI
 	else if(cnEq(2)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"SEMI")==0)
 	{
-		printf("ExtDef branch2\n");
+		// printf("ExtDef branch2\n");
 		Specifier(root->childp);
 	}
 	// Specifier FunDec CompSt
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"CompSt")==0){
-		printf("ExtDef branch3\n");
+		// printf("ExtDef branch3\n");
 		Type fun_type=Specifier(root->childp);
-		printf("flag1\n");
+		// printf("flag1\n");
 		FunDec(root->childp->right,fun_type,1);
-		printf("flag2\n");
+		// printf("flag2\n");
 		CompSt(root->childp->right->right,fun_type);
 		// Begin: need SYMTAB here and check FUNCTION errors
 		// done in FunDec function
@@ -63,7 +63,7 @@ void ExtDef(treeNode* root){
 	// Specifier FunDec SEMI
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"SEMI")==0){// elective
-		printf("ExtDef branch4\n");
+		// printf("ExtDef branch4\n");
 		Type fun_type=Specifier(root->childp);
 		FunDec(root->childp->right,fun_type,0);
 		// Begin: need SYMTAB here and check FUNCTION errors
@@ -80,13 +80,13 @@ void ExtDef(treeNode* root){
 void ExtDecList(treeNode* root, Type var_type){
 	// VarDec
 	if(cnEq(1)&&strcmp(firc(),"VarDec")==0){
-		printf("ExtDecList branch1\n");
+		// printf("ExtDecList branch1\n");
 		VarDec(root->childp,var_type);
 	}
 	// VarDec COMMA ExtDecList
 	else if(cnEq(3)&&strcmp(firc(),"VarDec")==0&&strcmp(secc(),"COMMA")==0
 	&&strcmp(thic(),"ExtDecList")==0){
-		printf("ExtDecList branch2\n");
+		// printf("ExtDecList branch2\n");
 		VarDec(root->childp,var_type);
 		ExtDecList(root->childp->right->right,var_type);
 	}
@@ -359,9 +359,9 @@ void CompSt(treeNode* root, Type func_type){
 	if(cnEq(4)&&strcmp(firc(),"LC")==0&&strcmp(secc(),"DefList")==0
 		&&(strcmp(thic(),"StmtList")==0||strcmp(thic(),"EPSILON")==0)
 		&&strcmp(fouc(),"RC")==0){
-		printf("CompSt branch1\n");
+		// printf("CompSt branch1\n");
 		DefList(root->childp->right);
-		printf("flag3\n");
+		// printf("flag3\n");
 		StmtList(root->childp->right->right, func_type);
 	}
 	else{
@@ -374,7 +374,7 @@ void StmtList(treeNode* root, Type func_type){
 	// Stmt StmtList
 	if(cnEq(2)&&strcmp(firc(),"Stmt")==0
 		&&(strcmp(secc(),"StmtList")==0||strcmp(secc(),"EPSILON")==0)){
-		printf("StmtList branch1\n");
+		// printf("StmtList branch1\n");
 		Stmt(root->childp, func_type);
 		StmtList(root->childp->right, func_type);
 	}
@@ -391,18 +391,18 @@ void StmtList(treeNode* root, Type func_type){
 void Stmt(treeNode* root, Type func_type){
 	// Exp SEMI
 	if(cnEq(2)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"SEMI")==0){
-		printf("Stmt branch1\n");
+		// printf("Stmt branch1\n");
 		Exp(root->childp);
 	}
 	// CompSt
 	else if(cnEq(1)&&strcmp(firc(),"CompSt")==0){
-		printf("Stmt branch2\n");
+		// printf("Stmt branch2\n");
 		CompSt(root->childp,func_type);
 	}
 	// RETURN Exp SEMI
 	else if(cnEq(3)&&strcmp(firc(),"RETURN")==0&&strcmp(secc(),"Exp")==0
 		&&strcmp(thic(),"SEMI")==0){
-		printf("Stmt branch3\n");
+		// printf("Stmt branch3\n");
 		Type ret_type=Exp(root->childp->right);
 		// Begin: need SYMTAB here and check RETURN errors
 		if(typeEqual(ret_type,func_type)==1)
@@ -417,7 +417,7 @@ void Stmt(treeNode* root, Type func_type){
 	else if(cnEq(5)&&strcmp(firc(),"IF")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"Exp")==0&&strcmp(fouc(),"RP")==0
 		&&strcmp(fifc(),"Stmt")==0){
-		printf("Stmt branch4\n");
+		// printf("Stmt branch4\n");
 		Exp(root->childp->right->right);
 		Stmt(root->childp->right->right->right->right, func_type);
 	}
@@ -426,7 +426,7 @@ void Stmt(treeNode* root, Type func_type){
 		&&strcmp(thic(),"Exp")==0&&strcmp(fouc(),"RP")==0
 		&&strcmp(fifc(),"Stmt")==0&&strcmp(sixc(),"ELSE")==0
 		&&strcmp(sevc(),"Stmt")==0){
-		printf("Stmt branch5\n");
+		// printf("Stmt branch5\n");
 		Exp(root->childp->right->right);
 		Stmt(root->childp->right->right->right->right, func_type);
 		Stmt(root->childp->right->right->right->right->right->right, func_type);
@@ -435,7 +435,7 @@ void Stmt(treeNode* root, Type func_type){
 	else if(cnEq(5)&&strcmp(firc(),"WHILE")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"Exp")==0&&strcmp(fouc(),"RP")==0
 		&&strcmp(fifc(),"Stmt")==0){
-		printf("Stmt branch6\n");
+		// printf("Stmt branch6\n");
 		Exp(root->childp->right->right);
 		Stmt(root->childp->right->right->right->right, func_type);
 	}
@@ -466,9 +466,9 @@ void DefList(treeNode* root){
 			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
 			// the later one is error type 15
 			f = VarDec(Dec->childp,p);
-			printf("BACK\n");
+			// printf("BACK\n");
 			add_new->var_type = f->type;
-			printf("flag4\n");
+			// printf("flag4\n");
 			strcpy(add_new->var_name,f->name);
 			add_item(add_new);
 			if( DecList -> childnum == 1 ){
