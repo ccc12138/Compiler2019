@@ -379,7 +379,7 @@ void Stmt(treeNode* root){
 		CompSt(root->childp);
 	}
 	// RETURN Exp SEMI
-	else if(cnEq(3)&&strcmp(firc(),"RETURE")==0&&strcmp(secc(),"Exp")==0
+	else if(cnEq(3)&&strcmp(firc(),"RETURN")==0&&strcmp(secc(),"Exp")==0
 		&&strcmp(thic(),"SEMI")==0){
 		printf("Stmt branch3\n");
 		Type ret_type=Exp(root->childp->right);
@@ -598,8 +598,28 @@ Type Exp(treeNode* root){
 
 /*
  * Args Func can compare whether cur_para_type=symtable.func.para_type
- * Return 0 means equal, otherwise unequal
+ * Return true means equal, otherwise unequal
  */
-int Args(treeNode* root, FieldList para){
-	return 0;
+bool Args(treeNode* root, FieldList para){
+	if(root==NULL)
+		return false;
+	if(para==NULL)
+		return false;
+
+	Type exp_type = Exp(root->childp);
+	if(!typeEqual(exp_type, para->type)){
+		printf("Error type 9 at Line %d: Function parameters not match\n",root->childp->lineno);
+		return false;
+	}
+	else if(cnEq(1)&&strcmp(firc(),"Exp")==0){
+		return true;
+	}
+	else if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"COMMA")==0
+		&&strcmp(thic(),"Args")==0){
+		return Args(root->childp->right->right, para->tail);
+	}
+	else{
+		printErr("Args");
+	}
+	return true;
 }
