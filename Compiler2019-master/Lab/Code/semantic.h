@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "syntaxTree.h"
 #include <assert.h>
+#include<stdbool.h>
 
 #ifndef _SEMANTIC_H_
 #define _SEMANTIC_H_
@@ -31,7 +32,12 @@
 	root->childp->right->right->right->right->right->name
 #define sevc()\
 	root->childp->right->right->right->right->right->right->name
-
+#define MACRO_RETURN(INT_FLOAT_TYPE)\
+	Type type = (Type)malloc(sizeof(struct Type_));\
+	type->kind = BASIC;\
+	type->u.basic = INT_FLOAT_TYPE;\
+	type->value = R_VALUE;\
+	return type;
 
 typedef struct Type_* Type;
 typedef struct FieldList_* FieldList;
@@ -86,11 +92,12 @@ struct item * find_item(char *name, Type item_type);
 void add_item(struct item* p);
 void print_table();
 struct item* create_new();
+
 /********************************************
  *equal judge api, implemented in equalJudge.c
  ********************************************/
-int typeEqual(Type ltype, Type rtype);
-
+bool typeEqual(Type ltype, Type rtype);
+bool structEqual(FieldList lstruct, FieldList rstruct);
 
 /*****************************************************
  *semantic non-terminal api, implemented in semantic.c

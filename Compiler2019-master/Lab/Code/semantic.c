@@ -538,12 +538,20 @@ Type Exp(treeNode* root){
 	// ID LP Args RP
 	else if(cnEq(4)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"Args")==0&&strcmp(fouc(),"RP")==0){
+		// TO IMPLEMENT: ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
+		// THIS Exp IS R_VALUE
+		// Begin:
 
+		// End
 	}
 	// ID LP RP
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"RP")==0){
+		// TO IMPLEMENT: ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
+		// THIS Exp IS R_VALUE
+		// Begin:
 
+		// End
 	}
 	// Exp LB Exp RB
 	else if(cnEq(4)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"LB")==0
@@ -553,21 +561,29 @@ Type Exp(treeNode* root){
 	// Exp DOT ID
 	else if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"DOT")==0
 		&&strcmp(thic(),"ID")==0){
+		// TO IMPLEMENT: Exp CHICK ERROR, ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
+		// THIS Exp IS ______?
+		// Begin:
 
+		// End
 	}
 	// <sth.>
 	else if(cnEq(1)){
 		// ID
 		if(strcmp(firc(),"ID")==0){
+			// TO IMPLEMENT: ID CHECK ERROR TYPE 1
+			// THIS IS LR_VALUE
+			// Begin:
 
+			// End
 		}
 		// INT
 		else if(strcmp(firc(),"INT")==0){
-
+			MACRO_RETURN(INT);
 		}
 		// FLOAT
 		else if(strcmp(firc(),"FLOAT")==0){
-
+			MACRO_RETURN(FLOAT);
 		}
 		else{
 			printErr("Exp->OP");
