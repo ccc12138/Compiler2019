@@ -41,7 +41,8 @@ void ExtDef(treeNode* root){
 		ExtDecList(root->childp->right,spec_type);
 	}
 	// Specifier SEMI
-	else if(cnEq(2)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"SEMI")==0){
+	else if(cnEq(2)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"SEMI")==0)
+	{
 		printf("ExtDef branch2\n");
 		Specifier(root->childp);
 	}
@@ -51,11 +52,11 @@ void ExtDef(treeNode* root){
 		printf("ExtDef branch3\n");
 		Type fun_type=Specifier(root->childp);
 		printf("flag1\n");
-		FunDec(root->childp->right,fun_type);
+		FunDec(root->childp->right,fun_type,1);
 		printf("flag2\n");
-		CompSt(root->childp->right->right);
+		CompSt(root->childp->right->right,fun_type);
 		// Begin: need SYMTAB here and check FUNCTION errors
-
+		// done in FunDec function
 
 		// End
 	}
@@ -64,9 +65,9 @@ void ExtDef(treeNode* root){
 	&&strcmp(thic(),"SEMI")==0){// elective
 		printf("ExtDef branch4\n");
 		Type fun_type=Specifier(root->childp);
-		FunDec(root->childp->right,fun_type);
+		FunDec(root->childp->right,fun_type,0);
 		// Begin: need SYMTAB here and check FUNCTION errors
-
+		// done in FunDec function
 		
 		// End
 	}
@@ -262,7 +263,7 @@ struct item* create_new(){
 }
 
 // FunDec -> ID LP VarList RP | ID LP RP
-Function FunDec(treeNode* root, Type fun_type){
+Function FunDec(treeNode* root, Type fun_type, int isDef){
 	Function func= (Function)malloc(sizeof(struct Function_));
 	//PrintDFS(root->childp,0);
 	if(func->name == NULL){
@@ -270,7 +271,7 @@ Function FunDec(treeNode* root, Type fun_type){
 	}
 	strcpy(func->name,root->childp->data.strd);
 	// printf("%s\n",func->name);
-	func->isDef=0;
+	func->isDef=isDef;
 	func->para=NULL;
 	func->fun_type=fun_type;
 	// ID RP VarList RP
@@ -282,7 +283,28 @@ Function FunDec(treeNode* root, Type fun_type){
 		add_new -> var_type -> kind = FUNCTION;
 		add_new -> var_type -> u.function = func;
 		strcpy(add_new -> var_name,func->name);
-		add_item(add_new);
+		// test before add item
+		struct item* po =find_item(add_new -> var_name, add_new -> var_type -> kind );
+		if(po==NULL)
+			add_item(add_new);//never declare or define
+		else{
+			if( structEqual(func->para,po->var_type->u.function->para)==1 && typeEqual(func->fun_type,po->var_type->u.function->fun_type)==1)
+			{
+				// nothing wrong
+			}
+			else{
+				if(structEqual(func->para,po->var_type->u.function->para)!=1)
+				{
+					// para not coordinate
+					printErr("FunDec");
+				}
+				if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)!=1)
+				{
+					// return type not coordinate
+					printErr("FunDec");
+				}
+			}
+		}
 		// to add func into symbol table
 	}
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
@@ -295,7 +317,6 @@ Function FunDec(treeNode* root, Type fun_type){
 		
 		strcpy(add_new -> var_name,func->name);
 		add_item(add_new);
-		// func->isDef=1;
 		// to add func into symbol table
 	}
 	else{
@@ -333,7 +354,7 @@ FieldList VarList(treeNode* root){
 }
 
 // Statements
-void CompSt(treeNode* root){
+void CompSt(treeNode* root, Type func_type){
 	//LC DefList StmtList RC
 	if(cnEq(4)&&strcmp(firc(),"LC")==0&&strcmp(secc(),"DefList")==0
 		&&(strcmp(thic(),"StmtList")==0||strcmp(thic(),"EPSILON")==0)
@@ -341,7 +362,7 @@ void CompSt(treeNode* root){
 		printf("CompSt branch1\n");
 		DefList(root->childp->right);
 		printf("flag3\n");
-		StmtList(root->childp->right->right);
+		StmtList(root->childp->right->right, func_type);
 	}
 	else{
 		printErr("CompSt");
@@ -349,13 +370,13 @@ void CompSt(treeNode* root){
 	return;
 }
 
-void StmtList(treeNode* root){
+void StmtList(treeNode* root, Type func_type){
 	// Stmt StmtList
 	if(cnEq(2)&&strcmp(firc(),"Stmt")==0
 		&&(strcmp(secc(),"StmtList")==0||strcmp(secc(),"EPSILON")==0)){
 		printf("StmtList branch1\n");
-		Stmt(root->childp);
-		StmtList(root->childp->right);
+		Stmt(root->childp, func_type);
+		StmtList(root->childp->right, func_type);
 	}
 	// epsilon
 	else if(cnEq(0)){
@@ -367,7 +388,7 @@ void StmtList(treeNode* root){
 	return;
 }
 
-void Stmt(treeNode* root){
+void Stmt(treeNode* root, Type func_type){
 	// Exp SEMI
 	if(cnEq(2)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"SEMI")==0){
 		printf("Stmt branch1\n");
@@ -376,7 +397,7 @@ void Stmt(treeNode* root){
 	// CompSt
 	else if(cnEq(1)&&strcmp(firc(),"CompSt")==0){
 		printf("Stmt branch2\n");
-		CompSt(root->childp);
+		CompSt(root->childp,func_type);
 	}
 	// RETURN Exp SEMI
 	else if(cnEq(3)&&strcmp(firc(),"RETURN")==0&&strcmp(secc(),"Exp")==0
@@ -384,8 +405,12 @@ void Stmt(treeNode* root){
 		printf("Stmt branch3\n");
 		Type ret_type=Exp(root->childp->right);
 		// Begin: need SYMTAB here and check RETURN errors
-
-
+		if(typeEqual(ret_type,func_type)==1)
+		{
+			// nothing error
+		}
+		else
+			printErr("Stmt");
 		// End	
 	}
 	// IF LP Exp RP Stmt
@@ -394,7 +419,7 @@ void Stmt(treeNode* root){
 		&&strcmp(fifc(),"Stmt")==0){
 		printf("Stmt branch4\n");
 		Exp(root->childp->right->right);
-		Stmt(root->childp->right->right->right->right);
+		Stmt(root->childp->right->right->right->right, func_type);
 	}
 	// IF LP Exp RP Stmt ELSE Stmt
 	else if(cnEq(7)&&strcmp(firc(),"IF")==0&&strcmp(secc(),"LP")==0
@@ -403,8 +428,8 @@ void Stmt(treeNode* root){
 		&&strcmp(sevc(),"Stmt")==0){
 		printf("Stmt branch5\n");
 		Exp(root->childp->right->right);
-		Stmt(root->childp->right->right->right->right);
-		Stmt(root->childp->right->right->right->right->right->right);
+		Stmt(root->childp->right->right->right->right, func_type);
+		Stmt(root->childp->right->right->right->right->right->right, func_type);
 	}
 	// WHILE LP Exp RP Stmt
 	else if(cnEq(5)&&strcmp(firc(),"WHILE")==0&&strcmp(secc(),"LP")==0
@@ -412,7 +437,7 @@ void Stmt(treeNode* root){
 		&&strcmp(fifc(),"Stmt")==0){
 		printf("Stmt branch6\n");
 		Exp(root->childp->right->right);
-		Stmt(root->childp->right->right->right->right);
+		Stmt(root->childp->right->right->right->right, func_type);
 	}
 	else{
 		printErr("Stmt");
@@ -542,6 +567,26 @@ Type Exp(treeNode* root){
 		// THIS Exp IS R_VALUE
 		// Begin:
 
+		// ID undefine
+		char * ID = root->childp->data.strd;
+		struct item* p = find_item(ID,FUNCTION);
+		if( p == NULL )
+		{
+			// two is possible: ID is a var, no ID
+			printErr("Exp");
+		}
+		else{
+			if( Args(root->childp->right->right, p->var_type->u.function->para) == 1 )
+			{
+				// nothing error
+				type = p->var_type->u.function->fun_type;
+				type -> value = R_VALUE;
+				return type;
+			}
+			else{
+				printErr("Exp");
+			}
+		}
 		// End
 	}
 	// ID LP RP
@@ -550,7 +595,25 @@ Type Exp(treeNode* root){
 		// TO IMPLEMENT: ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
 		// THIS Exp IS R_VALUE
 		// Begin:
-
+		char * ID = root->childp->data.strd;
+		struct item* p = find_item(ID,FUNCTION);
+		if( p == NULL )
+		{
+			// two is possible: ID is a var, no ID
+			printErr("Exp");
+		}
+		else{
+			if( Args(NULL, p->var_type->u.function->para) == 1 )
+			{
+				// nothing error
+				type = p->var_type->u.function->fun_type;
+				type -> value = R_VALUE;
+				return type;
+			}
+			else{
+				printErr("Exp");
+			}
+		}		
 		// End
 	}
 	// Exp LB Exp RB
@@ -561,10 +624,29 @@ Type Exp(treeNode* root){
 	// Exp DOT ID
 	else if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"DOT")==0
 		&&strcmp(thic(),"ID")==0){
-		// TO IMPLEMENT: Exp CHICK ERROR, ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
-		// THIS Exp IS ______?
+		// TO IMPLEMENT: Exp CHECK ERROR, ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
+		// THIS Exp IS ______? LR_VALUE
 		// Begin:
-
+		Type l = Exp(root->childp);
+		if(l->kind!=STRUCTURE)
+		{
+			// no structure
+			printErr("Exp");
+		}
+		else{
+			// for a struct
+			char * ID = root->childp->right->right->data.strd;
+			Type type = inFieldList(l->u.structure, ID);
+			if(type==NULL)
+			{
+				// ID not define in the structure
+				printErr("Exp");
+			}
+			else{
+				type -> value = LR_VALUE;
+				return type; 
+			}
+		}
 		// End
 	}
 	// <sth.>
@@ -574,7 +656,19 @@ Type Exp(treeNode* root){
 			// TO IMPLEMENT: ID CHECK ERROR TYPE 1
 			// THIS IS LR_VALUE
 			// Begin:
-
+			char * ID = root->childp->data.strd;
+			struct item* p = find_item(ID,0);
+			if( p == NULL )
+			{
+				// two is possible: ID is a func or not define
+				printErr("Exp");
+			}
+			else{
+				// nothing error
+				type = p->var_type;
+				type -> value = LR_VALUE;
+				return type;
+			}					
 			// End
 		}
 		// INT
@@ -595,12 +689,23 @@ Type Exp(treeNode* root){
 	type=NULL;
 	return type;
 }
-
+Type inFieldList(FieldList f, char* ID){
+	FieldList p = f;
+	while(p!=NULL){
+		if(strcmp(p->name,ID)==0){
+			return p->type;
+		}
+		p = p->tail;
+	}
+	return NULL;
+}
 /*
  * Args Func can compare whether cur_para_type=symtable.func.para_type
  * Return true means equal, otherwise unequal
  */
 bool Args(treeNode* root, FieldList para){
+	if(para==NULL && root==NULL)
+		return true;
 	if(root==NULL)
 		return false;
 	if(para==NULL)

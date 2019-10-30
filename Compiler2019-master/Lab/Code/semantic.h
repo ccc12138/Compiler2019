@@ -68,7 +68,7 @@ struct FieldList_
 
 struct Function_{
 	char *name;
-	Type fun_type;
+	Type fun_type;// return
 	int isDef;//to allign and to be simple
 	FieldList para;
 	int para_num;
@@ -80,7 +80,12 @@ struct item{
 	char* var_name;
 	// some data
 };
-
+/* 
+for a function item
+var_type->kind = FUNCTION
+var_type->u.function
+var_name
+*/
 /* hash table */
 extern struct item* table[TABLE_SIZE];
 
@@ -88,7 +93,7 @@ extern struct item* table[TABLE_SIZE];
  *hash table api, implemented in hashTable.c
  ********************************************/
 unsigned int hash_pjw(char* name);
-struct item * find_item(char *name, Type item_type);
+struct item * find_item(char *name, int t);
 void add_item(struct item* p);
 void print_table();
 struct item* create_new();
@@ -114,14 +119,13 @@ Type StructSpecifier(treeNode *root);
 
 //Declarators
 FieldList VarDec(treeNode* root, Type var_type);
-Type MultiArray(treeNode *root, int i, Type b);
-Function FunDec(treeNode* root, Type fun_type);
+Function FunDec(treeNode* root, Type fun_type, int isDef);
 FieldList VarList(treeNode* root);
 
 // Statements
-void CompSt(treeNode* root);
-void StmtList(treeNode* root);
-void Stmt(treeNode* root);
+void CompSt(treeNode* root, Type func_type);
+void StmtList(treeNode* root, Type func_type);
+void Stmt(treeNode* root, Type func_type);
 
 // Local Definitions
 void DefList(treeNode* root);
@@ -130,6 +134,10 @@ void DefList(treeNode* root);
 Type Exp(treeNode* root);
 bool Args(treeNode* root, FieldList para);
 
+
+//assistant function
+Type MultiArray(treeNode *root, int i, Type b);
+Type inFieldList(FieldList f, char* ID);
 
 
 
