@@ -219,7 +219,7 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	}
 	strcpy(add_var->name,p->childp->data.strd);
 	// printf("add_var->name=%s\n,add_var->name");
-
+	add_var->type = (Type)malloc(sizeof(struct Type_));
 	/* root->childp->name == ID      ->     VarDec -> ID*/
 	if(i==0){
         add_var->type->kind=BASIC;
@@ -431,21 +431,19 @@ void DefList(treeNode* root){
 		// printf("Def-> childp=%s\n",Def->childp->name);			
 		treeNode * DecList = Def->childp->right;
 		treeNode * specifierp = Def->childp;
+		Type p = Specifier(specifierp);
 		/* DecList -> Dec | Dec COMMA DecList */
 		while( DecList != NULL ){
-			struct item* add_new = (struct item*)malloc(sizeof(struct item));
+			struct item* add_new = create_new();
 			add_new -> next = NULL;			
 			FieldList f = (FieldList)malloc(sizeof(struct FieldList_));
 			treeNode * Dec = DecList->childp;
 			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
 			// the later one is error type 15
-			f = VarDec(Dec->childp,Specifier(specifierp));
+			f = VarDec(Dec->childp,p);
 			printf("BACK\n");
 			add_new->var_type = f->type;
 			printf("flag4\n");
-			if(add_new->var_name == NULL){
-				add_new->var_name = (char*)malloc(sizeof(char)*32);
-			}
 			strcpy(add_new->var_name,f->name);
 			add_item(add_new);
 			if( DecList -> childnum == 1 ){

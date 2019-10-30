@@ -85,7 +85,7 @@ unsigned int hash_pjw(char* name);
 struct item * find_item(char *name, Type item_type);
 void add_item(struct item* p);
 void print_table();
-
+struct item* create_new();
 /********************************************
  *equal judge api, implemented in equalJudge.c
  ********************************************/
