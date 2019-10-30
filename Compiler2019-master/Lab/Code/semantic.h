@@ -54,7 +54,7 @@ struct Type_
 
 struct FieldList_
 {
-	char* name;
+	char *name;
 	Type type;
 	FieldList tail;
 };

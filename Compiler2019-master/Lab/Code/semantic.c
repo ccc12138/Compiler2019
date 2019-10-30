@@ -213,8 +213,13 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
     }
 
 	FieldList add_var = (FieldList)malloc(sizeof(struct FieldList_));
-	strcpy(add_var->name, p->childp->data.strd); 
-	
+	// printf("p->childp->data.strd=%s\n,p->childp->data.strd");
+	if(add_var->name == NULL){
+		add_var->name = (char*)malloc(sizeof(char)*32);
+	}
+	strcpy(add_var->name,p->childp->data.strd);
+	// printf("add_var->name=%s\n,add_var->name");
+
 	/* root->childp->name == ID      ->     VarDec -> ID*/
 	if(i==0){
         add_var->type->kind=BASIC;
@@ -224,6 +229,9 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	/* i-dimension array */
 		add_var->type = MultiArray(root,i,var_type);
 		return add_var;
+	}
+	else{
+		printErr("VarDec");
 	}
 }
 
@@ -328,9 +336,11 @@ FieldList VarList(treeNode* root){
 void CompSt(treeNode* root){
 	//LC DefList StmtList RC
 	if(cnEq(4)&&strcmp(firc(),"LC")==0&&strcmp(secc(),"DefList")==0
-		&&strcmp(thic(),"StmtList")==0&&strcmp(fouc(),"RC")==0){
+		&&(strcmp(thic(),"StmtList")==0||strcmp(thic(),"EPSILON")==0)
+		&&strcmp(fouc(),"RC")==0){
 		printf("CompSt branch1\n");
 		DefList(root->childp->right);
+		printf("flag3\n");
 		StmtList(root->childp->right->right);
 	}
 	else{
@@ -418,7 +428,7 @@ void DefList(treeNode* root){
 	while( DefList->childp != NULL ){
 		/* each step deal with one type,semi and add it */
 		treeNode* Def = DefList-> childp;
-						
+		// printf("Def-> childp=%s\n",Def->childp->name);			
 		treeNode * DecList = Def->childp->right;
 		treeNode * specifierp = Def->childp;
 		/* DecList -> Dec | Dec COMMA DecList */
@@ -430,7 +440,12 @@ void DefList(treeNode* root){
 			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
 			// the later one is error type 15
 			f = VarDec(Dec->childp,Specifier(specifierp));
+			printf("BACK\n");
 			add_new->var_type = f->type;
+			printf("flag4\n");
+			if(add_new->var_name == NULL){
+				add_new->var_name = (char*)malloc(sizeof(char)*32);
+			}
 			strcpy(add_new->var_name,f->name);
 			add_item(add_new);
 			if( DecList -> childnum == 1 ){
@@ -454,7 +469,7 @@ Type Exp(treeNode* root){
 	if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(thic(),"Exp")==0){
 		// Exp ASSIGNOP Exp
 		if(strcmp(secc(),"ASSIGNOP")==0){
-
+			
 		}
 		// Exp AND Exp
 		else if(strcmp(secc(),"AND")==0){
