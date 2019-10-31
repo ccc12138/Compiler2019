@@ -741,7 +741,9 @@ bool Args(treeNode* root, FieldList para){
 
 	Type exp_type = Exp(root->childp);
 	if(!typeEqual(exp_type, para->type)){
-		printf("Error type 9 at Line %d: Function parameters not match\n",root->childp->lineno);
+		// TO IMPLEMENT ERROR TYPE 9
+		printf("Error type 9 at Line %d: Function \"%s\" is not applicable for arguments \"%s\".\n"
+			,root->childp->lineno, );
 		return false;
 	}
 	else if(cnEq(1)&&strcmp(firc(),"Exp")==0){
