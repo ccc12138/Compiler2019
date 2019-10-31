@@ -7,9 +7,9 @@
  *   2         0
  *   3         0
  *   4         1
- *   5         0
- *   6         0
- *   7         0
+ *   5         1
+ *   6         1
+ *   7         1
  *   8         0
  *   9         0
  *   10        0
@@ -524,17 +524,25 @@ Type Exp(treeNode* root){
 				return NULL;	
 			}
 			else{
+				ltype->value=LR_VALUE;
 				return ltype;
 			}
 		}
-
-		/*
-		 * Question: Does FLOAT/ARRAY/STRUCTURE sup AND/OR calculation?
-		 */
-
-		// Exp AND/OR/RELOP/PLUS/MINUS/STAR/DIV Exp
-		else if(strcmp(secc(),"AND")==0||strcmp(secc(),"OR")==0
-			||strcmp(secc(),"RELOP")==0||strcmp(secc(),"PLUS")==0
+		else if(strcmp(secc(),"AND")==0||strcmp(secc(),"OR")==0){
+			Type ltype=Exp(root->childp);
+			Type rtype=Exp(root->childp->right->right);
+			if(ltype==NULL||rtype==NULL){
+				return NULL;
+			}
+			if(!typeEqual(ltype,rtype)||ltype->kind!=BASIC
+				||(ltype->kind==BASIC&&ltype->u.basic!=INT)){
+				printf("Error type 7 at Line %d: Type mismatched for operation.\n",root->childp->lineno);
+				return NULL;
+			}
+			ltype->value=R_VALUE;
+			return ltype;
+		}
+		else if(strcmp(secc(),"RELOP")==0||strcmp(secc(),"PLUS")==0
 			||strcmp(secc(),"MINUS")==0||strcmp(secc(),"STAR")==0
 			||strcmp(secc(),"DIV")==0){
 			Type ltype=Exp(root->childp);
@@ -543,10 +551,11 @@ Type Exp(treeNode* root){
 				return NULL;
 			}
 			if(!typeEqual(ltype,rtype)||ltype->kind!=BASIC){
+				printf("Error type 7 at Line %d: Type mismatched for operation.\n",root->childp->lineno);
 				return NULL;
 			}
+			ltype->value=R_VALUE;
 			return ltype;
-			//else if(!typeEqual(ltype,rtype)||ltype->)
 		}
 		else{
 			printErr("Exp OP Exp");
@@ -586,22 +595,25 @@ Type Exp(treeNode* root){
 		// ID undefine
 		char * ID = root->childp->data.strd;
 		struct item* p = find_item(ID,FUNCTION);
-		if( p == NULL )
-		{
+		if( p == NULL ){
 			// two is possible: ID is a var, no ID
-			printErr("Exp");
+			printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
+				,root->childp->lineno,root->childp->name);
+		}
+		else if(p->var_type->u.function->isDef==0){
+			//Error type 18: Declared but not defined
+			printf("Error type 18 at Line %d: Undefined function \"%s\".\n"
+				,root->childp->lineno,root->childp->name);
+		}
+		else if( Args(root->childp->right->right, p->var_type->u.function->para) == 1 )
+		{
+			// nothing error
+			type = p->var_type->u.function->fun_type;
+			type -> value = R_VALUE;
+			return type;
 		}
 		else{
-			if( Args(root->childp->right->right, p->var_type->u.function->para) == 1 )
-			{
-				// nothing error
-				type = p->var_type->u.function->fun_type;
-				type -> value = R_VALUE;
-				return type;
-			}
-			else{
-				printErr("Exp");
-			}
+			printErr("Exp");
 		}
 		// End
 	}
@@ -613,10 +625,10 @@ Type Exp(treeNode* root){
 		// Begin:
 		char * ID = root->childp->data.strd;
 		struct item* p = find_item(ID,FUNCTION);
-		if( p == NULL )
-		{
+		if( p == NULL ){
 			// two is possible: ID is a var, no ID
-			printErr("Exp");
+			printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
+				,root->childp->lineno,root->childp->name);
 		}
 		else{
 			if( Args(NULL, p->var_type->u.function->para) == 1 )
