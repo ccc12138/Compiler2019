@@ -95,6 +95,7 @@ extern struct item* table[TABLE_SIZE];
 unsigned int hash_pjw(char* name);
 struct item * find_item(char *name, int t);
 void add_item(struct item* p);
+struct item* create_new();
 void print_table();
 struct item* create_new();
 
@@ -119,7 +120,7 @@ Type StructSpecifier(treeNode *root);
 
 //Declarators
 FieldList VarDec(treeNode* root, Type var_type);
-Function FunDec(treeNode* root, Type fun_type, int isDef);
+Function FunDec(treeNode* root, Type fun_type,int isDef);
 FieldList VarList(treeNode* root);
 
 // Statements

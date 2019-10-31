@@ -1,5 +1,29 @@
 #include "semantic.h"
 
+/*
+ *  Finished Error Detect
+ *  Type    Finished?
+ *   1         0
+ *   2         0
+ *   3         0
+ *   4         1
+ *   5         0
+ *   6         0
+ *   7         0
+ *   8         0
+ *   9         0
+ *   10        0
+ *   11        0
+ *   12        0
+ *   13        0
+ *   14        0
+ *   15        0
+ *   16        0
+ *   17        0
+ *   18        0
+ *   19        1
+ */
+
 // High Level Definitions
 void Program(treeNode* root){
 	// ExtDefList
@@ -47,28 +71,60 @@ void ExtDef(treeNode* root){
 		Specifier(root->childp);
 	}
 	// Specifier FunDec CompSt
+	// func define: Error type 4, 19
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"CompSt")==0){
 		// printf("ExtDef branch3\n");
 		Type fun_type=Specifier(root->childp);
 		// printf("flag1\n");
-		FunDec(root->childp->right,fun_type,1);
+		Function func=FunDec(root->childp->right,fun_type,1);
 		// printf("flag2\n");
+		struct item* add_new = create_new();
+		add_new -> next = NULL;
+		add_new -> var_type -> kind = FUNCTION;
+		add_new -> var_type -> u.function = func;
+		strcpy(add_new -> var_name,func->name);
+		// test before add item
+		struct item* po =find_item(add_new -> var_name, add_new -> var_type -> kind );
+		if(po==NULL)
+			add_item(add_new);//never declare or define
+		else if(po->var_type->u.function->isDef==1){
+			//Error type 4, multi define
+			printf("Error type 4 at Line %d: Redefined function \"%s\".\n"
+				,root->childp->right->lineno,root->childp->right->name);
+		}
+		else if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)==false
+			||structEqual(func->para,po->var_type->u.function->para)==false){
+			//Error type 19, conflict declare and define
+			printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n"
+				,root->childp->right->lineno,root->childp->right->name);
+		}
 		CompSt(root->childp->right->right,fun_type);
-		// Begin: need SYMTAB here and check FUNCTION errors
-		// done in FunDec function
-
-		// End
 	}
 	// Specifier FunDec SEMI
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"SEMI")==0){// elective
 		// printf("ExtDef branch4\n");
 		Type fun_type=Specifier(root->childp);
-		FunDec(root->childp->right,fun_type,0);
+		Function func=FunDec(root->childp->right,fun_type,0);
 		// Begin: need SYMTAB here and check FUNCTION errors
 		// done in FunDec function
-		
+		struct item* add_new = create_new();
+		add_new -> next = NULL;
+		add_new -> var_type -> kind = FUNCTION;
+		add_new -> var_type -> u.function = func;
+		strcpy(add_new -> var_name,func->name);
+		// test before add item
+		struct item* po =find_item(add_new -> var_name, add_new -> var_type -> kind );
+		if(po==NULL){
+			add_item(add_new);
+		}
+		else if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)==false
+			||structEqual(func->para,po->var_type->u.function->para)==false){
+			//Error type 19: conflicting declares + declare and define
+			printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n"
+				,root->childp->right->lineno,root->childp->right->name);
+		}
 		// End
 	}
 	else{
@@ -131,11 +187,6 @@ Type StructSpecifier(treeNode *root){
 			/* OptTag -> ID |  */
 			treeNode *OptTag = p->childp->right;//deal with the name of struct
 			if( OptTag == NULL )
-
-				/**********************
-				*****NULL OR ""?*******
-				***********************/
-
 				add_struct -> name = "";
 			else
 				strcpy(add_struct -> name,OptTag->childp->data.strd);
@@ -253,15 +304,6 @@ Type MultiArray(treeNode *root,int i,Type b){
 	return Array;
 }
 
-
-// malloc a new item
-struct item* create_new(){
-	struct item* add_new = (struct item*)malloc(sizeof(struct item));
-	add_new -> var_type = (Type)malloc(sizeof(struct Type_));
-	add_new -> var_name = (char*)malloc(sizeof(char)*32);
-	return add_new;
-}
-
 // FunDec -> ID LP VarList RP | ID LP RP
 Function FunDec(treeNode* root, Type fun_type, int isDef){
 	Function func= (Function)malloc(sizeof(struct Function_));
@@ -278,46 +320,20 @@ Function FunDec(treeNode* root, Type fun_type, int isDef){
 	if(cnEq(4)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 	&&strcmp(thic(),"VarList")==0&&strcmp(fouc(),"RP")==0){
 		func->para=VarList(root->childp->right->right);
-		struct item* add_new = create_new();
-		add_new -> next = NULL;
-		add_new -> var_type -> kind = FUNCTION;
-		add_new -> var_type -> u.function = func;
-		strcpy(add_new -> var_name,func->name);
-		// test before add item
-		struct item* po =find_item(add_new -> var_name, add_new -> var_type -> kind );
-		if(po==NULL)
-			add_item(add_new);//never declare or define
-		else{
-			if( structEqual(func->para,po->var_type->u.function->para)==1 && typeEqual(func->fun_type,po->var_type->u.function->fun_type)==1)
-			{
-				// nothing wrong
-			}
-			else{
-				if(structEqual(func->para,po->var_type->u.function->para)!=1)
-				{
-					// para not coordinate
-					printErr("FunDec");
-				}
-				if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)!=1)
-				{
-					// return type not coordinate
-					printErr("FunDec");
-				}
-			}
-		}
-		// to add func into symbol table
+		return func;
 	}
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 	&&strcmp(thic(),"RP")==0){
-		func->para=NULL;
-		struct item* add_new = create_new();
-		add_new -> next = NULL;
-		add_new -> var_type -> kind = FUNCTION;
-		add_new -> var_type -> u.function = func;
+		return func;
+		// func->para=NULL;
+		// struct item* add_new = create_new();
+		// add_new -> next = NULL;
+		// add_new -> var_type -> kind = FUNCTION;
+		// add_new -> var_type -> u.function = func;
 		
-		strcpy(add_new -> var_name,func->name);
-		add_item(add_new);
-		// to add func into symbol table
+		// strcpy(add_new -> var_name,func->name);
+		// add_item(add_new);
+		// // to add func into symbol table
 	}
 	else{
 		printErr("FunDec");

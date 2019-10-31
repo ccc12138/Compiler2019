@@ -13,6 +13,14 @@ unsigned int hash_pjw(char* name){
 	return val;
 }
 
+// malloc a new item
+struct item* create_new(){
+	struct item* add_new = (struct item*)malloc(sizeof(struct item));
+	add_new -> var_type = (Type)malloc(sizeof(struct Type_));
+	add_new -> var_name = (char*)malloc(sizeof(char)*32);
+	return add_new;
+}
+
 struct item * find_item(char *name, int t){
 	unsigned int index = hash_pjw(name);
 	if(table[index] == NULL)
