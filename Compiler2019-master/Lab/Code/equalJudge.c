@@ -50,3 +50,4 @@ bool structEqual(FieldList lstruct, FieldList rstruct){
 	}
 	return true;
 }
+

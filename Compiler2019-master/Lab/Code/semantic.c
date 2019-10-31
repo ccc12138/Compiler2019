@@ -176,14 +176,15 @@ Type Specifier(treeNode *root){
 	}
 }
 // StructSpecifier
-// NEED Error type 16,17
+
 Type StructSpecifier(treeNode *root){
 	treeNode *p=root;
 	Type add_type = (Type)malloc(sizeof(struct Type_));// return
 	/* StructSpecifier -> STRUCT OptTag LC DefList RC | STRUCT Tag */
 	if(strcmp(p->childp->name,"STRUCT")==0){
-		if(p->childnum==5){
+		if(p->childnum==5){//define a struct
 			FieldList add_struct = (FieldList)malloc(sizeof(struct FieldList_));
+			FieldList head = add_struct;
 			// add_type->u.structure = add_struct   point to the head (for example struct a{})
 			add_type->kind = STRUCTURE;
 			/* OptTag -> ID |  */
@@ -192,6 +193,12 @@ Type StructSpecifier(treeNode *root){
 				add_struct -> name = "";
 			else
 				strcpy(add_struct -> name,OptTag->childp->data.strd);
+			if(find_item(add_struct -> name,0)!=NULL)
+			{
+				//Need : already exist
+				printf("error!\n");
+				assert(0);
+			}
 			add_struct ->type-> kind = STRUCTURE;
 			//next deal with add_struct->tail point to all var of the struct
 			/* DefList -> Def DefList | */
@@ -210,19 +217,30 @@ Type StructSpecifier(treeNode *root){
 						if( DecList -> childnum == 1 ){
 							treeNode * Dec = DecList->childp;
 							/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
-							// the later one is error type 15
+							// Need error type 15_2
+							if(Dec->childnum==3)
+							{	
+								printf("error\n");
+								assert(0);
+							}
 							add_struct_new = VarDec(Dec->childp,Specifier(specifierp));
+							//deal with var define in struct
 							DecList = NULL;
 						}
 						else if( DecList -> childnum == 3 ){
 							treeNode * Dec = DecList->childp;
 							/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp*/
+							if(Dec->childnum==3)
+							{// Need error type 15_2
+								printf("error\n");
+								assert(0);
+							}
 							add_struct_new = VarDec(Dec->childp,Specifier(specifierp));
 							// the later one is error type 15
 							DecList = DecList->childp->right->right;
 						}
 						else{
-							printf("error!");
+							printf("error!\n");
 						}
 						add_struct->tail = add_struct_new;
 						add_struct = add_struct_new;
@@ -231,20 +249,41 @@ Type StructSpecifier(treeNode *root){
 					
 				}
 			}
-			add_type->u.structure = add_struct;
+			add_type->u.structure = head;
+			// check error type 15_1
+			
+			FieldList p = head->tail;
+			FieldList q = head->tail;
+			bool res = false;
+			while(p!=NULL){
+				q = p;
+				while(q!=NULL){
+					if(strcmp(q->name,p->name)==0)
+					{
+						res = true;
+					}
+					q = q->tail;
+				}
+				p = p->tail;
+			}
+			if(res==true){
+				// Need error type 15_1
+				printf("error\n");
+				assert(0);
+			}
 			return add_type;
 		}
 		else if(p->childnum==2){/* declaration */
-			/*
-			struct item* q = find_item(p->childp->right->childp->data.strd);
+			struct item* q = find_item(p->childp->right->childp->data.strd,STRUCTURE);
 			if(q==NULL){
-			*/
-				/* error ouput */	
-			/*}
+				/* error ouput */
+				//Need : the struct is not Define	
+				printf("error!\n");
+			}
 			else{
 				add_type = q->var_type;
 				return add_type;
-			}*/
+			}
 		}
 		else{
 			printf("error!");		
@@ -256,12 +295,11 @@ Type StructSpecifier(treeNode *root){
 }
 
 // A.1.4 Declarators
-// NEED Error type 3, 15
 // VarDec -> ID | VarDec LB INT RB
 FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	treeNode *p=root;
 	int i=0;
-	/* VarDec -> ID | VarDEc LB INT RB */
+	/* VarDec -> ID | VarDec LB INT RB */
 	while(strcmp(p->childp->name,"ID")!=0){
         p=p->childp;
         i++;
@@ -274,6 +312,12 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	}
 	strcpy(add_var->name,p->childp->data.strd);
 	// printf("add_var->name=%s\n,add_var->name");
+	struct item* p_ = find_item(add_var->name, 0);//0 signify var or structure
+	if(p_==NULL){
+		// Need error type 3
+		printf("error!\n");
+		assert(0);
+	}
 	add_var->type = (Type)malloc(sizeof(struct Type_));
 	/* root->childp->name == ID      ->     VarDec -> ID*/
 	if(i==0){
@@ -419,7 +463,6 @@ void Stmt(treeNode* root, Type func_type){
 		CompSt(root->childp,func_type);
 	}
 	// RETURN Exp SEMI
-	// NEED Error Type 8
 	else if(cnEq(3)&&strcmp(firc(),"RETURN")==0&&strcmp(secc(),"Exp")==0
 		&&strcmp(thic(),"SEMI")==0){
 		// printf("Stmt branch3\n");
@@ -429,8 +472,10 @@ void Stmt(treeNode* root, Type func_type){
 		{
 			// nothing error
 		}
-		else
+		else{
+			// NEED Error Type 8
 			printErr("Stmt");
+		}
 		// End	
 	}
 	// IF LP Exp RP Stmt
@@ -467,7 +512,6 @@ void Stmt(treeNode* root, Type func_type){
 
 // Local Definitions
 /* add to the symbol table when defining */
-// NEED Error type 15,5
 void DefList(treeNode* root){
 	/* like below */
 	treeNode* DefList = root;
@@ -485,7 +529,12 @@ void DefList(treeNode* root){
 			FieldList f = (FieldList)malloc(sizeof(struct FieldList_));
 			treeNode * Dec = DecList->childp;
 			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
-			// the later one is error type 15
+			Type r = Exp(Dec->childp->right->right);
+			if(typeEqual(p,r)==false){
+				// Need error type 5
+				printf("error\n");
+				assert(0);
+			}
 			f = VarDec(Dec->childp,p);
 			// printf("BACK\n");
 			add_new->var_type = f->type;
@@ -636,7 +685,6 @@ Type Exp(treeNode* root){
 		// End
 	}
 	// ID LP RP
-	// NEED Error type 11? But two is possible...2333
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"RP")==0){
 		// TO IMPLEMENT: ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
@@ -646,8 +694,17 @@ Type Exp(treeNode* root){
 		struct item* p = find_item(ID,FUNCTION);
 		if( p == NULL ){
 			// two is possible: ID is a var, no ID
-			printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
+			struct item* q = find_item(ID,0);
+			if (q == NULL ){
+				printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
 				,root->childp->lineno,root->childp->name);
+			
+			}
+			else{
+				// Need error type 11
+				printf("error\n");
+				assert(0);
+			}
 			++tempSemErrNum;
 		}
 		if(p->var_type->u.function->isDef==0){
@@ -709,19 +766,19 @@ Type Exp(treeNode* root){
 		// Begin:
 		Type l = Exp(root->childp);
 		if(l->kind!=STRUCTURE){
-			// Error type 13: not a structure
-			printf("Error type 13 at Line %d: Illegal use of \".\".\n");
+			// Need Error type 13: not a structure
+			// printf("Error type 13 at Line %d: Illegal use of \".\".\n");
 			++semErrNum;
 			return NULL;
 		}
 		else{
-			// NEED Error type 1, 14
 			// for a struct
 			char * ID = root->childp->right->right->data.strd;
 			Type type = inFieldList(l->u.structure, ID);
 			if(type==NULL)
 			{
 				// ID not define in the structure
+				// NEED Error type 14
 				printErr("Exp");
 			}
 			else{
