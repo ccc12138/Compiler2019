@@ -4,6 +4,7 @@
 extern FILE* yyin;
 int lexErrNum;
 int synErrNum;
+int semErrNum;
 int yylex();
 int yyrestart(FILE *);
 void yyset_lineno(int);
@@ -20,6 +21,7 @@ int main(int argc, char** argv){
     yyset_lineno(1);//Ref P19: Reset yylineno = 1 when read in another input file
     lexErrNum=0;
     synErrNum=0;
+    semErrNum=0;
     yyrestart(f);
     yyparse();
     if(lexErrNum==0&&synErrNum==0){

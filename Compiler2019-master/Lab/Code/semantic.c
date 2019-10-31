@@ -1,26 +1,27 @@
 #include "semantic.h"
 
+extern int semErrNum;
 /*
  *  Finished Error Detect
  *  Type    Finished?
- *   1         0
- *   2         0
+ *   1         1
+ *   2         1
  *   3         0
  *   4         1
  *   5         1
  *   6         1
  *   7         1
  *   8         0
- *   9         0
- *   10        0
+ *   9         1
+ *   10        1
  *   11        0
- *   12        0
+ *   12        1
  *   13        0
  *   14        0
  *   15        0
  *   16        0
  *   17        0
- *   18        0
+ *   18        1
  *   19        1
  */
 
@@ -175,6 +176,7 @@ Type Specifier(treeNode *root){
 	}
 }
 // StructSpecifier
+// NEED Error type 16,17
 Type StructSpecifier(treeNode *root){
 	treeNode *p=root;
 	Type add_type = (Type)malloc(sizeof(struct Type_));// return
@@ -254,6 +256,7 @@ Type StructSpecifier(treeNode *root){
 }
 
 // A.1.4 Declarators
+// NEED Error type 3, 15
 // VarDec -> ID | VarDec LB INT RB
 FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	treeNode *p=root;
@@ -416,6 +419,7 @@ void Stmt(treeNode* root, Type func_type){
 		CompSt(root->childp,func_type);
 	}
 	// RETURN Exp SEMI
+	// NEED Error Type 8
 	else if(cnEq(3)&&strcmp(firc(),"RETURN")==0&&strcmp(secc(),"Exp")==0
 		&&strcmp(thic(),"SEMI")==0){
 		// printf("Stmt branch3\n");
@@ -463,6 +467,7 @@ void Stmt(treeNode* root, Type func_type){
 
 // Local Definitions
 /* add to the symbol table when defining */
+// NEED Error type 15,5
 void DefList(treeNode* root){
 	/* like below */
 	treeNode* DefList = root;
@@ -504,6 +509,7 @@ void DefList(treeNode* root){
 // Experssions
 Type Exp(treeNode* root){
 	Type type;
+	int tempSemErrNum=0;
 	// Exp <sth.> Exp
 	if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(thic(),"Exp")==0){
 		// Exp ASSIGNOP Exp
@@ -513,19 +519,23 @@ Type Exp(treeNode* root){
 			if(ltype==NULL||rtype==NULL){
 				return NULL;
 			}
-			else if(ltype->value==R_VALUE){
+			if(ltype->value==R_VALUE){
 				printf("Error type 6 at Line %d: The left-hand side of an assignment must be a variable.\n"
 					, root->childp->lineno);
-				return NULL;
+				++tempSemErrNum;
 			}
-			else if(!typeEqual(ltype,rtype)){
+			if(!typeEqual(ltype,rtype)){
 				printf("Error type 5 at Line %d: Type mismatched for assignment.\n"
 					, root->childp->lineno);
-				return NULL;	
+				++tempSemErrNum;	
 			}
-			else{
+			if(!tempSemErrNum){
 				ltype->value=LR_VALUE;
 				return ltype;
+			}
+			else{
+				semErrNum+=tempSemErrNum;
+				return NULL;
 			}
 		}
 		else if(strcmp(secc(),"AND")==0||strcmp(secc(),"OR")==0){
@@ -537,6 +547,7 @@ Type Exp(treeNode* root){
 			if(!typeEqual(ltype,rtype)||ltype->kind!=BASIC
 				||(ltype->kind==BASIC&&ltype->u.basic!=INT)){
 				printf("Error type 7 at Line %d: Type mismatched for operation.\n",root->childp->lineno);
+				++semErrNum;
 				return NULL;
 			}
 			ltype->value=R_VALUE;
@@ -552,6 +563,7 @@ Type Exp(treeNode* root){
 			}
 			if(!typeEqual(ltype,rtype)||ltype->kind!=BASIC){
 				printf("Error type 7 at Line %d: Type mismatched for operation.\n",root->childp->lineno);
+				++semErrNum;
 				return NULL;
 			}
 			ltype->value=R_VALUE;
@@ -576,6 +588,7 @@ Type Exp(treeNode* root){
 			}
 			else if(exp_type->kind!=BASIC){
 				printf("Error type 7 at Line %d: Operands type mismatched\n", root->childp->lineno);
+				++semErrNum;
 				return NULL;
 			}
 			exp_type->value=R_VALUE;
@@ -599,14 +612,19 @@ Type Exp(treeNode* root){
 			// two is possible: ID is a var, no ID
 			printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
 				,root->childp->lineno,root->childp->name);
+			++tempSemErrNum;
 		}
-		else if(p->var_type->u.function->isDef==0){
+		if(p->var_type->u.function->isDef==0){
 			//Error type 18: Declared but not defined
 			printf("Error type 18 at Line %d: Undefined function \"%s\".\n"
 				,root->childp->lineno,root->childp->name);
+			++tempSemErrNum;
 		}
-		else if( Args(root->childp->right->right, p->var_type->u.function->para) == 1 )
-		{
+		if(tempSemErrNum!=0){
+			semErrNum+=tempSemErrNum;
+			return NULL;
+		}
+		else if( Args(root->childp->right->right, p->var_type->u.function->para) == 1 ){
 			// nothing error
 			type = p->var_type->u.function->fun_type;
 			type -> value = R_VALUE;
@@ -618,6 +636,7 @@ Type Exp(treeNode* root){
 		// End
 	}
 	// ID LP RP
+	// NEED Error type 11? But two is possible...2333
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"RP")==0){
 		// TO IMPLEMENT: ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
@@ -629,25 +648,58 @@ Type Exp(treeNode* root){
 			// two is possible: ID is a var, no ID
 			printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
 				,root->childp->lineno,root->childp->name);
+			++tempSemErrNum;
+		}
+		if(p->var_type->u.function->isDef==0){
+			//Error type 18: Declared but not defined
+			printf("Error type 18 at Line %d: Undefined function \"%s\".\n"
+				,root->childp->lineno,root->childp->name);
+			++tempSemErrNum;
+		}
+		if(tempSemErrNum!=0){
+			semErrNum+=tempSemErrNum;
+			return NULL;
+		}
+		else if( Args(NULL, p->var_type->u.function->para) == 1 ){
+			// nothing error
+			type = p->var_type->u.function->fun_type;
+			type -> value = R_VALUE;
+			return type;
 		}
 		else{
-			if( Args(NULL, p->var_type->u.function->para) == 1 )
-			{
-				// nothing error
-				type = p->var_type->u.function->fun_type;
-				type -> value = R_VALUE;
-				return type;
-			}
-			else{
-				printErr("Exp");
-			}
-		}		
+			printErr("Exp");
+		}
 		// End
 	}
 	// Exp LB Exp RB
 	else if(cnEq(4)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"LB")==0
 		&&strcmp(thic(),"Exp")==0&&strcmp(fouc(),"RB")==0){
-
+		Type arr_type=Exp(root->childp);
+		Type arr_opr=Exp(root->childp->right->right);
+		if(arr_type==NULL||arr_opr==NULL){
+			return NULL;
+		}
+		if(arr_type->kind!=ARRAY){
+			//Error type 10: not an array
+			printf("Error type 10 at Line %d: \"%s\" is not an array.\n"
+				, root->childp->lineno, root->childp->childp->name);
+			++tempSemErrNum;
+		}
+		if(arr_opr->kind!=BASIC||arr_opr->u.basic!=INT){
+			//Error type 12: not an integer
+			printf("Error type 12 at Line %d: \"%s\" is not an integer.\n"
+				, root->childp->right->right->lineno , root->childp->right->right->childp->name);
+			++tempSemErrNum;
+		}
+		if(tempSemErrNum!=0){
+			semErrNum+=tempSemErrNum;
+			return NULL;
+		}
+		else{
+			type=arr_type->u.array.elem;
+			type->value = LR_VALUE;
+			return type;
+		}
 	}
 	// Exp DOT ID
 	else if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"DOT")==0
@@ -656,12 +708,14 @@ Type Exp(treeNode* root){
 		// THIS Exp IS ______? LR_VALUE
 		// Begin:
 		Type l = Exp(root->childp);
-		if(l->kind!=STRUCTURE)
-		{
-			// no structure
-			printErr("Exp");
+		if(l->kind!=STRUCTURE){
+			// Error type 13: not a structure
+			printf("Error type 13 at Line %d: Illegal use of \".\".\n");
+			++semErrNum;
+			return NULL;
 		}
 		else{
+			// NEED Error type 1, 14
 			// for a struct
 			char * ID = root->childp->right->right->data.strd;
 			Type type = inFieldList(l->u.structure, ID);
@@ -686,10 +740,12 @@ Type Exp(treeNode* root){
 			// Begin:
 			char * ID = root->childp->data.strd;
 			struct item* p = find_item(ID,0);
-			if( p == NULL )
-			{
+			if( p == NULL ){
 				// two is possible: ID is a func or not define
-				printErr("Exp");
+				printf("Error type 1 at Line %d: Undefined variable \"%s\".\n"
+					, root->childp->lineno, root->childp->name);
+				++semErrNum;
+				return NULL;
 			}
 			else{
 				// nothing error
@@ -742,8 +798,8 @@ bool Args(treeNode* root, FieldList para){
 	Type exp_type = Exp(root->childp);
 	if(!typeEqual(exp_type, para->type)){
 		// TO IMPLEMENT ERROR TYPE 9
-		printf("Error type 9 at Line %d: Function \"%s\" is not applicable for arguments \"%s\".\n"
-			,root->childp->lineno, );
+		printf("Error type 9 at Line %d: Function is not applicable for arguments.\n"
+			,root->childp->lineno);
 		return false;
 	}
 	else if(cnEq(1)&&strcmp(firc(),"Exp")==0){
