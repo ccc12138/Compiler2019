@@ -129,7 +129,7 @@ void StmtList(treeNode* root, Type func_type);
 void Stmt(treeNode* root, Type func_type);
 
 // Local Definitions
-void DefList(treeNode* root);
+FieldList DefList(treeNode* root);
 
 // Experssions
 Type Exp(treeNode* root);
