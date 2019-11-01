@@ -1,29 +1,6 @@
 #include "semantic.h"
 
 extern int semErrNum;
-/*
- *  Finished Error Detect
- *  Type    Finished?
- *   1         1
- *   2         1
- *   3         0
- *   4         1
- *   5         1
- *   6         1
- *   7         1
- *   8         0
- *   9         1
- *   10        1
- *   11        0
- *   12        1
- *   13        0
- *   14        0
- *   15        0
- *   16        0
- *   17        0
- *   18        1
- *   19        1
- */
 
 // High Level Definitions
 void Program(treeNode* root){
@@ -75,6 +52,7 @@ void ExtDef(treeNode* root){
 	// func define: Error type 4, 19
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"CompSt")==0){
+		int tempSemErrNum=0;
 		// printf("ExtDef branch3\n");
 		Type fun_type=Specifier(root->childp);
 		// printf("flag1\n");
@@ -89,17 +67,20 @@ void ExtDef(treeNode* root){
 		struct item* po =find_item(add_new -> var_name, add_new -> var_type -> kind );
 		if(po==NULL)
 			add_item(add_new);//never declare or define
-		else if(po->var_type->u.function->isDef==1){
+		if(po->var_type->u.function->isDef==1){
 			//Error type 4, multi define
 			printf("Error type 4 at Line %d: Redefined function \"%s\".\n"
 				,root->childp->right->lineno,root->childp->right->name);
+			++tempSemErrNum;
 		}
-		else if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)==false
+		if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)==false
 			||structEqual(func->para,po->var_type->u.function->para)==false){
 			//Error type 19, conflict declare and define
 			printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n"
 				,root->childp->right->lineno,root->childp->right->name);
+			++tempSemErrNum;
 		}
+		semErrNum+=tempSemErrNum;
 		CompSt(root->childp->right->right,fun_type);
 	}
 	// Specifier FunDec SEMI
@@ -120,11 +101,12 @@ void ExtDef(treeNode* root){
 		if(po==NULL){
 			add_item(add_new);
 		}
-		else if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)==false
+		if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)==false
 			||structEqual(func->para,po->var_type->u.function->para)==false){
 			//Error type 19: conflicting declares + declare and define
 			printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n"
 				,root->childp->right->lineno,root->childp->right->name);
+			++semErrNum;
 		}
 		// End
 	}
@@ -176,7 +158,6 @@ Type Specifier(treeNode *root){
 	}
 }
 // StructSpecifier
-
 Type StructSpecifier(treeNode *root){
 	treeNode *p=root;
 	Type add_type = (Type)malloc(sizeof(struct Type_));// return
@@ -195,9 +176,10 @@ Type StructSpecifier(treeNode *root){
 				strcpy(add_struct -> name,OptTag->childp->data.strd);
 			if(find_item(add_struct -> name,0)!=NULL)
 			{
-				//Need : already exist
-				printf("error!\n");
-				assert(0);
+				// Error type 16: already exist
+				printf("Error type 16 at Line %d: Duplicated name \"%s\".\n"
+					,root->childp->right->lineno,root->childp->right->childp->name);
+				++semErrNum;
 			}
 			add_struct ->type-> kind = STRUCTURE;
 			//next deal with add_struct->tail point to all var of the struct
@@ -217,11 +199,16 @@ Type StructSpecifier(treeNode *root){
 						if( DecList -> childnum == 1 ){
 							treeNode * Dec = DecList->childp;
 							/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
-							// Need error type 15_2
+							// Error type 15_2
 							if(Dec->childnum==3)
 							{	
-								printf("error\n");
-								assert(0);
+								treeNode * id=Dec->childp->childp;
+								while(id!=NULL){
+									id=id->childp;
+								}
+								printf("Error type 15 at Line %d: Initialize field \"%s\" when defining.\n"
+									, Dec->childp->lineno, id->name);
+								++semErrNum;
 							}
 							add_struct_new = VarDec(Dec->childp,Specifier(specifierp));
 							//deal with var define in struct
@@ -231,16 +218,21 @@ Type StructSpecifier(treeNode *root){
 							treeNode * Dec = DecList->childp;
 							/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp*/
 							if(Dec->childnum==3)
-							{// Need error type 15_2
-								printf("error\n");
-								assert(0);
+							{// Error type 15_2
+								treeNode * id=Dec->childp->childp;
+								while(id!=NULL){
+									id=id->childp;
+								}
+								printf("Error type 15 at Line %d: Initialize field \"%s\" when defining.\n"
+									, Dec->childp->lineno, id->name);
+								++semErrNum;
 							}
 							add_struct_new = VarDec(Dec->childp,Specifier(specifierp));
 							// the later one is error type 15
 							DecList = DecList->childp->right->right;
 						}
 						else{
-							printf("error!\n");
+							printErr("Dec");
 						}
 						add_struct->tail = add_struct_new;
 						add_struct = add_struct_new;
@@ -254,22 +246,19 @@ Type StructSpecifier(treeNode *root){
 			
 			FieldList p = head->tail;
 			FieldList q = head->tail;
-			bool res = false;
 			while(p!=NULL){
 				q = p;
 				while(q!=NULL){
-					if(strcmp(q->name,p->name)==0)
-					{
-						res = true;
+					if(strcmp(q->name,p->name)==0){
+						// Plz rewrite the Struct func to sevel parts?
+						// It's diffcult to locate wrong line here.
+						// printf("Error type 15 at Line %d: Redefined field \"%s\"\n",
+						// 	);
+						// Confused?
 					}
 					q = q->tail;
 				}
 				p = p->tail;
-			}
-			if(res==true){
-				// Need error type 15_1
-				printf("error\n");
-				assert(0);
 			}
 			return add_type;
 		}
@@ -278,6 +267,7 @@ Type StructSpecifier(treeNode *root){
 			if(q==NULL){
 				/* error ouput */
 				//Need : the struct is not Define	
+				// Confused?
 				printf("error!\n");
 			}
 			else{
@@ -286,11 +276,11 @@ Type StructSpecifier(treeNode *root){
 			}
 		}
 		else{
-			printf("error!");		
+			printErr("StructSpecifier");		
 		}
 	}
 	else{
-		printf("error!");	
+		printf("StructSpecifier");	
 	}
 }
 
@@ -314,6 +304,7 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	// printf("add_var->name=%s\n,add_var->name");
 	struct item* p_ = find_item(add_var->name, 0);//0 signify var or structure
 	if(p_==NULL){
+		// Confused?
 		// Need error type 3
 		printf("error!\n");
 		assert(0);
@@ -474,7 +465,8 @@ void Stmt(treeNode* root, Type func_type){
 		}
 		else{
 			// NEED Error Type 8
-			printErr("Stmt");
+			printf("Error type 8 at Line %d: return type is not matched.\n", root->childp->lineno);
+			++semErrNum;
 		}
 		// End	
 	}
@@ -531,8 +523,8 @@ void DefList(treeNode* root){
 			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
 			Type r = Exp(Dec->childp->right->right);
 			if(typeEqual(p,r)==false){
-				// Need error type 5
-				printf("error\n");
+				// Error type 5
+				printf("Error type 5 at Line %d: Type mismatched for assignment.\n",Dec->childp->right->lineno);
 				assert(0);
 			}
 			f = VarDec(Dec->childp,p);
@@ -659,8 +651,15 @@ Type Exp(treeNode* root){
 		struct item* p = find_item(ID,FUNCTION);
 		if( p == NULL ){
 			// two is possible: ID is a var, no ID
-			printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
+			struct item* q = find_item(ID,0);
+			if(q==NULL){
+				printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
 				,root->childp->lineno,root->childp->name);
+			}
+			else{
+				printf("Error type 11 at Line %d: \"%s\" is not a function.\n"
+					, root->childp->lineno,root->childp->name);
+			}
 			++tempSemErrNum;
 		}
 		if(p->var_type->u.function->isDef==0){
@@ -701,9 +700,9 @@ Type Exp(treeNode* root){
 			
 			}
 			else{
-				// Need error type 11
-				printf("error\n");
-				assert(0);
+				// Error type 11
+				printf("Error type 11 at Line %d: \"%s\" is not a function.\n"
+					, root->childp->lineno,root->childp->name);
 			}
 			++tempSemErrNum;
 		}
@@ -766,8 +765,9 @@ Type Exp(treeNode* root){
 		// Begin:
 		Type l = Exp(root->childp);
 		if(l->kind!=STRUCTURE){
-			// Need Error type 13: not a structure
-			// printf("Error type 13 at Line %d: Illegal use of \".\".\n");
+			// Error type 13: not a structure
+			printf("Error type 13 at Line %d: Illegal use of \"%s\".\n"
+				, root->childp->lineno, root->childp->name);
 			++semErrNum;
 			return NULL;
 		}
@@ -779,7 +779,9 @@ Type Exp(treeNode* root){
 			{
 				// ID not define in the structure
 				// NEED Error type 14
-				printErr("Exp");
+				printf("Error type 14 at Line %d: Visit undefined field in struct.\n", root->childp->lineno);
+				++semErrNum;
+				return NULL;
 			}
 			else{
 				type -> value = LR_VALUE;
@@ -857,6 +859,7 @@ bool Args(treeNode* root, FieldList para){
 		// TO IMPLEMENT ERROR TYPE 9
 		printf("Error type 9 at Line %d: Function is not applicable for arguments.\n"
 			,root->childp->lineno);
+		++semErrNum;
 		return false;
 	}
 	else if(cnEq(1)&&strcmp(firc(),"Exp")==0){
