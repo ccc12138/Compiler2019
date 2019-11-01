@@ -203,7 +203,7 @@ Type StructSpecifier(treeNode *root){
 			if(q==NULL){
 				/* error ouput */
 				//Need : the struct is not Define	
-				// Confused?
+				// Confused? struct tag is not a defination
 				printf("error!\n");
 			}
 			else{
@@ -242,8 +242,7 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	// printf("add_var->name=%s\n,add_var->name");
 	struct item* p_ = find_item(add_var->name, 0);//0 signify var or structure
 	if(p_==NULL){
-		// Confused?
-		// Need error type 3
+		// Confused? add to table?
 		printf("error!\n");
 		assert(0);
 	}
