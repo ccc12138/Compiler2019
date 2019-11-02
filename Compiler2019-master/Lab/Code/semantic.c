@@ -201,10 +201,7 @@ Type StructSpecifier(treeNode *root){
 		else if(p->childnum==2){/* declaration */
 			struct item* q = find_item(p->childp->right->childp->data.strd,STRUCTURE);
 			if(q==NULL){
-				/* error ouput */
-				//Need : the struct is not Define	
-				// Confused? struct tag is not a defination
-				printf("error!\n");
+				return NULL;
 			}
 			else{
 				add_type = q->var_type;
@@ -241,8 +238,8 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 	strcpy(add_var->name,p->childp->data.strd);
 	// printf("add_var->name=%s\n,add_var->name");
 	struct item* p_ = find_item(add_var->name, 0);//0 signify var or structure
-	if(p_==NULL){
-		// Confused? add to table?
+	if(p_!=NULL){
+		// there is this var or structure in table
 		printf("error!\n");
 		assert(0);
 	}
@@ -458,6 +455,11 @@ FieldList DefList(treeNode* root){
 		treeNode * DecList = Def->childp->right;
 		treeNode * specifierp = Def->childp;
 		Type p = Specifier(specifierp);
+		if(p==NULL)
+		{
+			// undefined struct
+			assert(0);
+		}
 		/* DecList -> Dec | Dec COMMA DecList */
 		while( DecList != NULL ){
 			struct item* add_new = create_new();
@@ -469,7 +471,6 @@ FieldList DefList(treeNode* root){
 			if(typeEqual(p,r)==false){
 				// Error type 5
 				printf("Error type 5 at Line %d: Type mismatched for assignment.\n",Dec->childp->right->lineno);
-				assert(0);
 			}
 			f = VarDec(Dec->childp,p);
 			fp->tail = f;
