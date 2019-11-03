@@ -129,7 +129,8 @@ void StmtList(treeNode* root, Type func_type);
 void Stmt(treeNode* root, Type func_type);
 
 // Local Definitions
-FieldList DefList(treeNode* root);
+FieldList DefList(treeNode* root, bool isStruct);
+//isStruct=0: isn't a struct; isStruct=1: is a struct
 
 // Experssions
 Type Exp(treeNode* root);

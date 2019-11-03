@@ -1,5 +1,12 @@
+struct A{
+	int k;
+	struct B{
+		int I;
+	}b;
+}a;
+
 int main()
 {
 	int i = 1;
-	int j = 2;
+	int j = 1;
 }
