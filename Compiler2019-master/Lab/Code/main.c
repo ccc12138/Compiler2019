@@ -33,5 +33,6 @@ int main(int argc, char** argv){
     // else{
     //     printf("lexErrNum=%d, synErrNum=%d\n", lexErrNum, synErrNum);
     // }
+    // printf("semErrNum=%d\n",semErrNum);
     return 0;
 }

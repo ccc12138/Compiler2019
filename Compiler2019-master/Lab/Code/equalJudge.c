@@ -38,16 +38,13 @@ bool structEqual(FieldList lstruct, FieldList rstruct){
 		return true;
 	if(lstruct==NULL||rstruct==NULL)
 		return false;
-	if(lstruct!=NULL&&rstruct!=NULL){
-		while(lstruct!=NULL&&rstruct!=NULL){
-			if(!typeEqual(lstruct->type,rstruct->type))
-				return false;
-			lstruct=lstruct->tail;
-			rstruct=rstruct->tail;
-		}
-	}
-	else{// impossible to reach here
-		printErr("structErr");
+	while(lstruct!=NULL&&rstruct!=NULL){
+		if(!typeEqual(lstruct->type,rstruct->type))
+			return false;
+		if(strcmp(lstruct->name,rstruct->name)!=0)
+			return false;
+		lstruct=lstruct->tail;
+		rstruct=rstruct->tail;
 	}
 	return true;
 }

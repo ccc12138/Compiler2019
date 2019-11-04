@@ -120,9 +120,9 @@ Type Specifier(treeNode* root);
 Type StructSpecifier(treeNode *root);
 
 //Declarators
-FieldList VarDec(treeNode* root, Type var_type);
+FieldList VarDec(treeNode* root, Type var_type,int funRelated);
 Function FunDec(treeNode* root, Type fun_type,int isDef);
-FieldList VarList(treeNode* root);
+FieldList VarList(treeNode* root,int isDef);
 
 // Statements
 void CompSt(treeNode* root, Type func_type);
