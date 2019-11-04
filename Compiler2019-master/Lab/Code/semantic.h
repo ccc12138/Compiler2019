@@ -98,6 +98,7 @@ void add_item(struct item* p);
 struct item* create_new();
 void print_table();
 struct item* create_new();
+void add_funpara(FieldList head);
 
 /********************************************
  *equal judge api, implemented in equalJudge.c

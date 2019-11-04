@@ -1,6 +1,7 @@
 #include "semantic.h"
 
 bool typeEqual(Type ltype, Type rtype){
+	// ERRORRRRRRRRRRRRRRRRRRR: For struct?
 	// TO IMPLMENT
 	if(ltype==NULL&&rtype==NULL){
 		return true;

@@ -4,7 +4,7 @@ extern int semErrNum;
 
 // High Level Definitions
 void Program(treeNode* root){
-	//printf("Program\n");
+	printf("Program\n");
 	// ExtDefList
 	if(cnEq(1)&&strcmp(firc(),"ExtDefList")==0){
 		// printf("Program branch1\n");
@@ -17,7 +17,7 @@ void Program(treeNode* root){
 }
 
 void ExtDefList(treeNode* root){
-	//printf("ExtDefList\n");
+	printf("ExtDefList\n");
 	// ExtDef ExtDefList
 	if(cnEq(2)&&strcmp(firc(),"ExtDef")==0
 		&&(strcmp(secc(),"ExtDefList")==0||strcmp(secc(),"EPSILON")==0)){
@@ -37,7 +37,7 @@ void ExtDefList(treeNode* root){
 }
 
 void ExtDef(treeNode* root){
-	//printf("ExtDef\n");
+	printf("ExtDef\n");
 	// Specifier ExtDecList SEMI
 	if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"ExtDecList")==0
 	&&strcmp(thic(),"SEMI")==0){
@@ -58,9 +58,9 @@ void ExtDef(treeNode* root){
 		int tempSemErrNum=0;
 		// printf("ExtDef branch3\n");
 		Type fun_type=Specifier(root->childp);
-		// printf("flag1\n");
+		// printf("flag1----------------\n");
 		Function func=FunDec(root->childp->right,fun_type,1);
-		// printf("flag2\n");
+		// printf("flag2-------------------------\n");
 		struct item* add_new = create_new();
 		add_new -> next = NULL;
 		add_new -> var_type -> kind = FUNCTION;
@@ -69,6 +69,7 @@ void ExtDef(treeNode* root){
 		// test before add item
 		struct item* po =find_item(add_new -> var_name, add_new -> var_type -> kind );
 		if(po==NULL){
+			printf("add_item:ID:%s----type:%d\n",add_new->var_name,add_new->var_type->kind);
 			add_item(add_new);
 		}//never declare or define
 		else{
@@ -105,6 +106,7 @@ void ExtDef(treeNode* root){
 		// test before add item
 		struct item* po =find_item(add_new -> var_name, add_new -> var_type -> kind );
 		if(po==NULL){
+			printf("add_item:ID:%s----type:%d\n",add_new->var_name,add_new->var_type->kind);
 			add_item(add_new);
 		}
 		if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)==false
@@ -117,23 +119,39 @@ void ExtDef(treeNode* root){
 		// End
 	}
 	else{
+		// ERRORRRRRRRRRRRRRRRRRRR: Specifier FunDec?
+		printf("%s\n",secc());
 		printErr("ExtDef");
 	}
 	return;
 }
 
 void ExtDecList(treeNode* root, Type var_type){
-	//printf("ExtDecList\n");
+	printf("ExtDecList\n");
 	// VarDec
 	if(cnEq(1)&&strcmp(firc(),"VarDec")==0){
 		// printf("ExtDecList branch1\n");
-		VarDec(root->childp,var_type);
+		FieldList p = VarDec(root->childp,var_type);
+		while ( p!=NULL ){
+			struct item * a =(struct item*)malloc(sizeof(struct item));
+			a->var_type = p->type;
+			a->var_name = p->name;
+			p = p->tail;
+			add_item(a);
+		}
 	}
 	// VarDec COMMA ExtDecList
 	else if(cnEq(3)&&strcmp(firc(),"VarDec")==0&&strcmp(secc(),"COMMA")==0
 	&&strcmp(thic(),"ExtDecList")==0){
 		// printf("ExtDecList branch2\n");
-		VarDec(root->childp,var_type);
+		FieldList p = VarDec(root->childp,var_type);
+		while ( p!=NULL ){
+			struct item * a =(struct item*)malloc(sizeof(struct item));
+			a->var_type = p->type;
+			a->var_name = p->name;
+			p = p->tail;
+			add_item(a);
+		}
 		ExtDecList(root->childp->right->right,var_type);
 	}
 	else{
@@ -144,7 +162,7 @@ void ExtDecList(treeNode* root, Type var_type){
 
 // A.1.3 Specifiers
 Type Specifier(treeNode *root){
-	//printf("Specifier\n");
+	printf("Specifier\n");
 	treeNode *p=root;
 	/* Specifier -> TYPE | StructSpecifier */
 	Type add_type = (Type)malloc(sizeof(struct Type_));
@@ -168,6 +186,7 @@ Type Specifier(treeNode *root){
 }
 // StructSpecifier
 Type StructSpecifier(treeNode *root){
+	printf("StructSpecifier\n");
 	treeNode *p=root;
 	Type add_type = (Type)malloc(sizeof(struct Type_));// return
 	
@@ -186,12 +205,13 @@ Type StructSpecifier(treeNode *root){
 				add_struct -> name = "";
 			else
 				strcpy(add_struct -> name,OptTag->childp->data.strd);
+			//printf("ID:%s--------------------\n",add_struct -> name);
 			//printf("get here?\n");
 			if(find_item(add_struct -> name,0)!=NULL)
 			{
 				// Error type 16: already exist
 				printf("Error type 16 at Line %d: Duplicated name \"%s\".\n"
-					,root->childp->right->lineno,root->childp->right->childp->name);
+					,root->childp->right->lineno,root->childp->right->childp->data.strd);
 				++semErrNum;
 			}
 			add_struct ->type-> kind = STRUCTURE;
@@ -199,8 +219,22 @@ Type StructSpecifier(treeNode *root){
 			/* DefList -> Def DefList | */
 			treeNode* DefListp = p->childp->right->right->right;
 			FieldList p = DefList(DefListp,1);
+			FieldList h = p;
+			printf("A struct\n");
+			//printf("fieldName:------------------------%s\n",h->name);
+			while(h!=NULL){
+				printf("fieldName:--------------------%s\n",h->name);
+				h = h->tail;
+			}
 			add_struct->type-> u.structure = p;
 			add_type->u.structure = add_struct;
+			struct item* a = create_new();
+			a->next = NULL;
+			a->var_type = add_type;
+			//printf("kind:%d-----------------------\n",add_type->kind);
+			a->var_name = add_struct -> name;
+			printf("add_item:ID:%s----type:%d\n",a->var_name,a->var_type->kind);
+			add_item(a);
 			return add_type;
 		}
 		else if(p->childnum==2){/* declaration */
@@ -226,7 +260,8 @@ Type StructSpecifier(treeNode *root){
 // A.1.4 Declarators
 // VarDec -> ID | VarDec LB INT RB
 FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
-	//printf("VarDec\n");
+	printf("VarDec\n");
+	if(var_type==NULL) return NULL;
 	treeNode *p=root;
 	int i=0;
 	/* VarDec -> ID | VarDec LB INT RB */
@@ -237,27 +272,25 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 
 	FieldList add_var = (FieldList)malloc(sizeof(struct FieldList_));
 	//printf("p->childp->data.strd=%s\n",p->childp->data.strd);
-	if(add_var->name == NULL){
-		add_var->name = (char*)malloc(sizeof(char)*32);
-	}
-	strcpy(add_var->name,p->childp->data.strd);
-	//printf("add_var->name=%s\n",add_var->name);
+	add_var->name = p->childp->data.strd;
+	printf("add_var->name=%s\n",add_var->name);
 	struct item* p_ = find_item(add_var->name, 0);//0 signify var or structure
 	if(p_!=NULL){
 		// there is this var or structure in table
 		printf("Error type 3 at Line %d: Redefined variable \"%s\".\n"
-			,root->childp->lineno,root->childp->name);
+			,root->childp->lineno,add_var->name);
 		++semErrNum;
 	}
 	add_var->type = (Type)malloc(sizeof(struct Type_));
 	/* root->childp->name == ID      ->     VarDec -> ID*/
 	if(i==0){
-        add_var->type->kind=BASIC;
+        add_var->type = var_type;
         return add_var;
     }
 	else if(i>=1){
 	/* i-dimension array */
 		add_var->type = MultiArray(root,i,var_type);
+		printf("KIND------------------------------%d,%d\n",add_var->type->kind,add_var->type->u.array.elem->kind);
 		return add_var;
 	}
 	else{
@@ -266,9 +299,10 @@ FieldList VarDec(treeNode* root,Type var_type){// Inherited Attribute
 }
 
 Type MultiArray(treeNode *root,int i,Type b){
-	//printf("MultiArray\n");
+	printf("MultiArray\n");
 	treeNode *tp = root;
 	Type p = NULL;
+	Type q = NULL;
 	Type Array = (Type)malloc(sizeof(struct Type_));
 	p = Array;
 	int j=0;
@@ -276,16 +310,31 @@ Type MultiArray(treeNode *root,int i,Type b){
 		p->kind=ARRAY;
 		p->u.array.size = tp->childp->right->right->data.intd;
 		p->u.array.elem = (Type)malloc(sizeof(struct Type_));
+		q = p;
 		p = p->u.array.elem;
 		tp = tp->childp;
 	}
-	p = b;
+	q->u.array.elem = b;
 	return Array;
+}
+
+void add_funpara(FieldList head){
+	FieldList p = head;
+	while(p!=NULL){
+		struct item* a = (struct item *)malloc(sizeof(struct item));
+		a->var_type = p->type;
+		a->var_name = p->name;
+		//printf("%s-----------------------------\n",p->name);
+		printf("func para add_item:ID:%s----type:%d\n",a->var_name,a->var_type->kind);
+		add_item(a);
+		p = p->tail;
+	}
+	//printf("add_funpara-----------------\n");
 }
 
 // FunDec -> ID LP VarList RP | ID LP RP
 Function FunDec(treeNode* root, Type fun_type, int isDef){
-	//printf("FunDec\n");
+	printf("FunDec\n");
 	Function func= (Function)malloc(sizeof(struct Function_));
 	//PrintDFS(root->childp,0);
 	if(func->name == NULL){
@@ -300,6 +349,8 @@ Function FunDec(treeNode* root, Type fun_type, int isDef){
 	if(cnEq(4)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 	&&strcmp(thic(),"VarList")==0&&strcmp(fouc(),"RP")==0){
 		func->para=VarList(root->childp->right->right);
+		//printf("func->para\n");
+		add_funpara(func->para);
 		return func;
 	}
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
@@ -323,9 +374,9 @@ Function FunDec(treeNode* root, Type fun_type, int isDef){
 
 // VarList -> ParamDec COMMA VarList | ParamDec 		+ ParamDec
 FieldList VarList(treeNode* root){
-	//printf("VarList\n");
-	FieldList fieldl=(FieldList)malloc(sizeof(struct FieldList_));
-	FieldList p = fieldl;
+	printf("VarList\n");
+	FieldList fieldl=NULL;
+	FieldList ppp = NULL;
 	//to implement
 	treeNode* VarList = root;
 	while( VarList->childnum == 3 ){
@@ -334,8 +385,16 @@ FieldList VarList(treeNode* root){
 		treeNode * specifierp = Param->childp;
 		treeNode * VarDecp = Param->childp->right;
 		/* ParamDec -> Specifier VarDec */
-		p->tail = VarDec(VarDecp,Specifier(specifierp));
-		VarList = VarList->right->right->right;
+		FieldList p = VarDec(VarDecp,Specifier(specifierp));
+		if(fieldl==NULL){
+			fieldl = p;
+			ppp = p;
+		}
+		else{
+			ppp->tail = p;
+			ppp = ppp->tail;
+		}
+		VarList = VarList->childp->right->right;
 	}
 	if(VarList->childnum == 1)
 	{
@@ -344,17 +403,26 @@ FieldList VarList(treeNode* root){
 		treeNode * specifierp = Param->childp;
 		treeNode * VarDecp = Param->childp->right;
 		/* ParamDec -> Specifier VarDec */
-		p->tail = VarDec(VarDecp,Specifier(specifierp));
-		VarList = VarList->right->right->right;
+		FieldList p = VarDec(VarDecp,Specifier(specifierp));
+		if(fieldl==NULL){
+			fieldl = p;
+			ppp = p;
+		}
+		else{
+			ppp->tail = p;
+			ppp = ppp->tail;
+		}
 	}
+	ppp->tail=NULL;
 	return fieldl;
 }
 
 // Statements
 void CompSt(treeNode* root, Type func_type){
-	//printf("CompSt\n");
+	printf("CompSt\n");
+	//printf("%s %s %s %s\n",firc(),secc(),thic(),fouc());
 	//LC DefList StmtList RC
-	if(cnEq(4)&&strcmp(firc(),"LC")==0&&strcmp(secc(),"DefList")==0
+	if(cnEq(4)&&strcmp(firc(),"LC")==0&&(strcmp(secc(),"DefList")==0||strcmp(secc(),"EPSILON")==0)
 		&&(strcmp(thic(),"StmtList")==0||strcmp(thic(),"EPSILON")==0)
 		&&strcmp(fouc(),"RC")==0){
 		// printf("CompSt branch1\n");
@@ -369,7 +437,7 @@ void CompSt(treeNode* root, Type func_type){
 }
 
 void StmtList(treeNode* root, Type func_type){
-	//printf("StmtList\n");
+	printf("StmtList\n");
 	// Stmt StmtList
 	if(cnEq(2)&&strcmp(firc(),"Stmt")==0
 		&&(strcmp(secc(),"StmtList")==0||strcmp(secc(),"EPSILON")==0)){
@@ -388,6 +456,7 @@ void StmtList(treeNode* root, Type func_type){
 }
 
 void Stmt(treeNode* root, Type func_type){
+	printf("Stmt\n");
 	// Exp SEMI
 	if(cnEq(2)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"SEMI")==0){
 		// printf("Stmt branch1\n");
@@ -450,14 +519,14 @@ void Stmt(treeNode* root, Type func_type){
 // Local Definitions
 /* add to the symbol table when defining */
 FieldList DefList(treeNode* root, bool isStruct){
-	FieldList fp = (FieldList)malloc(sizeof(struct FieldList_));
-	FieldList head = fp;
+	printf("DefList\n");
+	FieldList fp=NULL;
+	FieldList ppp=NULL;
+	FieldList head=NULL;
 	treeNode* DefList = root;
-	/* like below */
+	int cnt = 0;
 	while( DefList->childp != NULL ){
-		/* each step deal with one type,semi and add it */
-		treeNode* Def = DefList-> childp;
-		//printf("Def-> childp=%s\n",Def->childp->name);			
+		treeNode* Def = DefList-> childp;		
 		treeNode * DecList = Def->childp->right;
 		treeNode * specifierp = Def->childp;
 		Type p = Specifier(specifierp);
@@ -471,7 +540,6 @@ FieldList DefList(treeNode* root, bool isStruct){
 		while( DecList != NULL ){
 			struct item* add_new = create_new();
 			add_new -> next = NULL;			
-			FieldList f;
 			treeNode * Dec = DecList->childp;
 			/* deal with Dec -> VarDec | VarDec ASSIGNOP Exp */
 			if(Dec->childnum==3){
@@ -494,24 +562,25 @@ FieldList DefList(treeNode* root, bool isStruct){
 			else{
 				assert(0);
 			}
-			fp->tail = NULL;
-			fp->name = (char*)malloc(sizeof(char)*32);
-			f = VarDec(Dec->childp,p);
-			//printf("%s\n",f->name);
-			if( inFieldList(head,f->name) != NULL){
-				//error_type 15_1
+			fp = VarDec(Dec->childp,p);
+			if(fp==NULL) return NULL;
+			if( isStruct && inFieldList(head,fp->name) != NULL){
 				printf("Error type 15 at Line %d:\n"
 						,Dec->childp->lineno);
 			}
-			else{
-				//do nothing
+			if(head==NULL){
+				head = fp;
+				ppp = fp;
 			}
-			fp->tail = f;
-			fp = fp->tail;
+			else{
+				ppp->tail = fp;
+				ppp = ppp->tail;
+			}
 			// printf("BACK\n");
-			add_new->var_type = f->type;
+			add_new->var_type = fp->type;
 			// printf("flag4\n");
-			strcpy(add_new->var_name,f->name);
+			add_new->var_name=fp->name;
+			printf("add_item:ID:%s----type:%d\n",add_new->var_name,add_new->var_type->kind);
 			add_item(add_new);
 			if( DecList -> childnum == 1 ){
 				DecList = NULL;
@@ -522,8 +591,9 @@ FieldList DefList(treeNode* root, bool isStruct){
 			else{
 				printf("error!");
 			}
+			fp = fp->tail;
 		}
-		DefList = Def->right;
+		DefList = DefList->childp->right;
 	}
 	return head; 
 }
@@ -532,6 +602,7 @@ FieldList DefList(treeNode* root, bool isStruct){
 
 // Experssions
 Type Exp(treeNode* root){
+	printf("Exp\n");
 	Type type;
 	int tempSemErrNum=0;
 	// Exp <sth.> Exp
@@ -539,14 +610,15 @@ Type Exp(treeNode* root){
 		// Exp ASSIGNOP Exp
 		if(strcmp(secc(),"ASSIGNOP")==0){
 			Type ltype=Exp(root->childp);
-			Type rtype=Exp(root->childp->right->right);
-			if(ltype==NULL||rtype==NULL){
-				return NULL;
-			}
-			if(ltype->value==R_VALUE){
+			if(ltype!=NULL&&ltype->value==R_VALUE){
+				printf("%d\n",ltype->value);
 				printf("Error type 6 at Line %d: The left-hand side of an assignment must be a variable.\n"
 					, root->childp->lineno);
 				++tempSemErrNum;
+			}
+			Type rtype=Exp(root->childp->right->right);
+			if(ltype==NULL||rtype==NULL){
+				return NULL;
 			}
 			if(!typeEqual(ltype,rtype)){
 				printf("Error type 5 at Line %d: Type mismatched for assignment.\n"
@@ -631,39 +703,44 @@ Type Exp(treeNode* root){
 
 		// ID undefine
 		char * ID = root->childp->data.strd;
+		printf("func:%s\n",ID);
 		struct item* p = find_item(ID,FUNCTION);
+		struct item* q = find_item(ID,0);
 		if( p == NULL ){
 			// two is possible: ID is a var, no ID
-			struct item* q = find_item(ID,0);
 			if(q==NULL){
 				printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
-				,root->childp->lineno,root->childp->name);
+				,root->childp->lineno,root->childp->data.strd);
 			}
 			else{
 				printf("Error type 11 at Line %d: \"%s\" is not a function.\n"
-					, root->childp->lineno,root->childp->name);
+					, root->childp->lineno,root->childp->data.strd);
+
 			}
 			++tempSemErrNum;
 		}
-		if(p->var_type->u.function->isDef==0){
-			//Error type 18: Declared but not defined
-			printf("Error type 18 at Line %d: Undefined function \"%s\".\n"
-				,root->childp->lineno,root->childp->name);
-			++tempSemErrNum;
-		}
-		if(tempSemErrNum!=0){
-			semErrNum+=tempSemErrNum;
-			return NULL;
-		}
-		else if( Args(root->childp->right->right, p->var_type->u.function->para) == 1 ){
-			// nothing error
-			type = p->var_type->u.function->fun_type;
-			type -> value = R_VALUE;
-			return type;
-		}
 		else{
-			printErr("Exp");
+			if(p->var_type->u.function->isDef==0){
+				//Error type 18: Declared but not defined
+				printf("Error type 18 at Line %d: Undefined function \"%s\".\n"
+				,root->childp->lineno,root->childp->name);
+				++tempSemErrNum;
+			}
+			if(tempSemErrNum!=0){
+				semErrNum+=tempSemErrNum;
+				return NULL;
+			}
+			else if(Args(root->childp->right->right, p->var_type->u.function->para) == 1 ){
+			// nothing error
+				type = p->var_type->u.function->fun_type;
+				type -> value = R_VALUE;
+				return type;
+			}
+			else{
+				//printErr("Exp");
+			}
 		}
+		//printf("----------------------------%s\n",ID);
 		// End
 	}
 	// ID LP RP
@@ -685,7 +762,7 @@ Type Exp(treeNode* root){
 			else{
 				// Error type 11
 				printf("Error type 11 at Line %d: \"%s\" is not a function.\n"
-					, root->childp->lineno,root->childp->name);
+					, root->childp->lineno,root->childp->data.strd);
 			}
 			++tempSemErrNum;
 		}
@@ -724,7 +801,8 @@ Type Exp(treeNode* root){
 				, root->childp->lineno, root->childp->childp->name);
 			++tempSemErrNum;
 		}
-		if(arr_opr->kind!=BASIC||arr_opr->u.basic!=INT){
+		printf("--%d\n",arr_opr->kind);
+		if(arr_opr->kind!=BASIC&&arr_opr->u.basic!=INT){
 			//Error type 12: not an integer
 			printf("Error type 12 at Line %d: \"%s\" is not an integer.\n"
 				, root->childp->right->right->lineno , root->childp->right->right->childp->name);
@@ -736,6 +814,7 @@ Type Exp(treeNode* root){
 		}
 		else{
 			type=arr_type->u.array.elem;
+			printf("ARRAY___________kind:%d\n",type->kind);
 			type->value = LR_VALUE;
 			return type;
 		}
@@ -747,7 +826,9 @@ Type Exp(treeNode* root){
 		// THIS Exp IS ______? LR_VALUE
 		// Begin:
 		Type l = Exp(root->childp);
-		if(l->kind!=STRUCTURE){
+		if(l==NULL)
+			return NULL;
+		else if(l->kind!=STRUCTURE){
 			// Error type 13: not a structure
 			printf("Error type 13 at Line %d: Illegal use of \"%s\".\n"
 				, root->childp->lineno, root->childp->name);
@@ -757,7 +838,8 @@ Type Exp(treeNode* root){
 		else{
 			// for a struct
 			char * ID = root->childp->right->right->data.strd;
-			Type type = inFieldList(l->u.structure, ID);
+			printf("ID:-----------------%s\n",ID);
+			Type type = inFieldList(l->u.structure->type->u.structure, ID);
 			if(type==NULL)
 			{
 				// ID not define in the structure
@@ -782,6 +864,7 @@ Type Exp(treeNode* root){
 			// Begin:
 			char * ID = root->childp->data.strd;
 			struct item* p = find_item(ID,0);
+			printf("ID----------->%s\n",ID);
 			if( p == NULL ){
 				// two is possible: ID is a func or not define
 				printf("Error type 1 at Line %d: Undefined variable \"%s\".\n"
@@ -793,6 +876,8 @@ Type Exp(treeNode* root){
 				// nothing error
 				type = p->var_type;
 				type -> value = LR_VALUE;
+				printf("%s:value-------------%d\n",ID,type -> value);
+				
 				return type;
 			}					
 			// End
@@ -817,9 +902,10 @@ Type Exp(treeNode* root){
 }
 Type inFieldList(FieldList f, char* ID){
 	FieldList p = f;
-	//printf("%s\n",p->name);
+	printf("ID:%s\n",ID);
+	//printf("fieldName:------------------------%s\n",p->name);
 	while(p!=NULL){
-		//printf("%s\n",p->name);
+		printf("fieldName:--------------------%s\n",p->name);
 		if(strcmp(p->name,ID)==0){
 			return p->type;
 		}
@@ -832,13 +918,20 @@ Type inFieldList(FieldList f, char* ID){
  * Return true means equal, otherwise unequal
  */
 bool Args(treeNode* root, FieldList para){
+	printf("Args\n");
 	if(para==NULL && root==NULL)
 		return true;
-	if(root==NULL)
+	if(root==NULL){
+		printf("Error type 9 at Line %d: Function is not applicable for arguments.\n"
+			,root->childp->lineno);
 		return false;
-	if(para==NULL)
+	}
+	if(para==NULL){
+		printf("Error type 9 at Line %d: Function is not applicable for arguments.\n"
+			,root->childp->lineno);
 		return false;
-
+	}
+	printf("kind:%d\n",para->type->kind);
 	Type exp_type = Exp(root->childp);
 	if(!typeEqual(exp_type, para->type)){
 		// TO IMPLEMENT ERROR TYPE 9
