@@ -557,12 +557,14 @@ FieldList DefList(treeNode* root, bool isStruct){
 					treeNode *wrong=Dec->childp->right->right;
 					printf("Error type 15 at Line %d: Initialize field \"%s\" in struct.\n"
 						,wrong->lineno, wrong->data.strd);
+					++semErrNum;
 				}
 				Type r = Exp(Dec->childp->right->right);
 				if(typeEqual(p,r)==false){
 					// Error type 5
 					printf("Error type 5 at Line %d: Type mismatched for assignment.\n"
 						,Dec->childp->right->lineno);
+					++semErrNum;
 				}
 			}
 			else if(Dec->childnum==1){
@@ -576,6 +578,7 @@ FieldList DefList(treeNode* root, bool isStruct){
 			if( isStruct && inFieldList(head,fp->name) != NULL){
 				printf("Error type 15 at Line %d: Redefined fields.\n"
 						,Dec->childp->lineno);
+				++semErrNum;
 			}
 			if(head==NULL){
 				head = fp;
@@ -620,7 +623,7 @@ Type Exp(treeNode* root){
 		if(strcmp(secc(),"ASSIGNOP")==0){
 			Type ltype=Exp(root->childp);
 			if(ltype!=NULL&&ltype->value==R_VALUE){
-				printf("%d\n",ltype->value);
+				// printf("%d\n",ltype->value);
 				printf("Error type 6 at Line %d: The left-hand side of an assignment must be a variable.\n"
 					, root->childp->lineno);
 				++tempSemErrNum;
@@ -635,6 +638,7 @@ Type Exp(treeNode* root){
 				++tempSemErrNum;	
 			}
 			if(!tempSemErrNum){
+				// printf("Exp ASSIGNOP Exp\n");
 				ltype->value=LR_VALUE;
 				return ltype;
 			}
@@ -721,7 +725,7 @@ Type Exp(treeNode* root){
 			if(q==NULL){
 				printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
 				,root->childp->lineno,root->childp->data.strd);
-				++tempSemErrNum;
+				++semErrNum;
 			}
 			else{
 				printf("Error type 11 at Line %d: \"%s\" is not a function.\n"
@@ -768,7 +772,7 @@ Type Exp(treeNode* root){
 			if (q == NULL ){
 				printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
 				,root->childp->lineno,root->childp->data.strd);
-				++tempSemErrNum;
+				++semErrNum;
 			}
 			else{
 				// Error type 11
@@ -807,14 +811,15 @@ Type Exp(treeNode* root){
 		if(arr_type==NULL||arr_opr==NULL){
 			return NULL;
 		}
+		// printf("arr_opr->kind=%d\n",arr_opr->kind);
 		if(arr_type->kind!=ARRAY){
 			//Error type 10: not an array
 			printf("Error type 10 at Line %d: \"%s\" is not an array.\n"
 				, root->childp->lineno, root->childp->childp->data.strd);
 			++tempSemErrNum;
 		}
-		printf("--%d\n",arr_opr->kind);
-		if(arr_opr->kind!=BASIC&&arr_opr->u.basic!=INT){
+		// printf("--%d\n",arr_opr->kind);
+		if(arr_opr->kind!=BASIC||(arr_opr->kind==BASIC&&arr_opr->u.basic!=INT)){
 			//Error type 12: not an integer
 			printf("Error type 12 at Line %d: \"%s\" is not an integer.\n"
 				, root->childp->right->right->lineno , root->childp->right->right->childp->data.strd);
@@ -938,11 +943,13 @@ bool Args(treeNode* root, FieldList para){
 	if(root==NULL){
 		printf("Error type 9 at Line %d: Function is not applicable for arguments.\n"
 			,root->childp->lineno);
+		++semErrNum;
 		return false;
 	}
 	if(para==NULL){
 		printf("Error type 9 at Line %d: Function is not applicable for arguments.\n"
 			,root->childp->lineno);
+		++semErrNum;
 		return false;
 	}
 	// printf("kind:%d\n",para->type->kind);
