@@ -1,0 +1,21 @@
+struct Position
+{
+    float x,y;
+};
+
+int func(int a);
+
+int func(struct Position p);
+
+int gg();
+
+int kkkkkk();
+
+int gg(){
+	return 1;
+}
+
+int main()
+{
+
+}

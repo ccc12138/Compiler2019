@@ -80,6 +80,13 @@ struct item{
 	char* var_name;
 	// some data
 };
+
+struct ListNode{
+	char* name;
+	int lineno;
+	struct ListNode *next;
+};
+
 /* 
 for a function item
 var_type->kind = FUNCTION
@@ -98,6 +105,7 @@ void add_item(struct item* p);
 struct item* create_new();
 void print_table();
 struct item* create_new();
+void add_funpara(FieldList head);
 
 /********************************************
  *equal judge api, implemented in equalJudge.c
@@ -108,6 +116,12 @@ bool structEqual(FieldList lstruct, FieldList rstruct);
 /*****************************************************
  *semantic non-terminal api, implemented in semantic.c
  *****************************************************/
+// Linked List Func
+void add_to_linked_list(char *name,int lineno);
+void del_from_linked_list(char *name);
+void judge_linked_list();
+
+
 // High Level Definitions
 void Program(treeNode* root);
 void ExtDefList(treeNode* root);
@@ -119,9 +133,9 @@ Type Specifier(treeNode* root);
 Type StructSpecifier(treeNode *root);
 
 //Declarators
-FieldList VarDec(treeNode* root, Type var_type);
+FieldList VarDec(treeNode* root, Type var_type,int funRelated);
 Function FunDec(treeNode* root, Type fun_type,int isDef);
-FieldList VarList(treeNode* root);
+FieldList VarList(treeNode* root,int isDef);
 
 // Statements
 void CompSt(treeNode* root, Type func_type);
@@ -129,7 +143,8 @@ void StmtList(treeNode* root, Type func_type);
 void Stmt(treeNode* root, Type func_type);
 
 // Local Definitions
-FieldList DefList(treeNode* root);
+FieldList DefList(treeNode* root, bool isStruct);
+//isStruct=0: isn't a struct; isStruct=1: is a struct
 
 // Experssions
 Type Exp(treeNode* root);

@@ -23,8 +23,10 @@ struct item* create_new(){
 
 struct item * find_item(char *name, int t){
 	unsigned int index = hash_pjw(name);
-	if(table[index] == NULL)
+	if(table[index] == NULL){
+		// printf("name=%s;\n",name);
 		return NULL;
+	}
 	else
 	{
 		struct item* p = table[index];
@@ -46,8 +48,10 @@ struct item * find_item(char *name, int t){
 
 void add_item(struct item* p){
 	int index = hash_pjw(p->var_name);
-	if(table[index] == NULL)
+	if(table[index] == NULL){
+		// printf("add_item name=%s;\n",p->var_name);
 		table[index]=p;
+	}
 	else
 	{
 		//insert to the head
@@ -64,6 +68,7 @@ void print_table(){
 			struct item* p = table[i];
 			while(p!=NULL){
 				printf("name:%s\n",p->var_name);
+				p=p->next;
 			}
 		}
 }
