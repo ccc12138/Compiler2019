@@ -890,7 +890,7 @@ Type Exp(treeNode* root){
 		else{
 			type=arr_type->u.array.elem;
 			// printf("ARRAY___________kind:%d\n",type->kind);
-			type->value = LR_VALUE;
+			type->value = R_VALUE;
 			return type;
 		}
 	}
@@ -924,7 +924,7 @@ Type Exp(treeNode* root){
 				return NULL;
 			}
 			else{
-				type -> value = LR_VALUE;
+				type->value = R_VALUE;
 				return type; 
 			}
 		}
