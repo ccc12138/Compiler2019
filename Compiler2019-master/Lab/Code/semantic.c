@@ -1,6 +1,56 @@
 #include "semantic.h"
 
 extern int semErrNum;
+struct ListNode *listHead=NULL;
+
+// Linked List Func
+void add_to_linked_list(char *name, int lineno){
+	struct ListNode *p=(struct ListNode*)malloc(sizeof(struct ListNode));
+	p->name=name;
+	p->lineno=lineno;
+	p->next=listHead;
+	listHead=p;
+}
+
+void del_from_linked_list(char *name){
+	// printf("name=%s\n",name);
+	struct ListNode *p=listHead;
+	if(p==NULL){// if use this func, this case is impossible.
+		assert(0);
+	}
+	bool isDel=false;
+	// printf("p->name=%s\n",p->name);
+	if(strcmp(p->name,name)==0){
+		p=p->next;
+		free(listHead);
+		listHead=p;
+		return;
+	}
+	p=p->next;
+	struct ListNode *q=listHead;
+	while(p!=NULL){
+		// printf("p->name=%s\n",p->name);
+		if(strcmp(p->name,name)==0){
+			struct ListNode *toDel=p;
+			p=p->next;
+			q->next=p;
+			free(toDel);
+			isDel=true;
+			break;
+		}
+		p=p->next;
+	}
+	assert(isDel);
+	return;
+}
+
+void judge_linked_list(){
+	struct ListNode *p=listHead;
+	while(p!=NULL){
+		printf("Error type 18 at Line %d: Undefined function \"%s\"\n",p->lineno,p->name);
+		p=p->next;
+	}
+}
 
 // High Level Definitions
 void Program(treeNode* root){
@@ -13,6 +63,7 @@ void Program(treeNode* root){
 	else{
 		printErr("Program");
 	}
+	judge_linked_list();
 	return;
 }
 
@@ -72,12 +123,12 @@ void ExtDef(treeNode* root){
 		struct item* po =find_item(add_new -> var_name, add_new -> var_type -> kind );
 		if(po==NULL){
 			// printf("add_item:ID:%s----type:%d\n",add_new->var_name,add_new->var_type->kind);
-			
 			add_item(add_new);
 		}//never declare or define
 		else if(po->var_type->kind==FUNCTION&&po->var_type->u.function->isDef==0){
 			// printf("\n\nenter updateIsDef!\n");
 			po->var_type->u.function->isDef=1;
+			del_from_linked_list(add_new->var_name);
 		}
 		else{
 			if(po->var_type->u.function->isDef==1){
@@ -115,6 +166,7 @@ void ExtDef(treeNode* root){
 		if(po==NULL){
 			// printf("add_item:ID:%s----type:%d\n",add_new->var_name,add_new->var_type->kind);
 			add_item(add_new);
+			add_to_linked_list(add_new->var_name,root->childp->right->lineno);
 			// printf("succ added\n");
 		}
 		else if(typeEqual(func->fun_type,po->var_type->u.function->fun_type)==false

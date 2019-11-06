@@ -2,7 +2,7 @@ make clean
 make
 
 # Book tests
-for((i=1;i<=23;i=i+1)){
+for((i=19;i<=19;i=i+1)){
 	echo "---------------Book Tests $i---------------"
 	./parser ../Test/BookTest/$i.txt
 }

@@ -80,6 +80,13 @@ struct item{
 	char* var_name;
 	// some data
 };
+
+struct ListNode{
+	char* name;
+	int lineno;
+	struct ListNode *next;
+};
+
 /* 
 for a function item
 var_type->kind = FUNCTION
@@ -109,6 +116,12 @@ bool structEqual(FieldList lstruct, FieldList rstruct);
 /*****************************************************
  *semantic non-terminal api, implemented in semantic.c
  *****************************************************/
+// Linked List Func
+void add_to_linked_list(char *name,int lineno);
+void del_from_linked_list(char *name);
+void judge_linked_list();
+
+
 // High Level Definitions
 void Program(treeNode* root);
 void ExtDefList(treeNode* root);
