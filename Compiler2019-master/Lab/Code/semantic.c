@@ -780,6 +780,7 @@ Type Exp(treeNode* root){
 				printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
 				,root->childp->lineno,root->childp->data.strd);
 				++semErrNum;
+				return NULL;
 			}
 			else{
 				printf("Error type 11 at Line %d: \"%s\" is not a function.\n"
@@ -793,7 +794,7 @@ Type Exp(treeNode* root){
 				//Error type 18: Declared but not defined
 				error = true;
 				printf("Error type 18 at Line %d: Undefined function \"%s\".\n"
-				,root->childp->lineno,root->childp->data.strd);
+					,root->childp->lineno,root->childp->data.strd);
 				++tempSemErrNum;
 			}
 			if(tempSemErrNum!=0){
@@ -828,6 +829,7 @@ Type Exp(treeNode* root){
 				printf("Error type 2 at Line %d: Undefined function \"%s\".\n"
 				,root->childp->lineno,root->childp->data.strd);
 				++semErrNum;
+				return NULL;
 			}
 			else{
 				// Error type 11
