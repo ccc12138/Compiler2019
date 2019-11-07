@@ -1,5 +1,6 @@
 #include "semantic.h"
 
+int anonyNum=0;
 extern int semErrNum;
 struct ListNode *listHead=NULL;
 bool error = false;
@@ -264,8 +265,14 @@ Type StructSpecifier(treeNode *root){
 			add_type->kind = STRUCTURE;
 			/* OptTag -> ID |  */
 			treeNode *OptTag = p->childp->right;//deal with the name of struct
-			if( OptTag == NULL )
-				add_struct -> name = "";
+            if(strcmp(OptTag->name,"EPSILON")==0){
+				char sub[23];
+				char anonyFunc[32]="anonyFunc";
+				sprintf(sub, "%d", anonyNum);
+				++anonyNum;
+				strcat(anonyFunc,sub);
+				add_struct->name = anonyFunc;
+			}
 			else
 				strcpy(add_struct -> name,OptTag->childp->data.strd);
 			//printf("ID:%s--------------------\n",add_struct -> name);
@@ -693,7 +700,6 @@ Type Exp(treeNode* root){
 			}
 			if(!tempSemErrNum){
 				// printf("Exp ASSIGNOP Exp\n");
-				ltype->value=LR_VALUE;
 				return ltype;
 			}
 			else{
@@ -890,7 +896,10 @@ Type Exp(treeNode* root){
 		else{
 			type=arr_type->u.array.elem;
 			// printf("ARRAY___________kind:%d\n",type->kind);
-			type->value = R_VALUE;
+			if(arr_type->value==LR_VALUE||arr_type->value==L_VALUE)
+				type->value = LR_VALUE;
+			else
+				type->value = R_VALUE;
 			return type;
 		}
 	}
@@ -924,7 +933,10 @@ Type Exp(treeNode* root){
 				return NULL;
 			}
 			else{
-				type->value = R_VALUE;
+				if(l->value==LR_VALUE||l->value==L_VALUE)
+					type->value = LR_VALUE;
+				else
+					type->value = R_VALUE;
 				return type; 
 			}
 		}
