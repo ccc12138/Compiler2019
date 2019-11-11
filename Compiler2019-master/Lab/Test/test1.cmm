@@ -1,16 +1,5 @@
-struct Test{
-  int a;
-};
-
-struct Test test;
-
-struct Test A(){
-  test.a=2;
-  return test;
+int main()
+{
+	int i = 1;
+	int j = 2;
 }
-
-int main(){
-  test.a=1;
-  A().a=1;
-}
-
