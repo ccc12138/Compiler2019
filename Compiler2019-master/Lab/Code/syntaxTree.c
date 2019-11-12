@@ -8,6 +8,7 @@ treeNode* InitNode(char* nodeName, int lineno){
     node->lineno=lineno;
     node->right=NULL;
     node->childp=NULL;
+    node->branch=-1;//not inited until semantic analysis
     return node;
 }
 

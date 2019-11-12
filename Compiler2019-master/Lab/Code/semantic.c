@@ -59,6 +59,7 @@ void Program(treeNode* root){
 	// ExtDefList
 	if(cnEq(1)&&strcmp(firc(),"ExtDefList")==0){
 		// printf("Program branch1\n");
+		root->branch=1;
 		ExtDefList(root->childp);
 	}
 	else{
@@ -75,6 +76,7 @@ void ExtDefList(treeNode* root){
 	// ExtDef ExtDefList
 	if(cnEq(2)&&strcmp(firc(),"ExtDef")==0
 		&&(strcmp(secc(),"ExtDefList")==0||strcmp(secc(),"EPSILON")==0)){
+		root->branch=1;
 		// printf("ExtDefList branch1\n");
 		ExtDef(root->childp);
 		// printf("succ return!\n");
@@ -82,6 +84,7 @@ void ExtDefList(treeNode* root){
 	}
 	// epsilon
 	else if(cnEq(0)){
+		root->branch=2;
 		// printf("ExtDefList branch2\n");
 		return;
 	}
@@ -97,12 +100,14 @@ void ExtDef(treeNode* root){
 	if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"ExtDecList")==0
 	&&strcmp(thic(),"SEMI")==0){
 		// printf("ExtDef branch1\n");
+		root->branch=1;
 		Type spec_type=Specifier(root->childp);
 		ExtDecList(root->childp->right,spec_type);
 	}
 	// Specifier SEMI
 	else if(cnEq(2)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"SEMI")==0)
 	{
+		root->branch=2;
 		// printf("ExtDef branch2\n");
 		Specifier(root->childp);
 	}
@@ -110,6 +115,7 @@ void ExtDef(treeNode* root){
 	// func define: Error type 4, 19
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"CompSt")==0){
+		root->branch=3;
 		int tempSemErrNum=0;
 		// printf("ExtDef branch3\n");
 		Type fun_type=Specifier(root->childp);
@@ -155,6 +161,7 @@ void ExtDef(treeNode* root){
 	else if(cnEq(3)&&strcmp(firc(),"Specifier")==0&&strcmp(secc(),"FunDec")==0
 	&&strcmp(thic(),"SEMI")==0){// elective
 		// printf("ExtDef branch4\n");
+		root->branch=4;
 		Type fun_type=Specifier(root->childp);
 		Function func=FunDec(root->childp->right,fun_type,0);
 		// Begin: need SYMTAB here and check FUNCTION errors
@@ -194,6 +201,7 @@ void ExtDecList(treeNode* root, Type var_type){
 	// printf("ExtDecList\n");
 	// VarDec
 	if(cnEq(1)&&strcmp(firc(),"VarDec")==0){
+		root->branch=1;
 		// printf("ExtDecList branch1\n");
 		FieldList p = VarDec(root->childp,var_type,0);
 		while ( p!=NULL ){
@@ -207,6 +215,7 @@ void ExtDecList(treeNode* root, Type var_type){
 	// VarDec COMMA ExtDecList
 	else if(cnEq(3)&&strcmp(firc(),"VarDec")==0&&strcmp(secc(),"COMMA")==0
 	&&strcmp(thic(),"ExtDecList")==0){
+		root->branch=2;
 		// printf("ExtDecList branch2\n");
 		FieldList p = VarDec(root->childp,var_type,0);
 		while ( p!=NULL ){
@@ -231,6 +240,7 @@ Type Specifier(treeNode *root){
 	/* Specifier -> TYPE | StructSpecifier */
 	Type add_type = (Type)malloc(sizeof(struct Type_));
 	if(cnEq(1)&&strcmp(p->childp->name,"TYPE")==0){
+		root->branch=1;
         add_type->kind = BASIC;
 		if(strcmp(p->childp->data.strd,"int")==0)
 			add_type->u.basic = INT;
@@ -241,6 +251,7 @@ Type Specifier(treeNode *root){
 		return add_type;
     }
 	else if(cnEq(1)&&strcmp(p->childp->name,"StructSpecifier")==0){
+		root->branch=2;
 		//printf("Specifier branch2\n");
 		add_type = StructSpecifier(p->childp);
 	}
@@ -257,6 +268,7 @@ Type StructSpecifier(treeNode *root){
 	/* StructSpecifier -> STRUCT OptTag LC DefList RC | STRUCT Tag */
 	if(strcmp(p->childp->name,"STRUCT")==0){
 		if(p->childnum==5){//define a struct
+			root->branch=1;
 			FieldList add_struct = (FieldList)malloc(sizeof(struct FieldList_));
 			add_struct->name = (char*)malloc(sizeof(char)*32);
 			add_struct->type = (Type)malloc(sizeof(struct Type_));
@@ -308,6 +320,7 @@ Type StructSpecifier(treeNode *root){
 			return add_type;
 		}
 		else if(p->childnum==2){/* declaration */
+			root->branch=2;
 			struct item* q = find_item(p->childp->right->childp->data.strd,STRUCTURE);
 			if(q==NULL){
 				return NULL;

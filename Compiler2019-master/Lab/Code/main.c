@@ -1,7 +1,7 @@
 /* Ref P25 */
 #include <stdio.h>
 #include "semantic.h"
-#include "interCode.h"
+#include "translate.h"
 extern FILE* yyin;
 int lexErrNum;
 int synErrNum;
@@ -34,13 +34,23 @@ int main(int argc, char** argv){
 
         // End
         // Here we need to printCode()
-        FILE *fp=fopen(argv[2],"w");
-        // printf("%s\n",argv[2]);
-        if(!fp){
-            perror(argv[2]);
-            return 1;
+        if(semErrNum==0&&argc==3){
+            FILE *fp=fopen(argv[2],"w");
+            // printf("%s\n",argv[2]);
+            if(!fp){
+                perror(argv[2]);
+                return 1;
+            }
+            printf("fp exist!\n");
+            translate_Program(root);
+            printf("translate succ!\n");
+            PrintCode(fp);
+            fclose(fp);
         }
-        PrintCode(fp);
+        else{
+            printf("semErrNum=%d\n",semErrNum);
+        }
     }
+    fclose(f);
     return 0;
 }

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include <stdlib.h>//malloc
 #include <stdarg.h>
@@ -14,6 +16,7 @@ typedef struct treeNode{
 	}data;							//数据
 	struct treeNode* right;
 	struct treeNode* childp;		//第一个子节点
+	int branch;//for switch
 }treeNode;
 //multitreeNode $1,$2... need va_list
 

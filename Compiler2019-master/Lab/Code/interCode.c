@@ -43,12 +43,6 @@ bool DeleteCode(InterCode node){
 	return true;
 }
 
-void PrintOperand(Operand op, FILE* fp){
-	assert(op!=NULL&&fp!=NULL);
-	// char 
-	return;
-}
-
 void PrintCode(FILE *fp){
 	assert(codeHead!=NULL&&codeTail!=NULL);
 	InterCode ic=codeHead;
@@ -62,11 +56,11 @@ void PrintCode(FILE *fp){
 				PRINT_SINOP("FUNCTION ");
 				fputs(": ",fp);
 				break;
-			case IC_ASSIGN://3,9,10
+			case IC_ASSIGN://3,8,9,10
 				PRINT_ASSIGN(":= ");
 				break;
 			case IC_ADD://4
-				PRINT_BINOP("+ ");// don't forget space!
+				PRINT_BINOP("+ ");
 				break;
 			case IC_SUB://5
 				PRINT_BINOP("- ");
@@ -76,9 +70,6 @@ void PrintCode(FILE *fp){
 				break;
 			case IC_DIV://7
 				PRINT_BINOP("/ ");
-				break;
-			case IC_ADDRESS://8
-				PRINT_ASSIGN(":= &");
 				break;
 			case IC_GOTO://11
 				PRINT_SINOP("GOTO ");
@@ -112,5 +103,38 @@ void PrintCode(FILE *fp){
 		}
 		ic=ic->next;
 	}while(ic!=codeHead);
+	return;
+}
 
+void PrintOperand(Operand op, FILE* fp){
+	assert(op!=NULL&&fp!=NULL);
+	char tempStr[STRLEN];
+	switch(op->kind){
+		case OP_VARIABLE://x
+			fprintf(fp,"%s ",op->u.name);
+			break;
+		case OP_TEMP_VAR://t
+			fprintf(fp,"t%d ",op->u.var_no);
+			break;
+		case OP_CONSTANT://#
+			fprintf(fp,"#%d ",op->u.value);
+			break;
+		case OP_VAR_ADDR://*
+			assert(op->u.addr!=NULL);
+			fprintf(fp,"*%s ",op->u.addr->u.name);
+			break;
+		case OP_TEMP_VAR_ADDR://*t
+			assert(op->u.addr!=NULL);
+			fprintf(fp,"*t%s ",op->u.addr->u.var_no);
+			break;
+		case OP_LABEL://label x
+			fprintf(fp,"label%d ",op->u.var_no);
+			break;
+		case OP_FUNCTION://x
+			fprintf(fp,"%s ",op->u.name);
+			break;
+		default://impossible to reach here
+			assert(0);
+	}
+	return;
 }
