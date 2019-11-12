@@ -1,6 +1,7 @@
 /* Ref P25 */
 #include <stdio.h>
 #include "semantic.h"
+#include "interCode.h"
 extern FILE* yyin;
 int lexErrNum;
 int synErrNum;
@@ -26,13 +27,20 @@ int main(int argc, char** argv){
     yyparse();
     if(lexErrNum==0&&synErrNum==0){
         // PrintDFS(root,0);
-
         //Here we have complete tree and we can do semantic analysis
         Program(root);
+        // Here we need to optimize code
+        // Begin:
+
+        // End
+        // Here we need to printCode()
+        FILE *fp=fopen(argv[2],"w");
+        // printf("%s\n",argv[2]);
+        if(!fp){
+            perror(argv[2]);
+            return 1;
+        }
+        PrintCode(fp);
     }
-    // else{
-    //     printf("lexErrNum=%d, synErrNum=%d\n", lexErrNum, synErrNum);
-    // }
-    // printf("semErrNum=%d\n",semErrNum);
     return 0;
 }
