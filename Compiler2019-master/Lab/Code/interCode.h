@@ -1,13 +1,18 @@
 #ifndef _INTERCODE_H
 #define _INTERCODE_H
 
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+
 typedef struct Operand_* Operand;
 typedef struct InterCode_* InterCode;
 
 struct Operand_{
 	enum{
-		VARIABLE, TEMPVAR, CONSTANT, 
-		ADDRESS, LABEL, FUNCTION
+		OP_VARIABLE, OP_TEMPVAR, OP_CONSTANT, 
+		OP_ADDRESS, OP_LABEL, OP_FUNCTION
 		// may still need sth
 	}kind;
 	union{
@@ -20,14 +25,13 @@ struct Operand_{
 /*
  * Double linked-list is easy for optimization of inter code? so
  */
-
-struct InterCode{
+struct InterCode_{
 	enum{// ref P64
-		ASSIGN, ADD, SUB, MUL, DIV, 
-		LABEL, FUNCTION, ADDRESS, 
-		GOTO, IF_GOTO, RETURN, 
-		DEC, ARG, CALL, PARAM, 
-		READ, WRITE
+		IC_ASSIGN, IC_ADD, IC_SUB, IC_MUL, IC_DIV, 
+		IC_LABEL, IC_FUNCTION, IC_ADDRESS, 
+		IC_GOTO, IC_IFGOTO, IC_RETURN, 
+		IC_DEC, IC_ARG, IC_CALL, IC_PARAM, 
+		IC_READ, IC_WRITE
 		// may still need sth
 	}kind;
 	union{
@@ -41,6 +45,15 @@ struct InterCode{
 	InterCode prev;
 	InterCode next;
 };
+
+InterCode codeHead=NULL;
+InterCode codeTail=NULL;
+
+bool InsertCode(InterCode node);
+bool DeleteCode(InterCode node);
+void PrintOperand(Operand op, FILE* fp);// fp should comes from main.c
+void PrintCode(FILE* fp);// fp should comes from main.c
+
 
 // May be we should finish intercode gen at semantic.c instead of using new func
 // InterCode translate_Exp(treeNode* root);

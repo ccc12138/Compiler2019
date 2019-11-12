@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "syntaxTree.h"
 #include <assert.h>
-#include<stdbool.h>
+#include <stdbool.h>
 
 #ifndef _SEMANTIC_H_
 #define _SEMANTIC_H_
