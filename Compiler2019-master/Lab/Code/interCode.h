@@ -50,7 +50,7 @@ struct Operand_{
 		// may still need sth
 	}kind;
 	union{
-		int var_no;
+		unsigned var_no;
 		int value;
 		char* name;
 		Operand addr;

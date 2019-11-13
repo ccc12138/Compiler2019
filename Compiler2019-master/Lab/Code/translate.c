@@ -2,6 +2,56 @@
 
 // DEBUG macro is defined in syntaxTree.h
 
+/* some useful functions */
+Operand look_Up(char *name, int t){
+	// TO IMPLEMENT
+	Operand tableOp=(Operand)malloc(sizeof(struct Operand_));
+	memset(tableOp,0,sizeof(struct Operand_));
+	struct item *tableItem;
+	tableItem=find_item(name,t);
+	switch(tableItem->var_type->kind){
+		case BASIC:
+			if(tableItem->var_type->u.basic==INT){
+				tableOp->kind=OP_VARIABLE;
+				tableOp->u.var_no=varNum;
+				++varNum;
+			}
+#ifdef DEBUG
+			else{// FLOAT is impossible
+				assert(0);
+			}
+#endif // DEBUG
+			break;
+		case ARRAY:
+			break;
+		case STRUCTURE:
+			break;
+		case FUNCTION:
+			break;
+		default:
+			assert(0);
+	}
+	return tableOp;
+}
+
+Operand new_Temp(){
+	Operand tempOp=(Operand)malloc(sizeof(struct Operand_));
+	memset(tempOp,0,sizeof(struct Operand_));
+	tempOp->kind=OP_TEMP_VAR;
+	tempOp->u.var_no=tempVarNum;
+	++tempVarNum;
+	return tempOp;
+}
+
+Operand new_Label(){
+	Operand tempOp=(Operand)malloc(sizeof(struct Operand_));
+	memset(tempOp,0,sizeof(struct Operand_));
+	tempOp->kind=OP_LABEL;
+	tempOp->u.var_no=labelNum;
+	++labelNum;
+	return tempOp;
+}
+
 /* High level Definitions */
 void translate_Program(treeNode* root){
 	switch(root->branch){
@@ -38,6 +88,7 @@ void translate_ExtDefList(treeNode* root){
 }
 
 void translate_ExtDef(treeNode* root){
+	// TO IMPLEMENT
 	switch(root->branch){
 		case 1:
 			translate_Specifier(root->childp);
@@ -122,9 +173,22 @@ void translate_Dec(treeNode* root){
 }
 
 /* Expressions */
-void translate_Exp(treeNode* root){
+void translate_Exp(treeNode* root, Operand place){
+	// TO IMPLEMENT
 	switch(root->branch){
-		case 1:
+		case 1://ASSIGNOP
+#ifdef DEBUG
+			assert(place!=NULL);
+#endif
+			// left Operand
+			Operand leftOp;
+			// right Operand
+			Operand rightOp=(Operand)malloc(sizeof(struct Operand_));
+			memset(rightOp,0,sizeof(struct Operand_));
+			rightOp->u.var_no=tempVarNum;
+			rightOp->kind=OP_TEMP_VAR;
+			++tempVarNum;
+			
 
 			break;
 		case 2:
@@ -144,10 +208,21 @@ void translate_Exp(treeNode* root){
 		case 9:
 			break;
 		case 10:
+#ifdef DEBUG
+			assert(place!=NULL);
+#endif
+			place->kind=OP_VARIABLE;
+			place->u.name=root->childp->data.strd;
 			break;
 		case 11:
+#ifdef DEBUG
+			assert(place!=NULL);
+#endif
+			place->kind=OP_CONSTANT;
+			place->u.value=root->childp->data.intd;
 			break;
 		case 12:
+			assert(0);// P63 Assume 1
 			break;
 		default:
 			assert(0);

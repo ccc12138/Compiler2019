@@ -111,7 +111,7 @@ void PrintOperand(Operand op, FILE* fp){
 	char tempStr[STRLEN];
 	switch(op->kind){
 		case OP_VARIABLE://x
-			fprintf(fp,"%s ",op->u.name);
+			fprintf(fp,"v%s ",op->u.var_no);
 			break;
 		case OP_TEMP_VAR://t
 			fprintf(fp,"t%d ",op->u.var_no);

@@ -1,6 +1,5 @@
 /* Ref P25 */
 #include <stdio.h>
-#include "semantic.h"
 #include "translate.h"
 extern FILE* yyin;
 int lexErrNum;
@@ -8,9 +7,9 @@ int synErrNum;
 int semErrNum;
 InterCode codeHead;
 InterCode codeTail;
-int tempVarNum;
-int labelNum;
-int varNum;
+unsigned varNum;
+unsigned tempVarNum;
+unsigned labelNum;
 int yylex();
 int yyrestart(FILE *);
 void yyset_lineno(int);
@@ -30,9 +29,9 @@ int main(int argc, char** argv){
     semErrNum=0;
     codeHead=NULL;
     codeTail=NULL;
-    tempVarNum=0;
-    labelNum=0;
-    varNum=0;
+    varNum=1;
+    tempVarNum=1;
+    labelNum=1;
     yyrestart(f);
     yyparse();
     if(lexErrNum==0&&synErrNum==0){

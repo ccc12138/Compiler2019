@@ -3,6 +3,19 @@
 
 #include "syntaxTree.h"
 #include "interCode.h"
+#include "semantic.h"
+
+#define TABLE_SIZE 0x3fff
+
+extern unsigned varNum;
+extern unsigned tempVarNum;
+extern unsigned labelNum;
+extern struct item* table[TABLE_SIZE];
+
+// some useful functions
+Operand look_Up(char *name, int t);
+Operand new_Temp();
+Operand new_Label();
 
 /* High level Definitions */
 void translate_Program(treeNode* root);
@@ -32,7 +45,7 @@ void translate_DecList(treeNode* root);
 void translate_Dec(treeNode* root);
 
 /* Expressions */
-void translate_Exp(treeNode* root);
+void translate_Exp(treeNode* root,Operand place);
 void translate_Args(treeNode* root);
 
 #endif
