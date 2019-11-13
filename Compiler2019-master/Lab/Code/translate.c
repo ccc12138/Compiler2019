@@ -3,12 +3,21 @@
 // DEBUG macro is defined in syntaxTree.h
 
 /* some useful functions */
-Operand look_Up(char *name, int t){
+Operand look_Up(char *name){
 	// TO IMPLEMENT
+	unsigned int index = hash_pjw(name);
+	struct item *tableItem = table[index];
+	while(tableItem!=NULL){
+		if(strcmp(tableItem->var_name,name)==0){
+			break;
+		}
+		tableItem=tableItem->next;
+	}
+#ifdef DEBUG
+	assert(tableItem!=NULL);
+#endif
 	Operand tableOp=(Operand)malloc(sizeof(struct Operand_));
 	memset(tableOp,0,sizeof(struct Operand_));
-	struct item *tableItem;
-	tableItem=find_item(name,t);
 	switch(tableItem->var_type->kind){
 		case BASIC:
 			if(tableItem->var_type->u.basic==INT){
@@ -181,14 +190,9 @@ void translate_Exp(treeNode* root, Operand place){
 			assert(place!=NULL);
 #endif
 			// left Operand
-			Operand leftOp;
+			// Operand leftOp=look_Up(Exp1.id)
 			// right Operand
-			Operand rightOp=(Operand)malloc(sizeof(struct Operand_));
-			memset(rightOp,0,sizeof(struct Operand_));
-			rightOp->u.var_no=tempVarNum;
-			rightOp->kind=OP_TEMP_VAR;
-			++tempVarNum;
-			
+			Operand rightOp=new_Temp();
 
 			break;
 		case 2:

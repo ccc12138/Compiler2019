@@ -13,7 +13,7 @@ extern unsigned labelNum;
 extern struct item* table[TABLE_SIZE];
 
 // some useful functions
-Operand look_Up(char *name, int t);
+Operand look_Up(char *name);
 Operand new_Temp();
 Operand new_Label();
 
