@@ -1,5 +1,7 @@
 #pragma once
 
+#define DEBUG
+
 #include <stdio.h>
 #include <stdlib.h>//malloc
 #include <stdarg.h>

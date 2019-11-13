@@ -85,6 +85,7 @@ bool InsertCode(InterCode node);
 bool DeleteCode(InterCode node);
 void PrintCode(FILE* fp);// fp should comes from main.c
 void PrintOperand(Operand op, FILE* fp);// fp should comes from PrintCode
+void OptimizeCode();
 
 // May be we should finish intercode gen at semantic.c instead of using new func
 // InterCode translate_Exp(treeNode* root);

@@ -431,6 +431,7 @@ Function FunDec(treeNode* root, Type fun_type, int isDef){
 	// ID RP VarList RP
 	if(cnEq(4)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 	&&strcmp(thic(),"VarList")==0&&strcmp(fouc(),"RP")==0){
+		root->branch=1;
 		func->para=VarList(root->childp->right->right,isDef);
 		//printf("func->para\n");
 		add_funpara(func->para);
@@ -438,6 +439,7 @@ Function FunDec(treeNode* root, Type fun_type, int isDef){
 	}
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 	&&strcmp(thic(),"RP")==0){
+		root->branch=2;
 		return func;
 		// func->para=NULL;
 		// struct item* add_new = create_new();
@@ -508,6 +510,7 @@ void CompSt(treeNode* root, Type func_type){
 	if(cnEq(4)&&strcmp(firc(),"LC")==0&&(strcmp(secc(),"DefList")==0||strcmp(secc(),"EPSILON")==0)
 		&&(strcmp(thic(),"StmtList")==0||strcmp(thic(),"EPSILON")==0)
 		&&strcmp(fouc(),"RC")==0){
+		root->branch=1;
 		// printf("CompSt branch1\n");
 		DefList(root->childp->right,0);//0 means it isn't a struct
 		// printf("flag3\n");
@@ -524,12 +527,14 @@ void StmtList(treeNode* root, Type func_type){
 	// Stmt StmtList
 	if(cnEq(2)&&strcmp(firc(),"Stmt")==0
 		&&(strcmp(secc(),"StmtList")==0||strcmp(secc(),"EPSILON")==0)){
+		root->branch=1;
 		// printf("StmtList branch1\n");
 		Stmt(root->childp, func_type);
 		StmtList(root->childp->right, func_type);
 	}
 	// epsilon
 	else if(cnEq(0)){
+		root->branch=2;
 		return;
 	}
 	else{
@@ -542,17 +547,20 @@ void Stmt(treeNode* root, Type func_type){
 	// printf("Stmt\n");
 	// Exp SEMI
 	if(cnEq(2)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"SEMI")==0){
+		root->branch=1;
 		// printf("Stmt branch1\n");
 		Exp(root->childp);
 	}
 	// CompSt
 	else if(cnEq(1)&&strcmp(firc(),"CompSt")==0){
+		root->branch=2;
 		// printf("Stmt branch2\n");
 		CompSt(root->childp,func_type);
 	}
 	// RETURN Exp SEMI
 	else if(cnEq(3)&&strcmp(firc(),"RETURN")==0&&strcmp(secc(),"Exp")==0
 		&&strcmp(thic(),"SEMI")==0){
+		root->branch=3;
 		// printf("Stmt branch3\n");
 		Type ret_type=Exp(root->childp->right);
 		// Begin: need SYMTAB here and check RETURN errors
@@ -571,6 +579,7 @@ void Stmt(treeNode* root, Type func_type){
 	else if(cnEq(5)&&strcmp(firc(),"IF")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"Exp")==0&&strcmp(fouc(),"RP")==0
 		&&strcmp(fifc(),"Stmt")==0){
+		root->branch=4;
 		// printf("Stmt branch4\n");
 		Exp(root->childp->right->right);
 		Stmt(root->childp->right->right->right->right, func_type);
@@ -580,6 +589,7 @@ void Stmt(treeNode* root, Type func_type){
 		&&strcmp(thic(),"Exp")==0&&strcmp(fouc(),"RP")==0
 		&&strcmp(fifc(),"Stmt")==0&&strcmp(sixc(),"ELSE")==0
 		&&strcmp(sevc(),"Stmt")==0){
+		root->branch=5;
 		// printf("Stmt branch5\n");
 		Exp(root->childp->right->right);
 		Stmt(root->childp->right->right->right->right, func_type);
@@ -589,6 +599,7 @@ void Stmt(treeNode* root, Type func_type){
 	else if(cnEq(5)&&strcmp(firc(),"WHILE")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"Exp")==0&&strcmp(fouc(),"RP")==0
 		&&strcmp(fifc(),"Stmt")==0){
+		root->branch=6;
 		// printf("Stmt branch6\n");
 		Exp(root->childp->right->right);
 		Stmt(root->childp->right->right->right->right, func_type);
@@ -695,6 +706,7 @@ Type Exp(treeNode* root){
 	if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(thic(),"Exp")==0){
 		// Exp ASSIGNOP Exp
 		if(strcmp(secc(),"ASSIGNOP")==0){
+			root->branch=1;
 			Type ltype=Exp(root->childp);
 			if(ltype!=NULL&&ltype->value==R_VALUE){
 				// printf("%d\n",ltype->value);
@@ -722,6 +734,7 @@ Type Exp(treeNode* root){
 		}
 		else if(strcmp(secc(),"AND")==0||strcmp(secc(),"OR")==0
 			||strcmp(secc(),"RELOP")==0){
+			root->branch=2;
 			Type ltype=Exp(root->childp);
 			Type rtype=Exp(root->childp->right->right);
 			if(ltype==NULL||rtype==NULL){
@@ -738,6 +751,7 @@ Type Exp(treeNode* root){
 		}
 		else if(strcmp(secc(),"PLUS")==0||strcmp(secc(),"MINUS")==0
 			||strcmp(secc(),"STAR")==0||strcmp(secc(),"DIV")==0){
+			root->branch=3;
 			Type ltype=Exp(root->childp);
 			Type rtype=Exp(root->childp->right->right);
 			if(ltype==NULL||rtype==NULL){
@@ -758,18 +772,36 @@ Type Exp(treeNode* root){
 	// LP Exp RP
 	else if(cnEq(3)&&strcmp(firc(),"LP")==0&&strcmp(secc(),"Exp")==0
 		&&strcmp(thic(),"RP")==0){
+		root->branch=4;
 		// printf("in here\n");
 		return Exp(root->childp->right);
 	}
 	// <sth.> Exp
 	else if(cnEq(2)&&strcmp(secc(),"Exp")==0){
-		// MINUS/NOT Exp
-		if(strcmp(firc(),"MINUS")==0||strcmp(firc(),"NOT")==0){
+		// MINUS Exp
+		if(strcmp(firc(),"MINUS")==0){
+			root->branch=5;
 			Type exp_type=Exp(root->childp->right);
 			if(exp_type==NULL){
 				return NULL;
 			}
 			else if(exp_type->kind!=BASIC){
+				printf("Error type 7 at Line %d: Operands type mismatched\n", root->childp->lineno);
+				++semErrNum;
+				return NULL;
+			}
+			exp_type->value=R_VALUE;
+			return exp_type;
+		}
+		// NOT Exp
+		else if(strcmp(firc(),"NOT")==0){
+			root->branch=2;
+			Type exp_type=Exp(root->childp->right);
+			if(exp_type==NULL){
+				return NULL;
+			}
+			else if(exp_type->kind!=BASIC
+				||(exp_type->kind==BASIC&&exp_type->u.basic!=INT)){
 				printf("Error type 7 at Line %d: Operands type mismatched\n", root->childp->lineno);
 				++semErrNum;
 				return NULL;
@@ -784,6 +816,7 @@ Type Exp(treeNode* root){
 	// ID LP Args RP
 	else if(cnEq(4)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"Args")==0&&strcmp(fouc(),"RP")==0){
+		root->branch=6;
 		// TO IMPLEMENT: ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
 		// THIS Exp IS R_VALUE
 		// Begin:
@@ -836,6 +869,7 @@ Type Exp(treeNode* root){
 	// ID LP RP
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0
 		&&strcmp(thic(),"RP")==0){
+		root->branch=7;
 		// TO IMPLEMENT: ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
 		// THIS Exp IS R_VALUE
 		// Begin:
@@ -883,6 +917,7 @@ Type Exp(treeNode* root){
 	// Exp LB Exp RB
 	else if(cnEq(4)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"LB")==0
 		&&strcmp(thic(),"Exp")==0&&strcmp(fouc(),"RB")==0){
+		root->branch=8;
 		Type arr_type=Exp(root->childp);
 		Type arr_opr=Exp(root->childp->right->right);
 		if(arr_type==NULL||arr_opr==NULL){
@@ -919,6 +954,7 @@ Type Exp(treeNode* root){
 	// Exp DOT ID
 	else if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"DOT")==0
 		&&strcmp(thic(),"ID")==0){
+		root->branch=9;
 		// TO IMPLEMENT: Exp CHECK ERROR, ID CHECK ERROR TYPE 1, FUNCTION CHECK ERROR
 		// THIS Exp IS ______? LR_VALUE
 		// Begin:
@@ -959,6 +995,7 @@ Type Exp(treeNode* root){
 	else if(cnEq(1)){
 		// ID
 		if(strcmp(firc(),"ID")==0){
+			root->branch=10;
 			// TO IMPLEMENT: ID CHECK ERROR TYPE 1
 			// THIS IS LR_VALUE
 			// Begin:
@@ -984,10 +1021,12 @@ Type Exp(treeNode* root){
 		}
 		// INT
 		else if(strcmp(firc(),"INT")==0){
+			root->branch=11;
 			MACRO_RETURN(INT);
 		}
 		// FLOAT
 		else if(strcmp(firc(),"FLOAT")==0){
+			root->branch=12;
 			MACRO_RETURN(FLOAT);
 		}
 		else{
@@ -1045,10 +1084,12 @@ bool Args(treeNode* root, FieldList para){
 		return false;
 	}
 	else if(cnEq(1)&&strcmp(firc(),"Exp")==0){
+		root->branch=1;
 		return true;
 	}
 	else if(cnEq(3)&&strcmp(firc(),"Exp")==0&&strcmp(secc(),"COMMA")==0
 		&&strcmp(thic(),"Args")==0){
+		root->branch=2;
 		return Args(root->childp->right->right, para->tail);
 	}
 	else{

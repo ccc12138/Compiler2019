@@ -6,6 +6,11 @@ extern FILE* yyin;
 int lexErrNum;
 int synErrNum;
 int semErrNum;
+InterCode codeHead;
+InterCode codeTail;
+int tempVarNum;
+int labelNum;
+int varNum;
 int yylex();
 int yyrestart(FILE *);
 void yyset_lineno(int);
@@ -23,6 +28,11 @@ int main(int argc, char** argv){
     lexErrNum=0;
     synErrNum=0;
     semErrNum=0;
+    codeHead=NULL;
+    codeTail=NULL;
+    tempVarNum=0;
+    labelNum=0;
+    varNum=0;
     yyrestart(f);
     yyparse();
     if(lexErrNum==0&&synErrNum==0){
@@ -41,9 +51,18 @@ int main(int argc, char** argv){
                 perror(argv[2]);
                 return 1;
             }
-            printf("fp exist!\n");
+#ifdef DEBUG
+            printf("Start Translate Program...\n");
+#endif
             translate_Program(root);
-            printf("translate succ!\n");
+#ifdef DEBUG
+            printf("Translate succ!\n");
+            printf("Start Optimize Code...\n");
+#endif
+            OptimizeCode();
+#ifdef DEBUG
+            printf("Optimize succ!\n");
+#endif
             PrintCode(fp);
             fclose(fp);
         }

@@ -1,7 +1,7 @@
 #include "interCode.h"
 
-InterCode codeHead=NULL;
-InterCode codeTail=NULL;
+extern InterCode codeHead;
+extern InterCode codeTail;
 
 bool InsertCode(InterCode node){
 	assert(node!=NULL);
@@ -136,5 +136,10 @@ void PrintOperand(Operand op, FILE* fp){
 		default://impossible to reach here
 			assert(0);
 	}
+	return;
+}
+
+void OptimizeCode(){
+	// TO IMPLEMENT
 	return;
 }
