@@ -55,6 +55,40 @@ void judge_linked_list(){
 
 // High Level Definitions
 void Program(treeNode* root){
+	/* add read and write function for Lab 3 */
+	struct item* read = create_new();
+	read->var_type->kind=FUNCTION;
+	read->var_type->value = R_VALUE;
+	read->var_name="read";
+	read->var_type->u.function=(Function)malloc(sizeof(struct Function_));
+	read->var_type->u.function->name = read->var_name;
+	read->var_type->u.function->isDef = 1;
+	read->var_type->u.function->para_num = 0;
+	read->var_type->u.function->para=NULL;
+	read->var_type->u.function->fun_type=(Type)malloc(sizeof(struct Type_));
+	read->var_type->u.function->fun_type->kind=BASIC;
+	read->var_type->u.function->fun_type->u.basic=INT;
+	read->var_type->u.function->fun_type->value=R_VALUE;
+	add_item(read);
+	struct item* write = create_new();
+	write->var_type->kind=FUNCTION;
+	write->var_type->value = R_VALUE;
+	write->var_name="write";
+	write->var_type->u.function=(Function)malloc(sizeof(struct Function_));
+	write->var_type->u.function->name = write->var_name;
+	write->var_type->u.function->isDef = 1;
+	write->var_type->u.function->para_num = 1;
+	write->var_type->u.function->para=(FieldList)malloc(sizeof(struct FieldList_));
+	write->var_type->u.function->para->name=NULL;
+	write->var_type->u.function->para->type=(Type)malloc(sizeof(struct Type_));
+	write->var_type->u.function->para->type->kind=BASIC;
+	write->var_type->u.function->para->type->u.basic=INT;
+	write->var_type->u.function->para->tail=NULL;
+	write->var_type->u.function->fun_type=(Type)malloc(sizeof(struct Type_));
+	write->var_type->u.function->fun_type->kind=BASIC;
+	write->var_type->u.function->fun_type->u.basic=INT;
+	write->var_type->u.function->fun_type->value=R_VALUE;
+	add_item(write);
 	// printf("Program\n");
 	// ExtDefList
 	if(cnEq(1)&&strcmp(firc(),"ExtDefList")==0){
@@ -205,7 +239,7 @@ void ExtDecList(treeNode* root, Type var_type){
 		// printf("ExtDecList branch1\n");
 		FieldList p = VarDec(root->childp,var_type,0);
 		while ( p!=NULL ){
-			struct item * a =(struct item*)malloc(sizeof(struct item));
+			struct item * a = create_new();
 			a->var_type = p->type;
 			a->var_name = p->name;
 			p = p->tail;
@@ -219,7 +253,7 @@ void ExtDecList(treeNode* root, Type var_type){
 		// printf("ExtDecList branch2\n");
 		FieldList p = VarDec(root->childp,var_type,0);
 		while ( p!=NULL ){
-			struct item * a =(struct item*)malloc(sizeof(struct item));
+			struct item * a = create_new();
 			a->var_type = p->type;
 			a->var_name = p->name;
 			p = p->tail;
@@ -404,7 +438,7 @@ Type MultiArray(treeNode *root,int i,Type b){
 void add_funpara(FieldList head){
 	FieldList p = head;
 	while(p!=NULL){
-		struct item* a = (struct item *)malloc(sizeof(struct item));
+		struct item* a = create_new();
 		a->var_type = p->type;
 		a->var_name = p->name;
 		//printf("%s-----------------------------\n",p->name);

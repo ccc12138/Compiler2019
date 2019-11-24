@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "syntaxTree.h"
+#include "interCode.h"
 #include <assert.h>
 #include <stdbool.h>
 
@@ -78,6 +79,7 @@ struct item{
 	struct item* next; // deal with collision
 	Type var_type;
 	char* var_name;
+	Operand op;
 	// some data
 };
 

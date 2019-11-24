@@ -8,8 +8,8 @@ bool InsertCode(InterCode node){
 	if(codeHead==NULL&&codeTail==NULL){
 		codeHead=node;
 		codeTail=node;
-		node->next=NULL;
-		node->prev=NULL;
+		node->next=node;
+		node->prev=node;
 	}
 	else{
 		node->prev=codeTail;
@@ -20,6 +20,23 @@ bool InsertCode(InterCode node){
 	}
 	return true;
 }
+
+bool InsertCode_func(char * func_name){
+	InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+	newcode -> kind = IC_FUNCTION;
+	newcode -> u.sinOp.op = malloc ( sizeof ( struct Operand_ ) );
+	newcode -> u.sinOp.op -> kind = OP_FUNCTION;
+	newcode -> u.sinOp.op -> u.name = func_name;
+	return InsertCode(newcode);
+}
+
+bool InsertCode_label(Operand label){
+	InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+	newcode -> kind = IC_LABEL;
+	newcode -> u.sinOp.op = label;
+	return InsertCode(newcode);
+}
+
 
 bool DeleteCode(InterCode node){
 	assert(node!=NULL&&codeHead!=NULL&&codeTail!=NULL);
@@ -101,6 +118,7 @@ void PrintCode(FILE *fp){
 			default:// impossible to reach here
 				assert(0);
 		}
+		fputs("\n",fp);
 		ic=ic->next;
 	}while(ic!=codeHead);
 	return;
@@ -111,7 +129,7 @@ void PrintOperand(Operand op, FILE* fp){
 	char tempStr[STRLEN];
 	switch(op->kind){
 		case OP_VARIABLE://x
-			fprintf(fp,"v%s ",op->u.var_no);
+			fprintf(fp,"v%d ",op->u.var_no);
 			break;
 		case OP_TEMP_VAR://t
 			fprintf(fp,"t%d ",op->u.var_no);
@@ -121,11 +139,11 @@ void PrintOperand(Operand op, FILE* fp){
 			break;
 		case OP_VAR_ADDR://*
 			assert(op->u.addr!=NULL);
-			fprintf(fp,"*%s ",op->u.addr->u.name);
+			fprintf(fp,"*v%d ",op->u.addr->u.var_no);
 			break;
 		case OP_TEMP_VAR_ADDR://*t
 			assert(op->u.addr!=NULL);
-			fprintf(fp,"*t%s ",op->u.addr->u.var_no);
+			fprintf(fp,"*t%d ",op->u.addr->u.var_no);
 			break;
 		case OP_LABEL://label x
 			fprintf(fp,"label%d ",op->u.var_no);
@@ -133,13 +151,118 @@ void PrintOperand(Operand op, FILE* fp){
 		case OP_FUNCTION://x
 			fprintf(fp,"%s ",op->u.name);
 			break;
+		case OP_GET_ADDR:
+			fprintf(fp,"&v%d ",op->u.var_no);
+			break;
 		default://impossible to reach here
 			assert(0);
 	}
 	return;
 }
 
+void PrintfCode(){
+	assert(codeHead!=NULL&&codeTail!=NULL);
+	InterCode ic=codeHead;
+	do{
+		switch(ic->kind){
+			case IC_LABEL://1
+				PRINTF_SINOP("LABEL ");
+				printf(": ");
+				break;//2
+			case IC_FUNCTION:
+				PRINTF_SINOP("FUNCTION ");
+				printf(": ");
+				break;
+			case IC_ASSIGN://3,8,9,10
+				PRINTF_ASSIGN(":= ");
+				break;
+			case IC_ADD://4
+				PRINTF_BINOP("+ ");
+				break;
+			case IC_SUB://5
+				PRINTF_BINOP("- ");
+				break;
+			case IC_MUL://6
+				PRINTF_BINOP("* ");
+				break;
+			case IC_DIV://7
+				PRINTF_BINOP("/ ");
+				break;
+			case IC_GOTO://11
+				PRINTF_SINOP("GOTO ");
+				break;
+			case IC_IFGOTO://12
+				PRINTF_TRIOP();
+				break;
+			case IC_RETURN://13
+				PRINTF_SINOP("RETURN ");
+				break;
+			case IC_DEC://14
+				PRINTF_DEC();
+				break;
+			case IC_ARG://15
+				PRINTF_SINOP("ARG ");
+				break;
+			case IC_CALL://16
+				PRINTF_ASSIGN(":= CALL ");
+				break;
+			case IC_PARAM://17
+				PRINTF_SINOP("PARAM ");
+				break;
+			case IC_READ://18
+				PRINTF_SINOP("READ ");
+				break;
+			case IC_WRITE://19
+				PRINTF_SINOP("WRITE ");
+				break;
+			default:// impossible to reach here
+				assert(0);
+		}
+		printf("\n");
+		ic=ic->next;
+	}while(ic!=codeHead);
+	return;
+}
+
+void PrintfOperand(Operand op){
+	assert(op!=NULL);
+	char tempStr[STRLEN];
+	switch(op->kind){
+		case OP_VARIABLE://x
+			printf("v%d ",op->u.var_no);
+			break;
+		case OP_TEMP_VAR://t
+			printf("t%d ",op->u.var_no);
+			break;
+		case OP_CONSTANT://#
+			printf("#%d ",op->u.value);
+			break;
+		case OP_VAR_ADDR://*
+			assert(op->u.addr!=NULL);
+			printf("*v%d ",op->u.addr->u.var_no);
+			break;
+		case OP_TEMP_VAR_ADDR://*t
+			assert(op->u.addr!=NULL);
+			printf("*t%d ",op->u.addr->u.var_no);
+			break;
+		case OP_LABEL://label x
+			printf("label%d ",op->u.var_no);
+			break;
+		case OP_FUNCTION://x
+			printf("%s ",op->u.name);
+			break;
+		case OP_GET_ADDR:
+			printf("&v%d ",op->u.var_no);
+			break;
+		default://impossible to reach here
+			assert(0);
+	}
+	return;
+}
+
+
 void OptimizeCode(){
+	
 	// TO IMPLEMENT
 	return;
 }

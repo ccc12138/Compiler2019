@@ -71,6 +71,7 @@ ID			[a-zA-Z_][a-zA-Z0-9_]*
 				//PrintInfol("ASSIGNOP",yylloc.first_line);
 				return ASSIGNOP;		}
 {RELOP}		{	yylval.type_node=InitNode("RELOP",yylloc.first_line);
+				sscanf(yytext,"%s",&yylval.type_node->data.strd);
 				//PrintInfol("RELOP",yylloc.first_line);
 				return RELOP;			}
 {PLUS}		{	yylval.type_node=InitNode("PLUS",yylloc.first_line);

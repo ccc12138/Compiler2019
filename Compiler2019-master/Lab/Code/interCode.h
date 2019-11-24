@@ -14,6 +14,7 @@
 	fputs(assign_str,fp);\
 	PrintOperand(ic->u.assign.right,fp);
 
+
 #define PRINT_BINOP(op_str)\
 	PrintOperand(ic->u.binOp.result,fp);\
 	fputs(":= ",fp);\
@@ -39,6 +40,38 @@
 	PrintOperand(ic->u.dec.op,fp);\
 	fprintf(fp,"%d",ic->u.dec.size);
 
+
+#define PRINTF_ASSIGN(assign_str)\
+	PrintfOperand(ic->u.assign.left);\
+	printf("%s",assign_str);\
+	PrintfOperand(ic->u.assign.right);
+
+
+#define PRINTF_BINOP(op_str)\
+	PrintfOperand(ic->u.binOp.result);\
+	printf(":= ");\
+	PrintfOperand(ic->u.binOp.op1);\
+	printf("%s",op_str);\
+	PrintfOperand(ic->u.binOp.op2);
+
+#define PRINTF_SINOP(kind_str)\
+	printf("%s",kind_str);\
+	PrintfOperand(ic->u.sinOp.op);
+
+#define PRINTF_TRIOP()\
+	printf("IF ");\
+	PrintfOperand(ic->u.triOp.op1);\
+	printf("%s",ic->u.triOp.relop);\
+	printf(" ");\
+	PrintfOperand(ic->u.triOp.op2);\
+	printf("GOTO ");\
+	PrintfOperand(ic->u.triOp.label);
+
+#define PRINTF_DEC()\
+	printf("DEC ");\
+	PrintfOperand(ic->u.dec.op);\
+	printf("%d",ic->u.dec.size);
+
 typedef struct Operand_* Operand;
 typedef struct InterCode_* InterCode;
 
@@ -46,7 +79,7 @@ struct Operand_{
 	enum{
 		OP_VARIABLE, OP_TEMP_VAR, OP_CONSTANT, 
 		OP_VAR_ADDR, OP_TEMP_VAR_ADDR,
-		OP_LABEL, OP_FUNCTION
+		OP_LABEL, OP_FUNCTION, OP_GET_ADDR
 		// may still need sth
 	}kind;
 	union{
@@ -82,9 +115,13 @@ struct InterCode_{
 };
 
 bool InsertCode(InterCode node);
+bool InsertCode_func(char * func_name);
+bool InsertCode_label(Operand label);
 bool DeleteCode(InterCode node);
 void PrintCode(FILE* fp);// fp should comes from main.c
 void PrintOperand(Operand op, FILE* fp);// fp should comes from PrintCode
+void PrintfCode();
+void PrintfOperand(Operand op);
 void OptimizeCode();
 
 // May be we should finish intercode gen at semantic.c instead of using new func

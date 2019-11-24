@@ -18,6 +18,7 @@ struct item* create_new(){
 	struct item* add_new = (struct item*)malloc(sizeof(struct item));
 	add_new -> var_type = (Type)malloc(sizeof(struct Type_));
 	add_new -> var_name = (char*)malloc(sizeof(char)*32);
+	add_new -> op = NULL;
 	return add_new;
 }
 
