@@ -65,9 +65,9 @@ int main(int argc, char** argv){
             PrintCode(fp);
             fclose(fp);
         }
-        else{
-            printf("semErrNum=%d\n",semErrNum);
-        }
+        // else{
+        //     printf("semErrNum=%d\n",semErrNum);
+        // }
     }
     fclose(f);
     return 0;

@@ -26,10 +26,6 @@ extern unsigned tempVarNum;
 extern unsigned labelNum;
 extern struct item* table[TABLE_SIZE];
 
-
-
-
-
 // some useful functions
 Operand look_Up(char *name);
 Operand new_Temp();

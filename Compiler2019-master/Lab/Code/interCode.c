@@ -2,6 +2,7 @@
 
 extern InterCode codeHead;
 extern InterCode codeTail;
+extern unsigned labelNum;
 
 bool InsertCode(InterCode node){
 	assert(node!=NULL);
@@ -44,20 +45,20 @@ bool DeleteCode(InterCode node){
 		codeHead=node->next;
 		codeHead->prev=codeTail;
 		codeTail->next=codeHead;
-		printf("node=codeHead to del!\n");
+		// printf("node=codeHead to del!\n");
 		free(node);
 	}
 	else if(node==codeTail){
 		codeTail=node->prev;
 		codeTail->next=codeHead;
 		codeHead->prev=codeTail;
-		printf("node=codeTail to del!\n");
+		// printf("node=codeTail to del!\n");
 		free(node);
 	}
 	else{
 		node->prev->next=node->next;
 		node->next->prev=node->prev;
-		printf("inner node to del!\n");
+		// printf("inner node to del!\n");
 		free(node);
 	}
 	return true;
@@ -266,8 +267,8 @@ void PrintfOperand(Operand op){
 
 void OptimizeCode(){
 	// TO IMPLEMENT
-	assert(OptimizeGoto());
-	assert(OptimizeLabel());
+	OptimizeGoto();
+	OptimizeLabel();
 	return;
 }
 
@@ -292,35 +293,37 @@ bool OptimizeGoto(){
 #endif
 				continue;
 			}
-			if(c2->kind==IC_GOTO&&c3->kind==IC_LABEL&&c1->u.triOp.label==c3->u.sinOp.op){
+			if(c2->kind==IC_GOTO&&c3->kind==IC_LABEL&&c2->u.sinOp.op==c3->u.sinOp.op){
+				DeleteCode(c2);
+			}
+			else if(c2->kind==IC_GOTO&&c3->kind==IC_LABEL&&c1->u.triOp.label==c3->u.sinOp.op){
 				c1->u.triOp.label=c2->u.sinOp.op;
 				if(strcmp(c1->u.triOp.relop,"==")==0){
 					UPDATE_RELOP("!=")
-					printf("succ find one == !");
+					// printf("succ find one == !\n");
 				}
 				else if(strcmp(c1->u.triOp.relop,"!=")==0){
 					UPDATE_RELOP("==")
-					printf("succ find one != !");
+					// printf("succ find one != !\n");
 				}
 				else if(strcmp(c1->u.triOp.relop,">")==0){
 					UPDATE_RELOP("<=")
-					printf("succ find one > !");
+					// printf("succ find one > !\n");
 				}
 				else if(strcmp(c1->u.triOp.relop,">=")==0){
 					UPDATE_RELOP("<")
-					printf("succ find one >= !");
+					// printf("succ find one >= !\n");
 				}
 				else if(strcmp(c1->u.triOp.relop,"<")==0){
 					UPDATE_RELOP(">=")
-					printf("succ find one < !");
+					// printf("succ find one < !\n");
 				}
 				else if(strcmp(c1->u.triOp.relop,"<=")==0){
 					UPDATE_RELOP(">");
-					printf("succ find one <= !");
+					// printf("succ find one <= !\n");
 				}
-				printf("\nEnter deletecode!\n");
+				// printf("\nEnter deletecode!\n");
 				DeleteCode(c2);
-				DeleteCode(c3);
 			}
 		}
 		else if(c->kind==IC_GOTO)
@@ -336,7 +339,6 @@ bool OptimizeGoto(){
 			}
 			if(c2->kind==IC_LABEL&&c1->u.sinOp.op==c2->u.sinOp.op){
 				DeleteCode(c1);
-				DeleteCode(c2);
 			}
 		}
 		c=c->next;
@@ -345,12 +347,39 @@ bool OptimizeGoto(){
 }
 
 bool OptimizeLabel(){
-	// InterCode c=codeHead;
-	// do{
-	// 	if(c.kind==IC_GOTO){
-	// 		struct 
-	// 	}
-	// 	c=c->next;
-	// }while(c!=codeHead);
+	// use bitmap to eliminate extra labels
+	unsigned mapSize=sizeof(bool)*labelNum;
+	bool *gotoMap=(bool*)malloc(mapSize);
+	bool *labelMap=(bool*)malloc(mapSize);
+	memset(gotoMap,false,mapSize);
+	memset(labelMap,false,mapSize);
+	InterCode ic=codeHead;
+	do{
+		if(ic->kind==IC_IFGOTO){
+			gotoMap[ic->u.triOp.label->u.var_no]=true;
+		}
+		else if(ic->kind==IC_GOTO){
+			gotoMap[ic->u.sinOp.op->u.var_no]=true;
+		}
+		else if(ic->kind==IC_LABEL){
+			labelMap[ic->u.sinOp.op->u.var_no]=true;
+		}
+		ic=ic->next;
+	}while(ic!=codeHead);
+	ic=codeHead;
+	do{
+		if(ic->kind==IC_LABEL){
+			unsigned index=ic->u.sinOp.op->u.var_no;
+			if(labelMap[index]==true&&gotoMap[index]==false){
+				InterCode tempic=ic;
+				ic=ic->next;
+				DeleteCode(tempic);
+				continue;
+			}
+		}
+		ic=ic->next;
+	}while(ic!=codeHead);
+	free(gotoMap);
+	free(labelMap);
 	return true;
 }

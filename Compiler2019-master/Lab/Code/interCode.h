@@ -75,6 +75,7 @@
 
 #define UPDATE_RELOP(str)\
 	char* newRelop = (char *)malloc(sizeof(char *));\
+	memset(newRelop,0,sizeof(char*));\
 	strcpy(newRelop,str);\
 	c1->u.triOp.relop=newRelop;
 
