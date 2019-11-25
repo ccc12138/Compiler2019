@@ -42,7 +42,7 @@ void translate_ExtDef(treeNode* root);
 // void translate_ExtDecList(treeNode* root);
 
 /* Specifiers */
-// void translate_Specifier(treeNode* root);
+void translate_Specifier(treeNode* root);
 // void translate_StructSpecifier(treeNode* root);
 
 /* Declarators */

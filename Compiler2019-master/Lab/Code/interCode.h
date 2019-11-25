@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define STRLEN 50
 
@@ -72,6 +73,11 @@
 	PrintfOperand(ic->u.dec.op);\
 	printf("%d",ic->u.dec.size);
 
+#define UPDATE_RELOP(str)\
+	char* newRelop = (char *)malloc(sizeof(char *));\
+	strcpy(newRelop,str);\
+	c1->u.triOp.relop=newRelop;
+
 typedef struct Operand_* Operand;
 typedef struct InterCode_* InterCode;
 
@@ -123,6 +129,8 @@ void PrintOperand(Operand op, FILE* fp);// fp should comes from PrintCode
 void PrintfCode();
 void PrintfOperand(Operand op);
 void OptimizeCode();
+bool OptimizeGoto();
+bool OptimizeLabel();
 
 // May be we should finish intercode gen at semantic.c instead of using new func
 // InterCode translate_Exp(treeNode* root);

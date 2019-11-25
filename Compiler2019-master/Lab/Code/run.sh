@@ -1,4 +1,6 @@
 make clean
 make
-./parser ../Test/test1.cmm out1.ir
+for((i=2;i<=2;i++)){
+	./parser ../Test/Normal/A_$i.cmm out$i.ir
+}
 python ./irsim/irsim.pyc

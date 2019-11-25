@@ -44,17 +44,20 @@ bool DeleteCode(InterCode node){
 		codeHead=node->next;
 		codeHead->prev=codeTail;
 		codeTail->next=codeHead;
+		printf("node=codeHead to del!\n");
 		free(node);
 	}
 	else if(node==codeTail){
 		codeTail=node->prev;
 		codeTail->next=codeHead;
 		codeHead->prev=codeTail;
+		printf("node=codeTail to del!\n");
 		free(node);
 	}
 	else{
 		node->prev->next=node->next;
 		node->next->prev=node->prev;
+		printf("inner node to del!\n");
 		free(node);
 	}
 	return true;
@@ -262,7 +265,92 @@ void PrintfOperand(Operand op){
 
 
 void OptimizeCode(){
-	
 	// TO IMPLEMENT
+	assert(OptimizeGoto());
+	assert(OptimizeLabel());
 	return;
+}
+
+bool OptimizeGoto(){
+	InterCode c=codeHead;
+	do{
+		if(c->kind==IC_IFGOTO){
+			InterCode c1=c;
+			InterCode c2=c->next;
+			if(c2==NULL){
+#ifdef DEBUG
+				printf("Something Wrong?\n");
+				return false;
+#endif
+				continue;
+			}
+			InterCode c3=c2->next;
+			if(c3==NULL){
+#ifdef DEBUG
+				printf("Something Wrong?\n");
+				return false;
+#endif
+				continue;
+			}
+			if(c2->kind==IC_GOTO&&c3->kind==IC_LABEL&&c1->u.triOp.label==c3->u.sinOp.op){
+				c1->u.triOp.label=c2->u.sinOp.op;
+				if(strcmp(c1->u.triOp.relop,"==")==0){
+					UPDATE_RELOP("!=")
+					printf("succ find one == !");
+				}
+				else if(strcmp(c1->u.triOp.relop,"!=")==0){
+					UPDATE_RELOP("==")
+					printf("succ find one != !");
+				}
+				else if(strcmp(c1->u.triOp.relop,">")==0){
+					UPDATE_RELOP("<=")
+					printf("succ find one > !");
+				}
+				else if(strcmp(c1->u.triOp.relop,">=")==0){
+					UPDATE_RELOP("<")
+					printf("succ find one >= !");
+				}
+				else if(strcmp(c1->u.triOp.relop,"<")==0){
+					UPDATE_RELOP(">=")
+					printf("succ find one < !");
+				}
+				else if(strcmp(c1->u.triOp.relop,"<=")==0){
+					UPDATE_RELOP(">");
+					printf("succ find one <= !");
+				}
+				printf("\nEnter deletecode!\n");
+				DeleteCode(c2);
+				DeleteCode(c3);
+			}
+		}
+		else if(c->kind==IC_GOTO)
+		{
+			InterCode c1=c;
+			InterCode c2=c->next;
+			if(c2==NULL){
+#ifdef DEBUG
+				printf("Something Wrong?\n");
+				return false;
+#endif
+				continue;
+			}
+			if(c2->kind==IC_LABEL&&c1->u.sinOp.op==c2->u.sinOp.op){
+				DeleteCode(c1);
+				DeleteCode(c2);
+			}
+		}
+		c=c->next;
+	}while(c!=codeHead);
+	return true;
+}
+
+bool OptimizeLabel(){
+	// InterCode c=codeHead;
+	// do{
+	// 	if(c.kind==IC_GOTO){
+	// 		struct 
+	// 	}
+	// 	c=c->next;
+	// }while(c!=codeHead);
+	return true;
 }

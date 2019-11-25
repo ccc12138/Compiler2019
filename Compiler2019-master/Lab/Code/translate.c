@@ -126,16 +126,16 @@ ExtDef -> Specifier ExtDecList SEMI | Specifier SEMI | Specifier FunDec CompSt
 	switch(root->branch){
 		case 1:
 			/* error: no use of global var */
-			// translate_Specifier(root->childp);
+			translate_Specifier(root->childp);
 			// translate_ExtDecList(root->childp->right);
 			assert(0);
 			break;
 		case 2:
-			// translate_Specifier(root->childp);
+			translate_Specifier(root->childp);
 			break;
 		case 3:
 			/* only define function */
-			// translate_Specifier(root->childp);
+			translate_Specifier(root->childp);
 			translate_FunDec(root->childp->right);
 			translate_CompSt(root->childp->right->right);
 			break;
@@ -165,15 +165,24 @@ void translate_ExtDecList(treeNode* root){
 */
 
 /* Specifiers */
-/*
+
 void translate_Specifier(treeNode* root){
+	switch(root->branch){
+		case 1:break;
+		case 2://means it is a struct specifier
+			// printf("line %d: ",root->childp->lineno);
+			printf("Cannot translate: Code contains variables or parameters of structure type.\n");
+			exit(-1);
+		default:
+			assert(0);
+	}
 	return;
 }
 
-void translate_StructSpecifier(treeNode* root){
-	return;
-}
-*/
+// void translate_StructSpecifier(treeNode* root){
+// 	return;
+// }
+
 
 /* Declarators */
 int isArray(char * name){
@@ -397,6 +406,7 @@ void translate_Def(treeNode* root){
 /*
 Def -> Specifier DecList SEMI
 */
+	translate_Specifier(root->childp);
 	translate_DecList(root->childp->right);
 	return;
 }
@@ -693,7 +703,9 @@ void translate_Exp(treeNode* root, Operand* place){
 		case 9:{
 			// Exp DOT ID
 			// no struct var exist
-			assert(0);
+			// printf("line %d: ",root->childp->lineno);
+			printf("Cannot translate: Code contains variables or parameters of structure type.\n");
+			exit(-1);
 			break;
 		}
 		case 10:{
