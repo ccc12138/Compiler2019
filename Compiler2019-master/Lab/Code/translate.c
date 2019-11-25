@@ -562,7 +562,8 @@ void translate_Exp(treeNode* root, Operand* place){
 			newcode -> u.assign.left = *place;
 			InsertCode(newcode);
 			// PrintfCode();
-			translate_Cond(root->childp, label1, label2);
+			
+			translate_Cond(root, label1, label2);
 
 			Operand t2=(Operand)malloc(sizeof(struct Operand_));
 			memset(t2,0,sizeof(struct Operand_));
@@ -768,13 +769,13 @@ Args -> Exp COMMA Args | Exp
 
 void translate_Cond(treeNode* root, Operand label_true, Operand label_false){
 	int case_k = 0;
-	if ( strcmp(secc(),"AND")==0 )
+	if ( root->childnum == 3 && strcmp(secc(),"AND")==0 )
 		case_k = 3;
-	if ( strcmp(secc(),"OR")==0 )
+	if ( root->childnum == 3 && strcmp(secc(),"OR")==0 )
 		case_k = 4;
-	if ( strcmp(secc(),"RELOP")==0 )
+	if ( root->childnum == 3 && strcmp(secc(),"RELOP")==0 )
 		case_k = 1;
-	if ( strcmp(firc(),"NOT")==0 )
+	if ( root->childnum == 2 && strcmp(firc(),"NOT")==0 )
 		case_k = 2;
 #ifdef DEBUG
 	// printf("translate_Cond:%d\n",case_k);
@@ -843,8 +844,7 @@ void translate_Cond(treeNode* root, Operand label_true, Operand label_false){
 			newcode -> u.triOp.relop = malloc ( sizeof ( char )*32 );
 			newcode -> u.triOp.relop = "!=";
 			InsertCode(newcode);
-			PrintfCode();
-			printf("\n\n\n");
+			// PrintfCode();
 			InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
 			newcode_ -> kind = IC_GOTO;
 			newcode_ -> u.sinOp.op = label_false;
