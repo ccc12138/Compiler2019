@@ -1,6 +1,6 @@
 make clean
 make
-for((i=0;i<=7;i++)){
-	./parser ../Test/Advanced/8Lab3Hard.$i.cmm out$i.ir
+for((i=1;i<=2;i++)){
+	./parser ../Test/Normal/C_$i.cmm out$i.ir
 }
 python ./irsim/irsim.pyc
