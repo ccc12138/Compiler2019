@@ -1,7 +1,0 @@
-int main(){
-	int x;
-	int y=10;
-	x=read();
-	if(x<100||x>200&&x!=y)x=0;
-	write(x);
-}
