@@ -26,27 +26,27 @@ struct RegDesc_ {//Register Descripter
 };
 
 void PrintMips(FILE *fp);
-void PrintMipsCode(InterCode it);
+void PrintMipsCode(InterCode it,FILE *fp);
 
 // Register
 void InitRegs();
 
 // Generate Mips Code
-void MipsCodeAssign(InterCode it);
-void MipsCodeAdd(InterCode it);
-void MipsCodeSub(InterCode it);
-void MipsCodeMul(InterCode it);
-void MipsCodeDiv(InterCode it);
-void MipsCodeLabel(InterCode it);
-void MipsCodeFunction(InterCode it);
-void MipsCodeGoto(InterCode it);
-void MipsCodeIfgoto(InterCode it);
-void MipsCodeReturn(InterCode it);
-void MipsCodeDec(InterCode it);
-void MipsCodeArg(InterCode it);
-void MipsCodeCall(InterCode it);
-void MipsCodeParam(InterCode it);
-void MipsCodeRead(InterCode it);
-void MipsCodeWrite(InterCode it);
+void MipsCodeAssign(InterCode it,FILE *fp);
+void MipsCodeAdd(InterCode it,FILE *fp);
+void MipsCodeSub(InterCode it,FILE *fp);
+void MipsCodeMul(InterCode it,FILE *fp);
+void MipsCodeDiv(InterCode it,FILE *fp);
+void MipsCodeLabel(InterCode it,FILE *fp);
+void MipsCodeFunction(InterCode it,FILE *fp);
+void MipsCodeGoto(InterCode it,FILE *fp);
+void MipsCodeIfgoto(InterCode it,FILE *fp);
+void MipsCodeReturn(InterCode it,FILE *fp);
+void MipsCodeDec(InterCode it,FILE *fp);
+void MipsCodeArg(InterCode it,FILE *fp);
+void MipsCodeCall(InterCode it,FILE *fp);
+void MipsCodeParam(InterCode it,FILE *fp);
+void MipsCodeRead(InterCode it,FILE *fp);
+void MipsCodeWrite(InterCode it,FILE *fp);
 
 #endif

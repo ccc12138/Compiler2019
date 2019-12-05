@@ -60,7 +60,7 @@ void PrintMips(FILE *fp){
 	// printf("reach here\n");
 	InterCode it = codeHead;
 	do{
-		PrintMipsCode(it);
+		PrintMipsCode(it,fp);
 		it = it->next;
 	}while(it!=codeHead);
 
@@ -68,56 +68,66 @@ void PrintMips(FILE *fp){
 	free(regs);
 }
 
-void PrintMipsCode(InterCode it){
+#define NOT_MENTIONED
+
+void PrintMipsCode(InterCode it, FILE *fp){
 	switch(it->kind){
+#ifdef NOT_MENTIONED
 	case IC_ASSIGN:
-		MipsCodeAssign(it);
+		MipsCodeAssign(it,fp);
 		break;
 	case IC_ADD:
-		MipsCodeAdd(it);
+		MipsCodeAdd(it,fp);
 		break;
 	case IC_SUB:
-		MipsCodeSub(it);
+		MipsCodeSub(it,fp);
 		break;
 	case IC_MUL:
-		MipsCodeMul(it);
+		MipsCodeMul(it,fp);
 		break;
 	case IC_DIV:
-		MipsCodeDiv(it);
+		MipsCodeDiv(it,fp);
 		break;
 	case IC_LABEL:
-		MipsCodeLabel(it);
+		MipsCodeLabel(it,fp);
 		break;
+#endif
 	case IC_FUNCTION:
-		MipsCodeFunction(it);
+		MipsCodeFunction(it,fp);
 		break;
+
+#ifdef NOT_MENTIONED
 	case IC_GOTO:
-		MipsCodeGoto(it);
+		MipsCodeGoto(it,fp);
 		break;
+
 	case IC_IFGOTO:
-		MipsCodeIfgoto(it);
+		MipsCodeIfgoto(it,fp);
 		break;
+// #endif
 	case IC_RETURN:
-		MipsCodeReturn(it);
+		MipsCodeReturn(it,fp);
 		break;
+// #ifdef NOT_MENTIONED
 	case IC_DEC:
-		MipsCodeDec(it);
+		MipsCodeDec(it,fp);
 		break;
 	case IC_ARG:
-		MipsCodeArg(it);
+		MipsCodeArg(it,fp);
 		break;
 	case IC_CALL:
-		MipsCodeCall(it);
+		MipsCodeCall(it,fp);
 		break;
 	case IC_PARAM:
-		MipsCodeParam(it);
+		MipsCodeParam(it,fp);
 		break;
 	case IC_READ:
-		MipsCodeRead(it);
+		MipsCodeRead(it,fp);
 		break;
 	case IC_WRITE:
-		MipsCodeWrite(it);
+		MipsCodeWrite(it,fp);
 		break;
+#endif
 	default:
 		assert(0);
 	}
@@ -141,74 +151,77 @@ void InitRegs(){
 /*****************
  **Gen mips code**
 *****************/
-void MipsCodeAssign(InterCode it){
+void MipsCodeAssign(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeAdd(InterCode it){
+void MipsCodeAdd(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeSub(InterCode it){
+void MipsCodeSub(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeMul(InterCode it){
+void MipsCodeMul(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeDiv(InterCode it){
+void MipsCodeDiv(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeLabel(InterCode it){
+void MipsCodeLabel(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeFunction(InterCode it){
-	// char str[_STR_LEN_];
-	// memset(str, 0, sizeof(str));
-	// // sp-=4, store ret addr, update fp, sp-=enough space
-	// fprintf(fp, "%s:\n
-	// 	\tsubu $sp, $sp, 4\n
-	// 	\tsw $fp, 0($sp)\n
-	// 	\tmove $fp, $sp\n
-	// 	\tsubu $sp, $sp, %d\n"
-	// 	,it->u.sinOp.op->u.name,_STACK_SIZE_);
+void MipsCodeFunction(InterCode it,FILE *fp){
+	// sp-=4, store ret addr
+	printf("to print function,\n");
+	fprintf(fp, "%s:\n\taddi $sp, $sp, -4\n\tsw $ra, 0($sp)\n"
+		,it->u.sinOp.op->u.name);
+	printf("end print function.\n");
 }
 
-void MipsCodeGoto(InterCode it){
-
+void MipsCodeGoto(InterCode it,FILE *fp){
+	// printf("to print goto.\n");
+	// fprintf(fp,"\tj %s\n",it->u.sinOp.op->u.name);
+	// printf("end print goto.\n");
 }
 
-void MipsCodeIfgoto(InterCode it){
-
-}
-
-void MipsCodeReturn(InterCode it){
+void MipsCodeIfgoto(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeDec(InterCode it){
+void MipsCodeReturn(InterCode it,FILE *fp){
+	Operand op=it->u.sinOp.op;
+	printf("to print return.\n");
+	if(op->kind==OP_CONSTANT){
+		fprintf(fp,"\tmove $v0, $%d\n\tjr $ra\n",op->u.value);
+	}
+	printf("end print return.\n");
+}
+
+void MipsCodeDec(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeArg(InterCode it){
+void MipsCodeArg(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeCall(InterCode it){
+void MipsCodeCall(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeParam(InterCode it){
+void MipsCodeParam(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeRead(InterCode it){
+void MipsCodeRead(InterCode it,FILE *fp){
 
 }
 
-void MipsCodeWrite(InterCode it){
+void MipsCodeWrite(InterCode it,FILE *fp){
 
 }

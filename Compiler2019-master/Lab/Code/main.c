@@ -62,8 +62,8 @@ int main(int argc, char** argv){
 #ifdef DEBUG
             printf("Optimize succ!\n");
 #endif
-            PrintCode(fp);
-            // PrintMips(fp);
+            // PrintCode(fp);
+            PrintMips(fp);
             fclose(fp);
         }
         // else{
