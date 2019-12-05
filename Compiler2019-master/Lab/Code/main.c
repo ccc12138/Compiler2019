@@ -1,6 +1,6 @@
 /* Ref P25 */
 #include <stdio.h>
-#include "translate.h"
+#include "mips.h"
 extern FILE* yyin;
 int lexErrNum;
 int synErrNum;
@@ -63,6 +63,7 @@ int main(int argc, char** argv){
             printf("Optimize succ!\n");
 #endif
             PrintCode(fp);
+            // PrintMips(fp);
             fclose(fp);
         }
         // else{

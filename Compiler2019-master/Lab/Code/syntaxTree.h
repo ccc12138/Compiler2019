@@ -1,6 +1,6 @@
 #pragma once
 
-// #define DEBUG
+#define DEBUG
 
 #include <stdio.h>
 #include <stdlib.h>//malloc
