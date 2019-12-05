@@ -30,13 +30,14 @@ void PrintMipsCode(InterCode it,FILE *fp);
 
 // Register
 void InitRegs();
+int getReg(Operand op);
 
 // Generate Mips Code
 void MipsCodeAssign(InterCode it,FILE *fp);
-void MipsCodeAdd(InterCode it,FILE *fp);
-void MipsCodeSub(InterCode it,FILE *fp);
-void MipsCodeMul(InterCode it,FILE *fp);
-void MipsCodeDiv(InterCode it,FILE *fp);
+void MipsCodeAddSubMulDiv(InterCode it,FILE *fp);
+// void MipsCodeSub(InterCode it,FILE *fp);
+// void MipsCodeMul(InterCode it,FILE *fp);
+// void MipsCodeDiv(InterCode it,FILE *fp);
 void MipsCodeLabel(InterCode it,FILE *fp);
 void MipsCodeFunction(InterCode it,FILE *fp);
 void MipsCodeGoto(InterCode it,FILE *fp);

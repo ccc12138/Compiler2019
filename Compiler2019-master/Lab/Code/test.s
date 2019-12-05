@@ -22,7 +22,21 @@ write:
 	jr $ra
 
 main:
-	addi $sp, $sp, -4
-	sw $ra, 0($sp)
+	li $zero, 0
+	li $zero, 1
+	li $zero, 0
+	jal read
+	move $zero, $zero
+label1:
+	beq $zero, $zero, label3
+	add $zero, $zero, $zero
+	move $zero, $zero
+jal write
+	move $zero, $zero
+	move $zero, $zero
+	addi $zero, $zero, 1
+	move $zero, $zero
+	j label1
+label3:
 	move $v0, $0
 	jr $ra

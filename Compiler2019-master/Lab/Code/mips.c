@@ -72,43 +72,30 @@ void PrintMips(FILE *fp){
 
 void PrintMipsCode(InterCode it, FILE *fp){
 	switch(it->kind){
-#ifdef NOT_MENTIONED
 	case IC_ASSIGN:
 		MipsCodeAssign(it,fp);
 		break;
 	case IC_ADD:
-		MipsCodeAdd(it,fp);
-		break;
 	case IC_SUB:
-		MipsCodeSub(it,fp);
-		break;
 	case IC_MUL:
-		MipsCodeMul(it,fp);
-		break;
 	case IC_DIV:
-		MipsCodeDiv(it,fp);
+		MipsCodeAddSubMulDiv(it,fp);
 		break;
 	case IC_LABEL:
 		MipsCodeLabel(it,fp);
 		break;
-#endif
 	case IC_FUNCTION:
 		MipsCodeFunction(it,fp);
 		break;
-
-#ifdef NOT_MENTIONED
 	case IC_GOTO:
 		MipsCodeGoto(it,fp);
 		break;
-
 	case IC_IFGOTO:
 		MipsCodeIfgoto(it,fp);
 		break;
-// #endif
 	case IC_RETURN:
 		MipsCodeReturn(it,fp);
 		break;
-// #ifdef NOT_MENTIONED
 	case IC_DEC:
 		MipsCodeDec(it,fp);
 		break;
@@ -127,7 +114,6 @@ void PrintMipsCode(InterCode it, FILE *fp){
 	case IC_WRITE:
 		MipsCodeWrite(it,fp);
 		break;
-#endif
 	default:
 		assert(0);
 	}
@@ -148,52 +134,213 @@ void InitRegs(){
 	}
 }
 
+int getReg(Operand op){
+	/*****************************
+	/* Still need implementation *
+	*****************************/
+	return 0;
+}
+
 /*****************
  **Gen mips code**
 *****************/
 void MipsCodeAssign(InterCode it,FILE *fp){
-
+	Operand op_left=it->u.assign.left;
+	Operand op_right=it->u.assign.right;
+	int left_id, right_id;
+	// Deal with assign here
+	if(op_left->kind==OP_TEMP_VAR||op_left->kind==OP_VARIABLE){
+		left_id=getReg(op_left);
+		//x := 
+		if(op_right->kind==OP_CONSTANT){
+			//x := #k
+			fprintf(fp,"\tli %s, %d\n",regs[left_id].name,op_right->u.value);
+		}
+		else if(op_right->kind==OP_TEMP_VAR||op_right->kind==OP_VARIABLE){
+			//x := y
+			right_id=getReg(op_right);
+			fprintf(fp,"\tmove %s, %s\n",regs[left_id].name,regs[right_id].name);
+		}
+		else if(op_right->kind==OP_VAR_ADDR||op_right->kind==OP_TEMP_VAR_ADDR){
+			//x := *y
+			right_id=getReg(op_right);
+			fprintf(fp,"\tlw %s, 0(%s)\n",regs[left_id].name,regs[right_id].name);
+		}
+		else{
+			assert(0);
+		}
+	}
+	else if(op_left->kind==OP_VAR_ADDR||op_left->kind==OP_TEMP_VAR_ADDR){
+		left_id=getReg(op_left);
+		if(op_right->kind==OP_CONSTANT){
+			//*x = #k;
+			fprintf(fp,"\tsw %s, %d\n",regs[left_id].name,op_right->u.value);
+		}
+		else if(op_right->kind==OP_VARIABLE||op_right->kind==OP_TEMP_VAR){
+			//*x = y;
+			right_id=getReg(op_right);
+			fprintf(fp,"\tsw %s, 0(%s)\n",regs[left_id].name,regs[right_id].name);
+		}
+		else{
+			assert(0);
+		}
+	}
+	else{
+		assert(0);
+	}
 }
 
-void MipsCodeAdd(InterCode it,FILE *fp){
-
-}
-
-void MipsCodeSub(InterCode it,FILE *fp){
-
-}
-
-void MipsCodeMul(InterCode it,FILE *fp){
-
-}
-
-void MipsCodeDiv(InterCode it,FILE *fp){
-
+void MipsCodeAddSubMulDiv(InterCode it,FILE *fp){
+	Operand op_res=it->u.binOp.result;
+	Operand op1=it->u.binOp.op1;
+	Operand op2=it->u.binOp.op2;
+	int res_id, op1_id, op2_id;
+	bool op1_cons=(op1->kind==OP_CONSTANT)?true:false;
+	bool op2_cons=(op2->kind==OP_CONSTANT)?true:false;
+	bool op_var=((op1->kind==OP_VARIABLE||op1->kind==OP_TEMP_VAR)
+		&&(op2->kind==OP_VARIABLE||op2->kind==OP_TEMP_VAR))?true:false;
+	res_id=getReg(op_res);
+	if(op1_cons){
+		op2_id=getReg(op2);
+		switch(it->kind){
+		case IC_ADD:
+			// x = #k + y, modified to x = y + #k
+			fprintf(fp,"\taddi %s, %s, %d\n",regs[res_id].name,regs[op2_id].name,op1->u.value);
+			break;
+		case IC_SUB:
+			// x = #k - y may have bugs here
+			fprintf(fp,"\taddi %s, %s, -%d\n",regs[res_id].name,regs[op2_id].name,op1->u.value);
+			fprintf(fp,"\tneg %s\n",regs[res_id].name);
+			break;
+		case IC_MUL:
+			/*****************************
+			/* Still need implementation *
+			*****************************/
+			// LOAD TO REGS FIRST
+			break;
+		case IC_DIV:
+			/*****************************
+			/* Still need implementation *
+			*****************************/
+			// LOAD TO REGS FIRST
+			break;
+		default:
+			assert(0);
+		}
+	}
+	else if(op2_cons){
+		op1_id=getReg(op1);
+		switch(it->kind){
+		case IC_ADD:
+			// x = y + #k
+			fprintf(fp,"\taddi %s, %s, %d\n",regs[res_id].name,regs[op1_id].name,op2->u.value);
+			break;
+		case IC_SUB:
+			// x = y - #k
+			fprintf(fp,"\taddi %s, %s, -%d\n",regs[res_id].name,regs[op1_id].name,op2->u.value);
+			break;
+		case IC_MUL:
+			/*****************************
+			/* Still need implementation *
+			*****************************/
+			// LOAD TO REGS FIRST
+			break;
+		case IC_DIV:
+			/*****************************
+			/* Still need implementation *
+			*****************************/
+			// LOAD TO REGS FIRST
+			break;
+		default:
+			assert(0);
+		}
+	}
+	else if(op_var){
+		op1_id=getReg(op1);
+		op2_id=getReg(op2);
+		switch(it->kind){
+		case IC_ADD:
+			//x = y + z
+			fprintf(fp,"\tadd %s, %s, %s\n",regs[res_id].name,regs[op1_id].name,regs[op2_id].name);
+			break;
+		case IC_SUB:
+			//x = y - z
+			fprintf(fp,"\tsub %s, %s, %s\n",regs[res_id].name,regs[op1_id].name,regs[op2_id].name);
+			break;
+		case IC_MUL:
+			//x = y * z
+			fprintf(fp,"\tmul %s, %s, %s\n",regs[res_id].name,regs[op1_id].name,regs[op2_id].name);
+			break;
+		case IC_DIV:
+			//x = y / z
+			fprintf(fp, "\tdiv %s, %s\n",regs[op1_id].name,regs[op2_id].name);
+			fprintf(fp, "\tmflo %s\n",regs[res_id]);
+			break;
+		default:
+			assert(0);
+		}
+	}
+	else{
+		assert(0);
+	}
 }
 
 void MipsCodeLabel(InterCode it,FILE *fp){
-
+	fprintf(fp, "label%d:\n", it->u.sinOp.op->u.var_no);
 }
 
 void MipsCodeFunction(InterCode it,FILE *fp){
+	/*****************************
+	/* Still need implementation *
+	*****************************/
 	// sp-=4, store ret addr
 	printf("to print function,\n");
-	fprintf(fp, "%s:\n\taddi $sp, $sp, -4\n\tsw $ra, 0($sp)\n"
+	fprintf(fp, "%s:\n"
 		,it->u.sinOp.op->u.name);
 	printf("end print function.\n");
 }
 
 void MipsCodeGoto(InterCode it,FILE *fp){
-	// printf("to print goto.\n");
-	// fprintf(fp,"\tj %s\n",it->u.sinOp.op->u.name);
-	// printf("end print goto.\n");
+	printf("to print goto.\n");
+	fprintf(fp,"\tj label%d\n",it->u.sinOp.op->u.var_no);
+	printf("end print goto.\n");
 }
 
 void MipsCodeIfgoto(InterCode it,FILE *fp){
-
+	Operand op1=it->u.triOp.op1;
+	Operand op2=it->u.triOp.op2;
+	int label_num=it->u.triOp.label->u.var_no;
+	char* relop=(char*)malloc(sizeof(char *));
+	relop=it->u.triOp.relop;
+	int op1_id=getReg(op1);
+	int op2_id=getReg(op2);
+	if(strcmp(relop,"==")){
+		fprintf(fp,"\tbeq %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+	}
+	else if(strcmp(relop,"!=")){
+		fprintf(fp,"\tbne %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+	}
+	else if(strcmp(relop,">")){
+		fprintf(fp,"\tbgt %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+	}
+	else if(strcmp(relop,"<")){
+		fprintf(fp,"\tblt %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+	}
+	else if(strcmp(relop,">=")){
+		fprintf(fp,"\tbge %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+	}
+	else if(strcmp(relop,"<=")){
+		fprintf(fp,"\tble %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+	}
+	else{
+		assert(0);
+	}
 }
 
 void MipsCodeReturn(InterCode it,FILE *fp){
+	/*****************************
+	/* Still need implementation *
+	*****************************/
 	Operand op=it->u.sinOp.op;
 	printf("to print return.\n");
 	if(op->kind==OP_CONSTANT){
@@ -203,25 +350,33 @@ void MipsCodeReturn(InterCode it,FILE *fp){
 }
 
 void MipsCodeDec(InterCode it,FILE *fp){
-
+	/*****************************
+	/* Still need implementation *
+	*****************************/
 }
 
 void MipsCodeArg(InterCode it,FILE *fp){
-
+	/*****************************
+	/* Still need implementation *
+	*****************************/
 }
 
 void MipsCodeCall(InterCode it,FILE *fp){
-
+	/*****************************
+	/* Still need implementation *
+	*****************************/
 }
 
 void MipsCodeParam(InterCode it,FILE *fp){
-
+	/*****************************
+	/* Still need implementation *
+	*****************************/
 }
 
 void MipsCodeRead(InterCode it,FILE *fp){
-
+	fprintf(fp, "\tjal read\n");
 }
 
 void MipsCodeWrite(InterCode it,FILE *fp){
-
+	fprintf(fp, "%sjal write\n");
 }
