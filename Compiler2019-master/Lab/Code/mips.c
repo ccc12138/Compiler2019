@@ -68,8 +68,6 @@ void PrintMips(FILE *fp){
 	free(regs);
 }
 
-#define NOT_MENTIONED
-
 void PrintMipsCode(InterCode it, FILE *fp){
 	switch(it->kind){
 	case IC_ASSIGN:
@@ -138,6 +136,7 @@ int getReg(Operand op){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
+	
 	return 0;
 }
 
@@ -312,28 +311,84 @@ void MipsCodeIfgoto(InterCode it,FILE *fp){
 	int label_num=it->u.triOp.label->u.var_no;
 	char* relop=(char*)malloc(sizeof(char *));
 	relop=it->u.triOp.relop;
-	int op1_id=getReg(op1);
-	int op2_id=getReg(op2);
-	if(strcmp(relop,"==")){
-		fprintf(fp,"\tbeq %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+	int op1_id;
+	int op2_id;
+	if(op1->kind!=OP_CONSTANT){
+		op1_id=getReg(op1);
+		if(op2->kind!=OP_CONSTANT){
+			op2_id=getReg(op2);
+			if(strcmp(relop,"==")){
+				fprintf(fp,"\tbeq %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+			}
+			else if(strcmp(relop,"!=")){
+				fprintf(fp,"\tbne %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+			}
+			else if(strcmp(relop,">")){
+				fprintf(fp,"\tbgt %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+			}
+			else if(strcmp(relop,"<")){
+				fprintf(fp,"\tblt %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+			}
+			else if(strcmp(relop,">=")){
+				fprintf(fp,"\tbge %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+			}
+			else if(strcmp(relop,"<=")){
+				fprintf(fp,"\tble %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
+			}
+			else{
+				assert(0);
+			}
+		}
+		else if(op2->kind==OP_CONSTANT){
+			if(strcmp(relop,"==")){
+				fprintf(fp,"\tbeq %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
+			}
+			else if(strcmp(relop,"!=")){
+				fprintf(fp,"\tbne %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
+			}
+			else if(strcmp(relop,">")){
+				fprintf(fp,"\tbgt %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
+			}
+			else if(strcmp(relop,"<")){
+				fprintf(fp,"\tblt %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
+			}
+			else if(strcmp(relop,">=")){
+				fprintf(fp,"\tbge %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
+			}
+			else if(strcmp(relop,"<=")){
+				fprintf(fp,"\tble %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
+			}
+			else{
+				assert(0);
+			}
+		}
+		else{
+			assert(0);
+		}
 	}
-	else if(strcmp(relop,"!=")){
-		fprintf(fp,"\tbne %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
-	}
-	else if(strcmp(relop,">")){
-		fprintf(fp,"\tbgt %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
-	}
-	else if(strcmp(relop,"<")){
-		fprintf(fp,"\tblt %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
-	}
-	else if(strcmp(relop,">=")){
-		fprintf(fp,"\tbge %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
-	}
-	else if(strcmp(relop,"<=")){
-		fprintf(fp,"\tble %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
-	}
-	else{
-		assert(0);
+	else if(op1->kind==OP_CONSTANT&&op2->kind!=OP_CONSTANT){
+		op2_id=getReg(op2);
+		if(strcmp(relop,"==")){
+			fprintf(fp,"\tbeq %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
+		}
+		else if(strcmp(relop,"!=")){
+			fprintf(fp,"\tbne %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
+		}
+		else if(strcmp(relop,">")){
+			fprintf(fp,"\tble %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
+		}
+		else if(strcmp(relop,"<")){
+			fprintf(fp,"\tbge %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
+		}
+		else if(strcmp(relop,">=")){
+			fprintf(fp,"\tblt %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
+		}
+		else if(strcmp(relop,"<=")){
+			fprintf(fp,"\tbgt %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
+		}
+		else{
+			assert(0);
+		}
 	}
 }
 
