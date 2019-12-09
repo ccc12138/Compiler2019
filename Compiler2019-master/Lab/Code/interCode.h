@@ -119,6 +119,7 @@ struct InterCode_{
 	}u;
 	InterCode prev;
 	InterCode next;
+	bool first_code;
 };
 
 bool InsertCode(InterCode node);

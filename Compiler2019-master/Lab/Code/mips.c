@@ -2,6 +2,8 @@
 
 VarDesc varList = NULL;
 RegDesc regs;
+int bb_num=0;
+BasicBlock bb;
 char* regNameArr[] = {
 	"$zero",//Constant value 0
 	"$at",//Reserved for assembler
@@ -31,6 +33,9 @@ void PrintMips(FILE *fp){
 	printf("Print Mips.\n");
 #endif
 	InitRegs();
+	InitFirstCode();
+	InitBasicBlocks();
+	InitActiveVar();
 #ifdef DEBUG
 	printf("Init Regs succ!\n");
 #endif
@@ -58,64 +63,148 @@ void PrintMips(FILE *fp){
 	fputs("\tjr $ra\n\n", fp);
 
 	// printf("reach here\n");
-	InterCode it = codeHead;
+	InterCode ic = codeHead;
 	do{
-		PrintMipsCode(it,fp);
-		it = it->next;
-	}while(it!=codeHead);
+		PrintMipsCode(ic,fp);
+		ic = ic->next;
+	}while(ic!=codeHead);
 
 	// free malloc spaces
 	free(regs);
+	free(bb);
 }
 
-void PrintMipsCode(InterCode it, FILE *fp){
-	switch(it->kind){
+void PrintMipsCode(InterCode ic, FILE *fp){
+	switch(ic->kind){
 	case IC_ASSIGN:
-		MipsCodeAssign(it,fp);
+		MipsCodeAssign(ic,fp);
 		break;
 	case IC_ADD:
 	case IC_SUB:
 	case IC_MUL:
 	case IC_DIV:
-		MipsCodeAddSubMulDiv(it,fp);
+		MipsCodeAddSubMulDiv(ic,fp);
 		break;
 	case IC_LABEL:
-		MipsCodeLabel(it,fp);
+		MipsCodeLabel(ic,fp);
 		break;
 	case IC_FUNCTION:
-		MipsCodeFunction(it,fp);
+		MipsCodeFunction(ic,fp);
 		break;
 	case IC_GOTO:
-		MipsCodeGoto(it,fp);
+		MipsCodeGoto(ic,fp);
 		break;
 	case IC_IFGOTO:
-		MipsCodeIfgoto(it,fp);
+		MipsCodeIfgoto(ic,fp);
 		break;
 	case IC_RETURN:
-		MipsCodeReturn(it,fp);
+		MipsCodeReturn(ic,fp);
 		break;
 	case IC_DEC:
-		MipsCodeDec(it,fp);
+		MipsCodeDec(ic,fp);
 		break;
 	case IC_ARG:
-		MipsCodeArg(it,fp);
+		MipsCodeArg(ic,fp);
 		break;
 	case IC_CALL:
-		MipsCodeCall(it,fp);
+		MipsCodeCall(ic,fp);
 		break;
 	case IC_PARAM:
-		MipsCodeParam(it,fp);
+		MipsCodeParam(ic,fp);
 		break;
 	case IC_READ:
-		MipsCodeRead(it,fp);
+		MipsCodeRead(ic,fp);
 		break;
 	case IC_WRITE:
-		MipsCodeWrite(it,fp);
+		MipsCodeWrite(ic,fp);
 		break;
 	default:
 		assert(0);
 	}
 	return;
+}
+
+// Basic Blocks
+void InitFirstCode(){
+#ifdef DEBUG
+	printf("Init First Code.\n");
+#endif
+	InterCode ic=codeHead;
+	ic->first_code=true;
+	++bb_num;
+	// printf("bb_num+1,1\n");
+	ic=ic->next;
+	while(ic!=codeHead){
+		if(ic->first_code==false&&(ic->kind==IC_LABEL||ic->kind==IC_FUNCTION)){
+			ic->first_code=true;
+			// printf("bb_num+1,2\n");
+			++bb_num;
+		}
+		else if(ic->next->first_code==false&&(ic->kind==IC_IFGOTO||ic->kind==IC_GOTO)){
+			ic->next->first_code=true;
+			// printf("bb_num+1,3\n");
+			++bb_num;
+		}
+		ic = ic->next;
+	};
+}
+
+void InitBasicBlocks(){
+#ifdef DEBUG
+	printf("Init Basic Blocks.\n");
+	// printf("bb_num=%d\n",bb_num);
+#endif
+	InterCode ic=codeHead;
+	bb=(BasicBlock)malloc(sizeof(struct BasicBlock_)*bb_num);
+	int index=0;
+	do{
+		if(ic->first_code==true){
+// #ifdef DEBUG
+// 			printf("current index=%d.\nlast index=%d.\n",index,(index+bb_num-1)%bb_num);
+// 			printf("reach here?\n");
+// #endif			
+			bb[index].first_ic=ic;
+			bb[(int)((index+bb_num-1)%bb_num)].last_ic=ic->prev;
+			++index;
+// #ifdef DEBUG
+// 			printf("reach here?\n");
+// #endif	
+		}
+		ic=ic->next;
+	}while(ic!=codeHead);
+	// printf("index=%d\n",index);
+	assert(index==bb_num);
+	return;
+}
+
+void InitActiveVar(){
+#ifdef DEBUG
+	printf("Init Active Var.\n");
+#endif
+	for(int i=0;i<bb_num;++i){
+		InterCode cur_ic=bb[i].last_ic;
+		InterCode fir_ic=bb[i].first_ic->prev;
+		int active_var=0;
+		//get num of active variables and temp variables
+		while(cur_ic!=fir_ic){
+
+			cur_ic=cur_ic->prev;
+		}
+#ifdef DEBUG
+		printf("Block %d: succ getting num.\n",i);
+#endif
+		// generate bit vector to get ready for the active var analysis
+
+		// do active var analysis
+		cur_ic=bb[i].last_ic;
+		while(cur_ic!=fir_ic){
+
+			cur_ic=cur_ic->prev;
+		}
+#ifdef DEBUG
+		printf("Block %d: succ do active var analysis\n",i);
+#endif
+	}
 }
 
 // Register
@@ -143,9 +232,9 @@ int getReg(Operand op){
 /*****************
  **Gen mips code**
 *****************/
-void MipsCodeAssign(InterCode it,FILE *fp){
-	Operand op_left=it->u.assign.left;
-	Operand op_right=it->u.assign.right;
+void MipsCodeAssign(InterCode ic,FILE *fp){
+	Operand op_left=ic->u.assign.left;
+	Operand op_right=ic->u.assign.right;
 	int left_id, right_id;
 	// Deal with assign here
 	if(op_left->kind==OP_TEMP_VAR||op_left->kind==OP_VARIABLE){
@@ -189,10 +278,10 @@ void MipsCodeAssign(InterCode it,FILE *fp){
 	}
 }
 
-void MipsCodeAddSubMulDiv(InterCode it,FILE *fp){
-	Operand op_res=it->u.binOp.result;
-	Operand op1=it->u.binOp.op1;
-	Operand op2=it->u.binOp.op2;
+void MipsCodeAddSubMulDiv(InterCode ic,FILE *fp){
+	Operand op_res=ic->u.binOp.result;
+	Operand op1=ic->u.binOp.op1;
+	Operand op2=ic->u.binOp.op2;
 	int res_id, op1_id, op2_id;
 	bool op1_cons=(op1->kind==OP_CONSTANT)?true:false;
 	bool op2_cons=(op2->kind==OP_CONSTANT)?true:false;
@@ -201,7 +290,7 @@ void MipsCodeAddSubMulDiv(InterCode it,FILE *fp){
 	res_id=getReg(op_res);
 	if(op1_cons){
 		op2_id=getReg(op2);
-		switch(it->kind){
+		switch(ic->kind){
 		case IC_ADD:
 			// x = #k + y, modified to x = y + #k
 			fprintf(fp,"\taddi %s, %s, %d\n",regs[res_id].name,regs[op2_id].name,op1->u.value);
@@ -229,7 +318,7 @@ void MipsCodeAddSubMulDiv(InterCode it,FILE *fp){
 	}
 	else if(op2_cons){
 		op1_id=getReg(op1);
-		switch(it->kind){
+		switch(ic->kind){
 		case IC_ADD:
 			// x = y + #k
 			fprintf(fp,"\taddi %s, %s, %d\n",regs[res_id].name,regs[op1_id].name,op2->u.value);
@@ -257,7 +346,7 @@ void MipsCodeAddSubMulDiv(InterCode it,FILE *fp){
 	else if(op_var){
 		op1_id=getReg(op1);
 		op2_id=getReg(op2);
-		switch(it->kind){
+		switch(ic->kind){
 		case IC_ADD:
 			//x = y + z
 			fprintf(fp,"\tadd %s, %s, %s\n",regs[res_id].name,regs[op1_id].name,regs[op2_id].name);
@@ -284,33 +373,33 @@ void MipsCodeAddSubMulDiv(InterCode it,FILE *fp){
 	}
 }
 
-void MipsCodeLabel(InterCode it,FILE *fp){
-	fprintf(fp, "label%d:\n", it->u.sinOp.op->u.var_no);
+void MipsCodeLabel(InterCode ic,FILE *fp){
+	fprintf(fp, "label%d:\n", ic->u.sinOp.op->u.var_no);
 }
 
-void MipsCodeFunction(InterCode it,FILE *fp){
+void MipsCodeFunction(InterCode ic,FILE *fp){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
 	// sp-=4, store ret addr
 	printf("to print function,\n");
 	fprintf(fp, "%s:\n"
-		,it->u.sinOp.op->u.name);
+		,ic->u.sinOp.op->u.name);
 	printf("end print function.\n");
 }
 
-void MipsCodeGoto(InterCode it,FILE *fp){
+void MipsCodeGoto(InterCode ic,FILE *fp){
 	printf("to print goto.\n");
-	fprintf(fp,"\tj label%d\n",it->u.sinOp.op->u.var_no);
+	fprintf(fp,"\tj label%d\n",ic->u.sinOp.op->u.var_no);
 	printf("end print goto.\n");
 }
 
-void MipsCodeIfgoto(InterCode it,FILE *fp){
-	Operand op1=it->u.triOp.op1;
-	Operand op2=it->u.triOp.op2;
-	int label_num=it->u.triOp.label->u.var_no;
+void MipsCodeIfgoto(InterCode ic,FILE *fp){
+	Operand op1=ic->u.triOp.op1;
+	Operand op2=ic->u.triOp.op2;
+	int label_num=ic->u.triOp.label->u.var_no;
 	char* relop=(char*)malloc(sizeof(char *));
-	relop=it->u.triOp.relop;
+	relop=ic->u.triOp.relop;
 	int op1_id;
 	int op2_id;
 	if(op1->kind!=OP_CONSTANT){
@@ -392,11 +481,11 @@ void MipsCodeIfgoto(InterCode it,FILE *fp){
 	}
 }
 
-void MipsCodeReturn(InterCode it,FILE *fp){
+void MipsCodeReturn(InterCode ic,FILE *fp){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
-	Operand op=it->u.sinOp.op;
+	Operand op=ic->u.sinOp.op;
 	printf("to print return.\n");
 	if(op->kind==OP_CONSTANT){
 		fprintf(fp,"\tmove $v0, $%d\n\tjr $ra\n",op->u.value);
@@ -404,34 +493,34 @@ void MipsCodeReturn(InterCode it,FILE *fp){
 	printf("end print return.\n");
 }
 
-void MipsCodeDec(InterCode it,FILE *fp){
+void MipsCodeDec(InterCode ic,FILE *fp){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
 }
 
-void MipsCodeArg(InterCode it,FILE *fp){
+void MipsCodeArg(InterCode ic,FILE *fp){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
 }
 
-void MipsCodeCall(InterCode it,FILE *fp){
+void MipsCodeCall(InterCode ic,FILE *fp){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
 }
 
-void MipsCodeParam(InterCode it,FILE *fp){
+void MipsCodeParam(InterCode ic,FILE *fp){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
 }
 
-void MipsCodeRead(InterCode it,FILE *fp){
+void MipsCodeRead(InterCode ic,FILE *fp){
 	fprintf(fp, "\tjal read\n");
 }
 
-void MipsCodeWrite(InterCode it,FILE *fp){
+void MipsCodeWrite(InterCode ic,FILE *fp){
 	fprintf(fp, "%sjal write\n");
 }

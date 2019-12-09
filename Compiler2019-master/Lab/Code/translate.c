@@ -268,6 +268,7 @@ ParamDec -> Specifier VarDec
 	if ( res == -1 )
 	{
 		InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+		newcode -> first_code = false;
 		newcode -> kind = IC_PARAM;
 		newcode -> u.sinOp.op = look_Up(var_name);
 		InsertCode(newcode);
@@ -275,6 +276,7 @@ ParamDec -> Specifier VarDec
 	else{
 		Operand var_op = look_Up(var_name);
 		InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+		newcode -> first_code = false;
 		newcode -> kind = IC_PARAM;
 		newcode -> u.sinOp.op = var_op->u.addr;
 		InsertCode(newcode);
@@ -325,6 +327,7 @@ Stmt -> Exp SEMI | CompSt | RETURN Exp SEMI | IF LP Exp RP Stmt | IF LP Exp RP S
 			Operand t1 = new_Temp();
 			translate_Exp(root->childp->right, &t1);
 			InterCode newcode = (InterCode)malloc(sizeof(struct InterCode_));
+			newcode -> first_code = false;
 			newcode->kind = IC_RETURN;
 			newcode->u.sinOp.op = t1;
 			InsertCode(newcode);
@@ -353,6 +356,7 @@ Stmt -> Exp SEMI | CompSt | RETURN Exp SEMI | IF LP Exp RP Stmt | IF LP Exp RP S
 			translate_Stmt(root->childp->right->right->right->right);
 
 			InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
+			newcode_ -> first_code = false;
 			newcode_ -> kind = IC_GOTO;
 			newcode_ -> u.sinOp.op = label3;
 			InsertCode(newcode_);// [GOTO label3]
@@ -376,6 +380,7 @@ Stmt -> Exp SEMI | CompSt | RETURN Exp SEMI | IF LP Exp RP Stmt | IF LP Exp RP S
 			// PrintfCode();
 			translate_Stmt(root->childp->right->right->right->right);// code2 = translate_Stmt(Stmt1, sym_table)
 			InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
+			newcode_ -> first_code = false;
 			newcode_ -> kind = IC_GOTO;
 			newcode_ -> u.sinOp.op = label1;
 			InsertCode(newcode_);// [GOTO label1]
@@ -458,6 +463,7 @@ Dec -> VarDec | VarDec ASSIGNOP Exp
 		var_op = changeiop(var_name);
 		// PrintfOperand(var_op);
 		InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+		newcode -> first_code = false;
 		newcode -> kind = IC_DEC;
 		newcode -> u.dec.op = (Operand)malloc(sizeof(struct Operand_));
 		newcode -> u.dec.op -> kind = var_op -> kind;
@@ -472,6 +478,7 @@ Dec -> VarDec | VarDec ASSIGNOP Exp
 		Operand t1 = new_Temp();
 		translate_Exp(root->childp->right->right, &t1);	
 		InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+		newcode -> first_code = false;
 		newcode -> kind = IC_ASSIGN;
 		newcode -> u.assign.right = t1;
 		newcode -> u.assign.left = p;
@@ -528,6 +535,7 @@ void translate_Exp(treeNode* root, Operand* place){
 			translate_Exp(root->childp->right->right, &t1);
 			
 			InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+			newcode -> first_code = false;
 			newcode -> kind = IC_ASSIGN;
 			newcode -> u.assign.right = t1;
 			newcode -> u.assign.left = v_t;
@@ -535,6 +543,7 @@ void translate_Exp(treeNode* root, Operand* place){
 			// PrintfCode();
 			if ( place!=NULL ){
 				InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
 				newcode_ -> kind = IC_ASSIGN;
 				newcode_ -> u.assign.right = v_t;
 				newcode_ -> u.assign.left = *place;
@@ -553,6 +562,7 @@ void translate_Exp(treeNode* root, Operand* place){
 			Operand label2 = new_Label();
 
 			InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+			newcode -> first_code = false;
 			newcode -> kind = IC_ASSIGN;
 			Operand t1=(Operand)malloc(sizeof(struct Operand_));
 			memset(t1,0,sizeof(struct Operand_));
@@ -574,6 +584,7 @@ void translate_Exp(treeNode* root, Operand* place){
 			// PrintfCode();
 
 			InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
+			newcode -> first_code = false;
 			newcode_ -> kind = IC_ASSIGN;
 			newcode_ -> u.assign.right = t2;
 			newcode_ -> u.assign.left = *place;
@@ -593,6 +604,7 @@ void translate_Exp(treeNode* root, Operand* place){
 			if ( place != NULL )
 			{
 				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
 				newcode -> u.binOp.result = *place;
 				newcode -> u.binOp.op1 = t1;
 				newcode -> u.binOp.op2 = t2;
@@ -625,6 +637,7 @@ void translate_Exp(treeNode* root, Operand* place){
 			if ( place != NULL )
 			{
 				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
 				newcode -> u.binOp.result = *place;
 				Operand t1=(Operand)malloc(sizeof(struct Operand_));
 				memset(t1,0,sizeof(struct Operand_));
@@ -645,6 +658,7 @@ void translate_Exp(treeNode* root, Operand* place){
 			translate_Args(root->childp->right->right, arg_list, &size);
 			if (strcmp(root->childp->data.strd, "write")==0){
 				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
 				newcode -> u.sinOp.op = arg_list[0];
 				newcode -> kind = IC_WRITE;
 				InsertCode(newcode);
@@ -654,12 +668,14 @@ void translate_Exp(treeNode* root, Operand* place){
 				int i = 0;
 				for ( i = size-1 ; i >= 0 ; i -- ){
 					InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+					newcode -> first_code = false;
 					newcode -> u.sinOp.op = arg_list[i];
 					newcode -> kind = IC_ARG;
 					InsertCode(newcode);
 				}
 				struct item* funcp = find_item(root->childp->data.strd, FUNCTION);
 				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
 				newcode -> kind = IC_CALL;
 				if (place!=NULL)
 					newcode -> u.assign.left = *place;
@@ -679,6 +695,7 @@ void translate_Exp(treeNode* root, Operand* place){
 			// ID LP RP
 			struct item* funcp = find_item(root->childp->data.strd, FUNCTION);
 			InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+			newcode -> first_code = false;
 			if (strcmp(funcp->var_name,"read")==0){
 				newcode -> kind = IC_READ;
 				newcode -> u.sinOp.op = *place;
@@ -792,6 +809,7 @@ void translate_Cond(treeNode* root, Operand label_true, Operand label_false){
 			char* op;
 			op = root->childp->right->data.strd;
 			InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+			newcode -> first_code = false;
 			newcode -> kind = IC_IFGOTO;
 			newcode -> u.triOp.op1 = t1;
 			newcode -> u.triOp.op2 = t2;
@@ -800,6 +818,7 @@ void translate_Cond(treeNode* root, Operand label_true, Operand label_false){
 			InsertCode(newcode);
 			// PrintfCode();
 			InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
+			newcode -> first_code = false;
 			newcode_ -> kind = IC_GOTO;
 			newcode_ -> u.sinOp.op = label_false;
 			InsertCode(newcode_);
@@ -837,6 +856,7 @@ void translate_Cond(treeNode* root, Operand label_true, Operand label_false){
 			t2->kind=OP_CONSTANT;
 			t2->u.value = 0;
 			InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+			newcode -> first_code = false;
 			newcode -> kind = IC_IFGOTO;
 			newcode -> u.triOp.op1 = t1;
 			newcode -> u.triOp.op2 = t2;
@@ -846,6 +866,7 @@ void translate_Cond(treeNode* root, Operand label_true, Operand label_false){
 			InsertCode(newcode);
 			// PrintfCode();
 			InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
+			newcode -> first_code = false;
 			newcode_ -> kind = IC_GOTO;
 			newcode_ -> u.sinOp.op = label_false;
 			InsertCode(newcode_);
@@ -918,6 +939,7 @@ void translate_Array(treeNode* root,  Operand* place){
 				t2->u.value = typesize*cur_size;
 				Operand t3=new_Temp();
 				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
 				newcode -> u.binOp.result = t3;
 				newcode -> u.binOp.op1 = t1;
 				newcode -> u.binOp.op2 = t2;
@@ -925,6 +947,7 @@ void translate_Array(treeNode* root,  Operand* place){
 				InsertCode(newcode);
 
 				InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
 				newcode_ -> u.binOp.result = bias;
 				newcode_ -> u.binOp.op1 = bias;
 				newcode_ -> u.binOp.op2 = t3;
@@ -944,6 +967,7 @@ void translate_Array(treeNode* root,  Operand* place){
 
 			Operand t5=new_Temp();
 			InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
+			newcode_ -> first_code = false;
 			newcode_ -> u.binOp.result = t5;
 			newcode_ -> u.binOp.op1 = bias;
 			newcode_ -> u.binOp.op2 = t4;

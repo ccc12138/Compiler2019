@@ -7,6 +7,8 @@ int synErrNum;
 int semErrNum;
 InterCode codeHead;
 InterCode codeTail;
+BasicBlock blockHead;
+BasicBlock blockTail;
 unsigned varNum;
 unsigned tempVarNum;
 unsigned labelNum;
@@ -29,6 +31,8 @@ int main(int argc, char** argv){
     semErrNum=0;
     codeHead=NULL;
     codeTail=NULL;
+    blockHead=NULL;
+    blockTail=NULL;
     varNum=1;
     tempVarNum=1;
     labelNum=1;

@@ -12,6 +12,7 @@ extern char* regsNameArr[];
 
 typedef struct VarDesc_* VarDesc;
 typedef struct RegDesc_* RegDesc;
+typedef struct BasicBlock_* BasicBlock;
 
 struct VarDesc_{//Var Descripter
 	char *name;//Var name
@@ -25,29 +26,40 @@ struct RegDesc_ {//Register Descripter
 	VarDesc var;//Describe register
 };
 
+// Double linked list
+struct BasicBlock_{
+	InterCode first_ic;
+	InterCode last_ic;
+};
+
 void PrintMips(FILE *fp);
-void PrintMipsCode(InterCode it,FILE *fp);
+void PrintMipsCode(InterCode ic,FILE *fp);
+
+// Basic Blocks
+void InitFirstCode();
+void InitBasicBlocks();
+void InitActiveVar();
 
 // Register
 void InitRegs();
 int getReg(Operand op);
 
 // Generate Mips Code
-void MipsCodeAssign(InterCode it,FILE *fp);
-void MipsCodeAddSubMulDiv(InterCode it,FILE *fp);
-// void MipsCodeSub(InterCode it,FILE *fp);
-// void MipsCodeMul(InterCode it,FILE *fp);
-// void MipsCodeDiv(InterCode it,FILE *fp);
-void MipsCodeLabel(InterCode it,FILE *fp);
-void MipsCodeFunction(InterCode it,FILE *fp);
-void MipsCodeGoto(InterCode it,FILE *fp);
-void MipsCodeIfgoto(InterCode it,FILE *fp);
-void MipsCodeReturn(InterCode it,FILE *fp);
-void MipsCodeDec(InterCode it,FILE *fp);
-void MipsCodeArg(InterCode it,FILE *fp);
-void MipsCodeCall(InterCode it,FILE *fp);
-void MipsCodeParam(InterCode it,FILE *fp);
-void MipsCodeRead(InterCode it,FILE *fp);
-void MipsCodeWrite(InterCode it,FILE *fp);
+void MipsCodeAssign(InterCode ic,FILE *fp);
+void MipsCodeAddSubMulDiv(InterCode ic,FILE *fp);
+// void MipsCodeSub(InterCode ic,FILE *fp);
+// void MipsCodeMul(InterCode ic,FILE *fp);
+// void MipsCodeDiv(InterCode ic,FILE *fp);
+void MipsCodeLabel(InterCode ic,FILE *fp);
+void MipsCodeFunction(InterCode ic,FILE *fp);
+void MipsCodeGoto(InterCode ic,FILE *fp);
+void MipsCodeIfgoto(InterCode ic,FILE *fp);
+void MipsCodeReturn(InterCode ic,FILE *fp);
+void MipsCodeDec(InterCode ic,FILE *fp);
+void MipsCodeArg(InterCode ic,FILE *fp);
+void MipsCodeCall(InterCode ic,FILE *fp);
+void MipsCodeParam(InterCode ic,FILE *fp);
+void MipsCodeRead(InterCode ic,FILE *fp);
+void MipsCodeWrite(InterCode ic,FILE *fp);
 
 #endif
