@@ -158,17 +158,10 @@ void InitBasicBlocks(){
 	bb=(BasicBlock)malloc(sizeof(struct BasicBlock_)*bb_num);
 	int index=0;
 	do{
-		if(ic->first_code==true){
-// #ifdef DEBUG
-// 			printf("current index=%d.\nlast index=%d.\n",index,(index+bb_num-1)%bb_num);
-// 			printf("reach here?\n");
-// #endif			
+		if(ic->first_code==true){		
 			bb[index].first_ic=ic;
 			bb[(int)((index+bb_num-1)%bb_num)].last_ic=ic->prev;
 			++index;
-// #ifdef DEBUG
-// 			printf("reach here?\n");
-// #endif	
 		}
 		ic=ic->next;
 	}while(ic!=codeHead);
