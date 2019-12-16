@@ -120,10 +120,8 @@ struct InterCode_{
 	InterCode prev;
 	InterCode next;
 	// 64 bits
-	unsigned long long def_vbitv;
-	unsigned long long def_tbitv;
-	unsigned long long use_vbitv;
-	unsigned long long use_tbitv;
+	unsigned long long vbitv;
+	unsigned long long tbitv;
 	bool first_code;
 };
 
