@@ -274,7 +274,7 @@ ParamDec -> Specifier VarDec
 		newcode -> u.sinOp.op = op_;
 /* ----------------------------------------------------------------------- */
 		if ( op_->kind == OP_VARIABLE ){
-			newcode.use_vbitv = newcode.use_vbitv | (1<<(op_->u.var_no));
+			newcode->use_vbitv = newcode->use_vbitv | (1<<(op_->u.var_no));
 		}
 /* ----------------------------------------------------------------------- */
 		InsertCode(newcode);
@@ -287,7 +287,7 @@ ParamDec -> Specifier VarDec
 		newcode -> u.sinOp.op = var_op->u.addr;
 /* ----------------------------------------------------------------------- */
 		assert ( var_op->kind == OP_VAR_ADDR );
-		newcode.use_vbitv = newcode.use_vbitv | (1<<(var_op->u.addr->u.var_no));
+		newcode->use_vbitv = newcode->use_vbitv | (1<<(var_op->u.addr->u.var_no));
 /* ----------------------------------------------------------------------- */
 		InsertCode(newcode);
 		assert(var_op->u.addr->kind==OP_VARIABLE);
@@ -344,11 +344,11 @@ Stmt -> Exp SEMI | CompSt | RETURN Exp SEMI | IF LP Exp RP Stmt | IF LP Exp RP S
 			assert ( t1->kind != OP_VAR_ADDR &&  t1->kind != OP_TEMP_VAR_ADDR &&  t1->kind != OP_GET_ADDR );
 			if ( t1->kind != OP_CONSTANT ){
 				if ( t1->kind == OP_VARIABLE ){
-					newcode.use_vbitv = newcode.use_vbitv | (1<<(t1->u.var_no));
+					newcode->use_vbitv = newcode->use_vbitv | (1<<(t1->u.var_no));
 				}
 				else{
 					assert ( t1->kind == OP_TEMP_VAR );
-					newcode.use_tbitv = newcode.use_tbitv | (1<<(t1->u.var_no));
+					newcode->use_tbitv = newcode->use_tbitv | (1<<(t1->u.var_no));
 				}
 			}
 /* ----------------------------------------------------------------------- */
@@ -494,7 +494,7 @@ Dec -> VarDec | VarDec ASSIGNOP Exp
 		newcode -> u.dec.size = res;
 
 /* ----------------------------------------------------------------------- */
-		newcode.def_vbitv = newcode.def_vbitv | (1<<(var_op -> u.var_no));
+		newcode->def_vbitv = newcode->def_vbitv | (1<<(var_op -> u.var_no));
 /* ----------------------------------------------------------------------- */
 
 		InsertCode(newcode);
@@ -512,15 +512,15 @@ Dec -> VarDec | VarDec ASSIGNOP Exp
 		newcode -> u.assign.left = p;
 /* ----------------------------------------------------------------------- */
 		assert ( p->kind == OP_VARIABLE );
-		newcode.def_vbitv = newcode.def_vbitv | (1<<(p -> u.var_no));
+		newcode->def_vbitv = newcode->def_vbitv | (1<<(p -> u.var_no));
 
 		if ( t1->kind != OP_CONSTANT ){
 			if ( t1->kind == OP_VARIABLE || t1->kind == OP_VAR_ADDR || t1->kind == OP_GET_ADDR ){
-				newcode.use_vbitv = newcode.use_vbitv | (1<<(t1->u.var_no));
+				newcode->use_vbitv = newcode->use_vbitv | (1<<(t1->u.var_no));
 			}
 			else{
 				assert ( t1->kind == OP_TEMP_VAR || t1->kind == OP_TEMP_VAR_ADDR );
-				newcode.use_tbitv = newcode.use_tbitv | (1<<(t1->u.var_no));
+				newcode->use_tbitv = newcode->use_tbitv | (1<<(t1->u.var_no));
 			}
 		}
 /* ----------------------------------------------------------------------- */
@@ -584,19 +584,19 @@ void translate_Exp(treeNode* root, Operand* place){
 /* ----------------------------------------------------------------------- */
 			assert ( v_t->kind != OP_CONSTANT );
 			if ( v_t->kind == OP_VARIABLE || v_t->kind == OP_VAR_ADDR || v_t->kind == OP_GET_ADDR ){
-				newcode.def_vbitv = newcode.def_vbitv | (1<<(v_t -> u.var_no));
+				newcode->def_vbitv = newcode->def_vbitv | (1<<(v_t -> u.var_no));
 			}
 			else{
 				assert ( v_t->kind == OP_TEMP_VAR || v_t->kind == OP_TEMP_VAR_ADDR );
-				newcode.def_tbitv = newcode.def_tbitv | (1<<(v_t->u.var_no));
+				newcode->def_tbitv = newcode->def_tbitv | (1<<(v_t->u.var_no));
 			}
 			if ( t1->kind != OP_CONSTANT ){
 				if ( t1->kind == OP_VARIABLE || t1->kind == OP_VAR_ADDR || t1->kind == OP_GET_ADDR ){
-					newcode.use_vbitv = newcode.use_vbitv | (1<<(t1->u.var_no));
+					newcode->use_vbitv = newcode->use_vbitv | (1<<(t1->u.var_no));
 				}
 				else{
 					assert ( t1->kind == OP_TEMP_VAR || t1->kind == OP_TEMP_VAR_ADDR );
-					newcode.use_tbitv = newcode.use_tbitv | (1<<(t1->u.var_no));
+					newcode->use_tbitv = newcode->use_tbitv | (1<<(t1->u.var_no));
 				}
 			}
 /* ----------------------------------------------------------------------- */
@@ -611,19 +611,19 @@ void translate_Exp(treeNode* root, Operand* place){
 /* ----------------------------------------------------------------------- */
 				assert ( v_t->kind != OP_CONSTANT );
 				if ( v_t->kind == OP_VARIABLE || v_t->kind == OP_VAR_ADDR || v_t->kind == OP_GET_ADDR ){
-					newcode.def_vbitv = newcode.def_vbitv | (1<<(v_t -> u.var_no));
+					newcode->def_vbitv = newcode->def_vbitv | (1<<(v_t -> u.var_no));
 				}
 				else{
 					assert ( v_t->kind == OP_TEMP_VAR || v_t->kind == OP_TEMP_VAR_ADDR );
-					newcode.def_tbitv = newcode.def_tbitv | (1<<(v_t->u.var_no));
+					newcode->def_tbitv = newcode->def_tbitv | (1<<(v_t->u.var_no));
 				}
 				if ( (*place)->kind != OP_CONSTANT ){
 					if ( (*place)->kind == OP_VARIABLE || (*place)->kind == OP_VAR_ADDR || (*place)->kind == OP_GET_ADDR ){
-						newcode.use_vbitv = newcode.use_vbitv | (1<<((*place)->u.var_no));
+						newcode->use_vbitv = newcode->use_vbitv | (1<<((*place)->u.var_no));
 					}
 					else{
 						assert ( (*place)->kind == OP_TEMP_VAR ||(*place)->kind == OP_TEMP_VAR_ADDR );
-						newcode.use_tbitv = newcode.use_tbitv | (1<<((*place)->u.var_no));
+						newcode->use_tbitv = newcode->use_tbitv | (1<<((*place)->u.var_no));
 					}
 				}
 /* ----------------------------------------------------------------------- */
@@ -653,11 +653,11 @@ void translate_Exp(treeNode* root, Operand* place){
 /* ----------------------------------------------------------------------- */
 			assert ( (*place)->kind != OP_CONSTANT );
 			if ( (*place)->kind == OP_VARIABLE || (*place)->kind == OP_VAR_ADDR || (*place)->kind == OP_GET_ADDR ){
-				newcode.def_vbitv = newcode.def_vbitv | (1<<((*place) -> u.var_no));
+				newcode->def_vbitv = newcode->def_vbitv | (1<<((*place) -> u.var_no));
 			}
 			else{
 				assert ( (*place)->kind == OP_TEMP_VAR || (*place)->kind == OP_TEMP_VAR_ADDR );
-				newcode.def_tbitv = newcode.def_tbitv | (1<<((*place)->u.var_no));
+				newcode->def_tbitv = newcode->def_tbitv | (1<<((*place)->u.var_no));
 			}
 /* ----------------------------------------------------------------------- */
 			InsertCode(newcode);
@@ -681,11 +681,11 @@ void translate_Exp(treeNode* root, Operand* place){
 /* ----------------------------------------------------------------------- */
 			assert ( (*place)->kind != OP_CONSTANT );
 			if ( (*place)->kind == OP_VARIABLE || (*place)->kind == OP_VAR_ADDR || (*place)->kind == OP_GET_ADDR ){
-				newcode.def_vbitv = newcode.def_vbitv | (1<<((*place) -> u.var_no));
+				newcode->def_vbitv = newcode->def_vbitv | (1<<((*place) -> u.var_no));
 			}
 			else{
 				assert ( (*place)->kind == OP_TEMP_VAR || (*place)->kind == OP_TEMP_VAR_ADDR );
-				newcode.def_tbitv = newcode.def_tbitv | (1<<((*place)->u.var_no));
+				newcode->def_tbitv = newcode->def_tbitv | (1<<((*place)->u.var_no));
 			}
 /* ----------------------------------------------------------------------- */
 			InsertCode(newcode);
@@ -723,28 +723,28 @@ void translate_Exp(treeNode* root, Operand* place){
 /* ----------------------------------------------------------------------- */
 				assert ( (*place)->kind != OP_CONSTANT );
 				if ( (*place)->kind == OP_VARIABLE || (*place)->kind == OP_VAR_ADDR || (*place)->kind == OP_GET_ADDR ){
-					newcode.def_vbitv = newcode.def_vbitv | (1<<((*place) -> u.var_no));
+					newcode->def_vbitv = newcode->def_vbitv | (1<<((*place) -> u.var_no));
 				}
 				else{
 					assert ( (*place)->kind == OP_TEMP_VAR || (*place)->kind == OP_TEMP_VAR_ADDR );
-					newcode.def_tbitv = newcode.def_tbitv | (1<<((*place)->u.var_no));
+					newcode->def_tbitv = newcode->def_tbitv | (1<<((*place)->u.var_no));
 				}
 				if ( t1->kind != OP_CONSTANT ){
 					if ( t1->kind == OP_VARIABLE || t1->kind == OP_VAR_ADDR || t1->kind == OP_GET_ADDR ){
-						newcode.use_vbitv = newcode.use_vbitv | (1<<(t1->u.var_no));
+						newcode->use_vbitv = newcode->use_vbitv | (1<<(t1->u.var_no));
 					}
 					else{
 						assert ( t1->kind == OP_TEMP_VAR || t1->kind == OP_TEMP_VAR_ADDR );
-						newcode.use_tbitv = newcode.use_tbitv | (1<<(t1->u.var_no));
+						newcode->use_tbitv = newcode->use_tbitv | (1<<(t1->u.var_no));
 					}
 				}
 				if ( t2->kind != OP_CONSTANT ){
 					if ( t2->kind == OP_VARIABLE || t2->kind == OP_VAR_ADDR || t2->kind == OP_GET_ADDR ){
-						newcode.use_vbitv = newcode.use_vbitv | (1<<(t2->u.var_no));
+						newcode->use_vbitv = newcode->use_vbitv | (1<<(t2->u.var_no));
 					}
 					else{
 						assert ( t2->kind == OP_TEMP_VAR || t2->kind == OP_TEMP_VAR_ADDR );
-						newcode.use_tbitv = newcode.use_tbitv | (1<<(t2->u.var_no));
+						newcode->use_tbitv = newcode->use_tbitv | (1<<(t2->u.var_no));
 					}
 				}
 /* ----------------------------------------------------------------------- */
@@ -777,19 +777,19 @@ void translate_Exp(treeNode* root, Operand* place){
 /* ----------------------------------------------------------------------- */
 				assert ( (*place)->kind != OP_CONSTANT );
 				if ( (*place)->kind == OP_VARIABLE || (*place)->kind == OP_VAR_ADDR || (*place)->kind == OP_GET_ADDR ){
-					newcode.def_vbitv = newcode.def_vbitv | (1<<((*place) -> u.var_no));
+					newcode->def_vbitv = newcode->def_vbitv | (1<<((*place) -> u.var_no));
 				}
 				else{
 					assert ( (*place)->kind == OP_TEMP_VAR || (*place)->kind == OP_TEMP_VAR_ADDR );
-					newcode.def_tbitv = newcode.def_tbitv | (1<<((*place)->u.var_no));
+					newcode->def_tbitv = newcode->def_tbitv | (1<<((*place)->u.var_no));
 				}
 				if ( t2->kind != OP_CONSTANT ){
 					if ( t2->kind == OP_VARIABLE || t2->kind == OP_VAR_ADDR || t2->kind == OP_GET_ADDR ){
-						newcode.use_vbitv = newcode.use_vbitv | (1<<(t2->u.var_no));
+						newcode->use_vbitv = newcode->use_vbitv | (1<<(t2->u.var_no));
 					}
 					else{
 						assert ( t2->kind == OP_TEMP_VAR || t2->kind == OP_TEMP_VAR_ADDR );
-						newcode.use_tbitv = newcode.use_tbitv | (1<<(t2->u.var_no));
+						newcode->use_tbitv = newcode->use_tbitv | (1<<(t2->u.var_no));
 					}
 				}
 /* ----------------------------------------------------------------------- */
@@ -812,11 +812,11 @@ void translate_Exp(treeNode* root, Operand* place){
 /* ----------------------------------------------------------------------- */
 				if ( op_->kind != OP_CONSTANT ){
 					if ( op_->kind == OP_VARIABLE ){
-						newcode.use_vbitv = newcode.use_vbitv | (1<<(op_->u.var_no));
+						newcode->use_vbitv = newcode->use_vbitv | (1<<(op_->u.var_no));
 					}
 					else{
 						assert ( op_->kind == OP_TEMP_VAR );
-						newcode.use_tbitv = newcode.use_tbitv | (1<<(op_->u.var_no));
+						newcode->use_tbitv = newcode->use_tbitv | (1<<(op_->u.var_no));
 					}
 				}
 /* ----------------------------------------------------------------------- */
@@ -834,11 +834,11 @@ void translate_Exp(treeNode* root, Operand* place){
 /* ----------------------------------------------------------------------- */
 					if ( op_->kind != OP_CONSTANT ){
 						if ( op_->kind == OP_VARIABLE ){
-							newcode.use_vbitv = newcode.use_vbitv | (1<<(op_->u.var_no));
+							newcode->use_vbitv = newcode->use_vbitv | (1<<(op_->u.var_no));
 						}
 						else{
 							assert ( op_->kind == OP_TEMP_VAR );
-							newcode.use_tbitv = newcode.use_tbitv | (1<<(op_->u.var_no));
+							newcode->use_tbitv = newcode->use_tbitv | (1<<(op_->u.var_no));
 						}
 					}
 /* ----------------------------------------------------------------------- */
@@ -860,11 +860,11 @@ void translate_Exp(treeNode* root, Operand* place){
 				if ( place != NULL ){
 					assert ( (*place)->kind != OP_CONSTANT );
 					if ( (*place)->kind == OP_VARIABLE || (*place)->kind == OP_VAR_ADDR || (*place)->kind == OP_GET_ADDR ){
-						newcode.def_vbitv = newcode.def_vbitv | (1<<((*place) -> u.var_no));
+						newcode->def_vbitv = newcode->def_vbitv | (1<<((*place) -> u.var_no));
 					}
 					else{
 						assert ( (*place)->kind == OP_TEMP_VAR || (*place)->kind == OP_TEMP_VAR_ADDR );
-						newcode.def_tbitv = newcode.def_tbitv | (1<<((*place)->u.var_no));
+						newcode->def_tbitv = newcode->def_tbitv | (1<<((*place)->u.var_no));
 					}
 				}
 /* ----------------------------------------------------------------------- */
@@ -895,11 +895,11 @@ void translate_Exp(treeNode* root, Operand* place){
 			if ( place != NULL ){
 				assert ( (*place)->kind != OP_CONSTANT );
 				if ( (*place)->kind == OP_VARIABLE || (*place)->kind == OP_VAR_ADDR || (*place)->kind == OP_GET_ADDR ){
-					newcode.def_vbitv = newcode.def_vbitv | (1<<((*place) -> u.var_no));
+					newcode->def_vbitv = newcode->def_vbitv | (1<<((*place) -> u.var_no));
 				}
 				else{
 					assert ( (*place)->kind == OP_TEMP_VAR || (*place)->kind == OP_TEMP_VAR_ADDR );
-					newcode.def_tbitv = newcode.def_tbitv | (1<<((*place)->u.var_no));
+					newcode->def_tbitv = newcode->def_tbitv | (1<<((*place)->u.var_no));
 				}
 			}
 /* ----------------------------------------------------------------------- */
@@ -1013,20 +1013,20 @@ void translate_Cond(treeNode* root, Operand label_true, Operand label_false){
 /* ----------------------------------------------------------------------- */
 			if ( t1->kind != OP_CONSTANT ){
 				if ( t1->kind == OP_VARIABLE ){
-					newcode.use_vbitv = newcode.use_vbitv | (1<<(t1->u.var_no));
+					newcode->use_vbitv = newcode->use_vbitv | (1<<(t1->u.var_no));
 				}
 				else{
 					assert ( t1->kind == OP_TEMP_VAR );
-					newcode.use_tbitv = newcode.use_tbitv | (1<<(t1->u.var_no));
+					newcode->use_tbitv = newcode->use_tbitv | (1<<(t1->u.var_no));
 				}
 			}
 			if ( t2->kind != OP_CONSTANT ){
 				if ( t2->kind == OP_VARIABLE ){
-					newcode.use_vbitv = newcode.use_vbitv | (1<<(t2->u.var_no));
+					newcode->use_vbitv = newcode->use_vbitv | (1<<(t2->u.var_no));
 				}
 				else{
 					assert ( t2->kind == OP_TEMP_VAR );
-					newcode.use_tbitv = newcode.use_tbitv | (1<<(t2->u.var_no));
+					newcode->use_tbitv = newcode->use_tbitv | (1<<(t2->u.var_no));
 				}
 			}
 /* ----------------------------------------------------------------------- */
@@ -1081,11 +1081,11 @@ void translate_Cond(treeNode* root, Operand label_true, Operand label_false){
 /* ----------------------------------------------------------------------- */
 			if ( t1->kind != OP_CONSTANT ){
 				if ( t1->kind == OP_VARIABLE ){
-					newcode.use_vbitv = newcode.use_vbitv | (1<<(t1->u.var_no));
+					newcode->use_vbitv = newcode->use_vbitv | (1<<(t1->u.var_no));
 				}
 				else{
 					assert ( t1->kind == OP_TEMP_VAR );
-					newcode.use_tbitv = newcode.use_tbitv | (1<<(t1->u.var_no));
+					newcode->use_tbitv = newcode->use_tbitv | (1<<(t1->u.var_no));
 				}
 			}
 /* ----------------------------------------------------------------------- */
@@ -1151,7 +1151,7 @@ void translate_Array(treeNode* root,  Operand* place){
 			newcod -> u.assign.left = bias;
 /* ----------------------------------------------------------------------- */
 			assert ( bias->kind == OP_TEMP_VAR );
-			newcode.def_tbitv = newcode.def_tbitv | (1<<(bias->u.var_no));
+			newcod->def_tbitv = newcod->def_tbitv | (1<<(bias->u.var_no));
 /* ----------------------------------------------------------------------- */
 			InsertCode(newcod);
 			int cnt=-1;
@@ -1176,14 +1176,14 @@ void translate_Array(treeNode* root,  Operand* place){
 				newcode -> kind = IC_MUL;
 /* ----------------------------------------------------------------------- */
 				assert ( t3->kind == OP_TEMP_VAR );
-				newcode.def_tbitv = newcode.def_tbitv | (1<<(t3->u.var_no));
+				newcode->def_tbitv = newcode->def_tbitv | (1<<(t3->u.var_no));
 				if ( t1->kind != OP_CONSTANT ){
 					if ( t1->kind == OP_VARIABLE ){
-						newcode.use_vbitv = newcode.use_vbitv | (1<<(t1->u.var_no));
+						newcode->use_vbitv = newcode->use_vbitv | (1<<(t1->u.var_no));
 					}
 					else{
 						assert ( t1->kind == OP_TEMP_VAR );
-						newcode.use_tbitv = newcode.use_tbitv | (1<<(t1->u.var_no));
+						newcode->use_tbitv = newcode->use_tbitv | (1<<(t1->u.var_no));
 					}
 				}
 /* ----------------------------------------------------------------------- */
@@ -1197,10 +1197,10 @@ void translate_Array(treeNode* root,  Operand* place){
 				newcode_ -> kind = IC_ADD;
 /* ----------------------------------------------------------------------- */
 				assert ( bias->kind == OP_TEMP_VAR );
-				newcode.def_tbitv = newcode.def_tbitv | (1<<(bias->u.var_no));
-				newcode.use_tbitv = newcode.use_tbitv | (1<<(bias->u.var_no));
+				newcode->def_tbitv = newcode->def_tbitv | (1<<(bias->u.var_no));
+				newcode->use_tbitv = newcode->use_tbitv | (1<<(bias->u.var_no));
 				assert ( t3->kind == OP_TEMP_VAR );
-				newcode.use_tbitv = newcode.use_tbitv | (1<<(t3->u.var_no));
+				newcode->use_tbitv = newcode->use_tbitv | (1<<(t3->u.var_no));
 /* ----------------------------------------------------------------------- */
 				InsertCode(newcode_);
 				p = p->childp;
@@ -1224,12 +1224,12 @@ void translate_Array(treeNode* root,  Operand* place){
 			newcode_ -> kind = IC_ADD;
 /* ----------------------------------------------------------------------- */
 			assert ( t5->kind == OP_TEMP_VAR );
-			newcode.def_tbitv = newcode.def_tbitv | (1<<(t5->u.var_no));
+			newcode_->def_tbitv = newcode_->def_tbitv | (1<<(t5->u.var_no));
 			assert ( bias->kind == OP_TEMP_VAR );
-			newcode.use_tbitv = newcode.use_tbitv | (1<<(bias->u.var_no));
+			newcode_->use_tbitv = newcode_->use_tbitv | (1<<(bias->u.var_no));
 
 			assert ( t4->kind == OP_GET_ADDR || t4->kind == OP_VARIABLE );
-			newcode.use_vbitv = newcode.use_vbitv | (1<<(t4->u.var_no));
+			newcode_->use_vbitv = newcode_->use_vbitv | (1<<(t4->u.var_no));
 /* ----------------------------------------------------------------------- */
 			InsertCode(newcode_);	
 			// PrintfCode();
