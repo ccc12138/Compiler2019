@@ -47,6 +47,7 @@ void InitActiveVar();
 void InitRegs();
 void InitVars();
 int getReg(Operand op, FILE *fp);
+int findVar(Operand op);//just find where it is
 
 // Generate Mips Code
 void MipsCodeAssign(InterCode ic,FILE *fp);

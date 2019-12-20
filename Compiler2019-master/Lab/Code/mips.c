@@ -8,6 +8,7 @@ VarDesc temp_var;
 int cur_reg_var=0;//var index
 int cur_reg_temp_var=0;//temp var index
 int offset=0;
+int cur_arg=0;
 char* regNameArr[] = {
 	"$zero",//Constant value 0
 	"$at",//Reserved for assembler
@@ -279,11 +280,12 @@ int getReg(Operand op, FILE *fp){
 		}
 		return ret;
 	case OP_TEMP_VAR:
+	case OP_GET_ADDR:
 		ret=temp_var[id].reg;
 		pointer=cur_reg_temp_var;
 		if(ret==0){
 			offset-=4;
-			var[id].offset=offset;
+			temp_var[id].offset=offset;
 			do{
 				if(regs[pointer+8].var==NULL){
 					has_looped=false;
@@ -306,10 +308,20 @@ int getReg(Operand op, FILE *fp){
 	case OP_VAR_ADDR:
 	case OP_TEMP_VAR_ADDR:
 		return getReg(op->u.addr,fp);
-	case OP_GET_ADDR:
-		return 0;
+	default:
+		assert(0);//don't know if it is correct
 	}
 	return 0;
+}
+
+int findVar(Operand op){
+	switch(op->kind){
+	case OP_VARIABLE:
+	case OP_TEMP_VAR:
+		return op->u.var_no;
+	default:
+		assert(0);
+	}
 }
 
 /*****************
@@ -467,8 +479,7 @@ void MipsCodeFunction(InterCode ic,FILE *fp){
 	// sp-=4, store ret addr
 	printf("to print function,\n");
 	offset=0;//for a new func set offset = 0
-	fprintf(fp, "%s:\n"
-		,ic->u.sinOp.op->u.name);
+	fprintf(fp, "%s:\n",ic->u.sinOp.op->u.name);
 	printf("end print function.\n");
 }
 
@@ -587,12 +598,32 @@ void MipsCodeArg(InterCode ic,FILE *fp){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
+	int t_id=getReg(ic->u.sinOp.op,fp);
+	if(cur_arg<4){
+		fprintf(fp, "\tmove $a%d, %s\n", cur_arg, regs[t_id].name);
+	}
+	else{
+		// wrong here, you should start from here
+		// fprintf(fp, "\tsw %s, %d($sp)\n", regs[t_id].name, (cur_arg-4)<<2);
+	}
+	++cur_arg;
+	if(ic->next==codeHead||ic->next->kind!=IC_ARG){
+		cur_arg=0;//re init
+	}
 }
 
 void MipsCodeCall(InterCode ic,FILE *fp){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
+	// WRONG WRONG WRONG
+	// fprintf(fp, "\taddi $sp, $sp, -%d\n", cur_arg);
+	// fputs("\tsw $ra, 0($sp)\n", fp);
+	// fprintf(fp, "\tjal %s\n", ic->u.sinOp.op->u.name);
+	// int t_id=getReg(ic->u.sinOp.op,fp);
+	// fprintf(fp, "\tmove %s, $v0\n", regs[t_id].name);
+	// fputs("\tlw $ra, 0($sp)\n", fp);
+	// fputs("\taddi $sp, $sp, 4\n", fp);
 }
 
 void MipsCodeParam(InterCode ic,FILE *fp){
@@ -605,17 +636,23 @@ void MipsCodeRead(InterCode ic,FILE *fp){
 	fputs("\taddi $sp, $sp, -4\n", fp);
 	fputs("\tsw $ra, 0($sp)\n", fp);
 	fputs("\tjal read\n", fp);
+	int t_id=getReg(ic->u.sinOp.op,fp);
+	fprintf(fp, "\tmove %s, $v0\n", regs[t_id].name);
 	fputs("\tlw $ra, 0($sp)\n", fp);
 	fputs("\taddi $sp, $sp, 4\n", fp);
-	/*****************************
-	/* Still need implementation *
-	*****************************/
-	// TODO: Deal with return value.
 }
 
 void MipsCodeWrite(InterCode ic,FILE *fp){
 	fputs("\taddi $sp, $sp, -4\n", fp);
 	fputs("\tsw $ra, 0($sp)\n", fp);
+	int t_id=getReg(ic->u.sinOp.op,fp);
+	if(ic->u.sinOp.op->kind==OP_VARIABLE||ic->u.sinOp.op->kind==OP_TEMP_VAR
+		||ic->u.sinOp.op->kind==OP_GET_ADDR){
+		fprintf(fp, "\tmove $a0, %s\n", regs[t_id].name);
+	}
+	else if(ic->u.sinOp.op->kind==OP_VAR_ADDR||ic->u.sinOp.op->kind==OP_TEMP_VAR_ADDR){
+		fprintf(fp, "\tlw $a0, 0(%s)\n", regs[t_id].name);
+	}
 	fputs("\tjal write\n", fp);
 	fputs("\tlw $ra, 0($sp)\n", fp);
 	fputs("\taddi $sp, $sp, 4\n", fp);

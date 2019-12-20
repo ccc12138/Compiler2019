@@ -28,6 +28,7 @@ main:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	jal read
+	move $t0, $v0
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
 	move $s3, $t0
@@ -37,6 +38,7 @@ label1:
 	move $s4, $t1
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
+	move $a0, $s1
 	jal write
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
