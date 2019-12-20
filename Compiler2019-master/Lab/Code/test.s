@@ -22,20 +22,28 @@ write:
 	jr $ra
 
 main:
-	li $zero, 0
-	li $zero, 1
-	li $zero, 0
+	li $s0, 0
+	li $s1, 1
+	li $s2, 0
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
 	jal read
-	move $zero, $zero
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	move $s3, $t0
 label1:
-	beq $zero, $zero, label3
-	add $zero, $zero, $zero
-	move $zero, $zero
-jal write
-	move $zero, $zero
-	move $zero, $zero
-	addi $zero, $zero, 1
-	move $zero, $zero
+	beq $s2, $s3, label3
+	add $t1, $s0, $s1
+	move $s4, $t1
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	jal write
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	move $s0, $s1
+	move $s1, $s4
+	addi $t2, $s2, 1
+	move $s2, $t2
 	j label1
 label3:
 	move $v0, $0

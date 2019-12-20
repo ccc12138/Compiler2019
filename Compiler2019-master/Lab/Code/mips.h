@@ -5,20 +5,23 @@
 
 #define _REG_NUM_ 32
 #define _STR_LEN_ 256
+#define _SAVED_VAR_ 16
 
 extern InterCode codeHead;
 extern InterCode codeTail;
 extern char* regsNameArr[];
+
+// #define GET_VAR_REG(op)\
+
+
 
 typedef struct VarDesc_* VarDesc;
 typedef struct RegDesc_* RegDesc;
 typedef struct BasicBlock_* BasicBlock;
 
 struct VarDesc_{//Var Descripter
-	char *name;//Var name
 	int reg;//register match
 	int offset;//for param
-	VarDesc next;//next var descripter
 };
 
 struct RegDesc_ {//Register Descripter
@@ -42,7 +45,8 @@ void InitActiveVar();
 
 // Register
 void InitRegs();
-int getReg(Operand op);
+void InitVars();
+int getReg(Operand op, FILE *fp);
 
 // Generate Mips Code
 void MipsCodeAssign(InterCode ic,FILE *fp);
