@@ -522,22 +522,22 @@ void MipsCodeIfgoto(InterCode ic,FILE *fp){
 		op1_id=getReg(op1,fp);
 		if(op2->kind!=OP_CONSTANT){
 			op2_id=getReg(op2,fp);
-			if(strcmp(relop,"==")){
+			if(strcmp(relop,"==")==0){
 				fprintf(fp,"\tbeq %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
 			}
-			else if(strcmp(relop,"!=")){
+			else if(strcmp(relop,"!=")==0){
 				fprintf(fp,"\tbne %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
 			}
-			else if(strcmp(relop,">")){
+			else if(strcmp(relop,">")==0){
 				fprintf(fp,"\tbgt %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
 			}
-			else if(strcmp(relop,"<")){
+			else if(strcmp(relop,"<")==0){
 				fprintf(fp,"\tblt %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
 			}
-			else if(strcmp(relop,">=")){
+			else if(strcmp(relop,">=")==0){
 				fprintf(fp,"\tbge %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
 			}
-			else if(strcmp(relop,"<=")){
+			else if(strcmp(relop,"<=")==0){
 				fprintf(fp,"\tble %s, %s, label%d\n",regs[op1_id].name,regs[op2_id].name,label_num);
 			}
 			else{
@@ -545,22 +545,22 @@ void MipsCodeIfgoto(InterCode ic,FILE *fp){
 			}
 		}
 		else if(op2->kind==OP_CONSTANT){
-			if(strcmp(relop,"==")){
+			if(strcmp(relop,"==")==0){
 				fprintf(fp,"\tbeq %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
 			}
-			else if(strcmp(relop,"!=")){
+			else if(strcmp(relop,"!=")==0){
 				fprintf(fp,"\tbne %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
 			}
-			else if(strcmp(relop,">")){
+			else if(strcmp(relop,">")==0){
 				fprintf(fp,"\tbgt %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
 			}
-			else if(strcmp(relop,"<")){
+			else if(strcmp(relop,"<")==0){
 				fprintf(fp,"\tblt %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
 			}
-			else if(strcmp(relop,">=")){
+			else if(strcmp(relop,">=")==0){
 				fprintf(fp,"\tbge %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
 			}
-			else if(strcmp(relop,"<=")){
+			else if(strcmp(relop,"<=")==0){
 				fprintf(fp,"\tble %s, %d, label%d\n",regs[op1_id].name,op2->u.value,label_num);
 			}
 			else{
@@ -573,22 +573,22 @@ void MipsCodeIfgoto(InterCode ic,FILE *fp){
 	}
 	else if(op1->kind==OP_CONSTANT&&op2->kind!=OP_CONSTANT){
 		op2_id=getReg(op2,fp);
-		if(strcmp(relop,"==")){
+		if(strcmp(relop,"==")==0){
 			fprintf(fp,"\tbeq %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
 		}
-		else if(strcmp(relop,"!=")){
+		else if(strcmp(relop,"!=")==0){
 			fprintf(fp,"\tbne %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
 		}
-		else if(strcmp(relop,">")){
+		else if(strcmp(relop,">")==0){
 			fprintf(fp,"\tble %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
 		}
-		else if(strcmp(relop,"<")){
+		else if(strcmp(relop,"<")==0){
 			fprintf(fp,"\tbge %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
 		}
-		else if(strcmp(relop,">=")){
+		else if(strcmp(relop,">=")==0){
 			fprintf(fp,"\tblt %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
 		}
-		else if(strcmp(relop,"<=")){
+		else if(strcmp(relop,"<=")==0){
 			fprintf(fp,"\tbgt %s, %d, label%d\n",regs[op2_id].name,op1->u.value,label_num);
 		}
 		else{

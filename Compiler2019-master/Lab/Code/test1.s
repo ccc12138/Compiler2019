@@ -37,7 +37,7 @@ main:
 	addi $sp, $sp, 4
 	move $s3, $t0
 label1:
-	beq $s2, $s3, label3
+	bge $s2, $s3, label3
 	add $t1, $s0, $s1
 	move $s4, $t1
 	addi $sp, $sp, -4

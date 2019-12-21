@@ -27,7 +27,7 @@ fact:
 	move $fp, $sp
 	subu $sp, $sp, 72
 	move $s0, $a0
-	beq $s0, 1, label2
+	bne $s0, 1, label2
 	move $v0, $s0
 	addi $sp, $sp, 72
 	lw $fp, 0($sp)
@@ -62,7 +62,7 @@ main:
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
 	move $s1, $t3
-	beq $s1, 1, label5
+	ble $s1, 1, label5
 	addi $sp, $sp, -4
 	move $a0, $s1
 	sw $ra, 0($sp)
