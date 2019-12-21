@@ -1,0 +1,31 @@
+int change(int x,int y)
+{
+    write(x);
+    write(y);
+    return 0;
+}
+
+int hanoi(int n,int a,int b,int c)
+{
+    if(n == 1)
+    {
+        change(a, c);
+    }
+    else
+    {
+        hanoi(n-1, a, c, b);
+        change(a, c); 
+        hanoi(n-1, b, a, c);
+    }
+    return 0;
+}
+int main()
+{
+    int m;
+    int g = 1;
+    int h = 2;
+    int i = 3;
+    m = read();
+    hanoi(m,g,h,i);
+    return 0;
+}

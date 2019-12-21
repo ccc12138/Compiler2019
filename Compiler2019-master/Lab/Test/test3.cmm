@@ -1,0 +1,19 @@
+int main()
+{
+	int op[2];
+	int r;
+	int i = 0, j = 0;
+	while (i < 2)
+	{
+		while (j < 2)
+		{
+			op[j] = i + j;
+			j = j + 1;
+		}
+		r = op[0] + op[1];
+		write(r);
+		i = i + 1;
+		j = 0;
+	}
+	return 0;
+}

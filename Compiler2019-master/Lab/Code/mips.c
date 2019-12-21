@@ -245,6 +245,9 @@ int getReg(Operand op, FILE *fp){
 	/*****************************
 	/* Still need implementation *
 	*****************************/
+	/*************************
+	/* Wrong: Alloc new regs *
+	*************************/
 #ifdef DEBUG
 	printf("Enter getReg!\n");
 #endif
@@ -258,7 +261,7 @@ int getReg(Operand op, FILE *fp){
 		printf("case variable\n");
 		ret=var[id].reg;
 		pointer=cur_reg_var;
-		if(ret==0){
+ 		if(ret==0){
 			offset-=4;
 			var[id].offset=offset;
 			do{
@@ -271,8 +274,11 @@ int getReg(Operand op, FILE *fp){
 			// printf("get over while!\npointer=%d\n",pointer);
 			if(has_looped==true&&pointer==cur_reg_var){//store old and get new id
 				pointer=(pointer+1)%8;
+				// wrong here
+				// how to deal with fp?
+				regs[pointer+18].var->offset=offset;
 				fprintf(fp,"\tsw %s, %d($fp)\n"
-					, regs[pointer+18].name,regs[pointer+18].var->offset);
+					, regs[pointer+18].name,offset);
 				regs[pointer+18].var->reg=0;
 			}
 			// printf("get over if\n");
@@ -283,8 +289,10 @@ int getReg(Operand op, FILE *fp){
 		}
 		return ret;
 	case OP_TEMP_VAR:
-		printf("case temp_var\n");
 	case OP_GET_ADDR:
+	/**************************************
+	/* May be different!!But I don't know?*
+	***************************************/
 		printf("case get addr\n");
 		ret=temp_var[id].reg;
 		pointer=cur_reg_temp_var;
@@ -306,8 +314,9 @@ int getReg(Operand op, FILE *fp){
 			// printf("ret=0 and loop end\n");
 			if(has_looped==true&&pointer==cur_reg_temp_var){
 				pointer=(pointer+1)%10;
+				regs[pointer+8].var->offset=offset;
 				fprintf(fp,"\tsw %s, %d($fp)\n"
-					, regs[pointer+8].name,regs[pointer+8].var->offset);
+					, regs[pointer+8].name,offset);
 				regs[pointer+8].var->reg=0;
 			}
 			cur_reg_temp_var=pointer;
@@ -386,14 +395,32 @@ void MipsCodeAssign(InterCode ic,FILE *fp){
 }
 
 void MipsCodeAddSubMulDiv(InterCode ic,FILE *fp){
+#ifdef DEBUG
+	switch(ic->kind){
+		case IC_ADD://4
+			PRINTF_BINOP("+ ");
+			break;
+		case IC_SUB://5
+			PRINTF_BINOP("- ");
+			break;
+		case IC_MUL://6
+			PRINTF_BINOP("* ");
+			break;
+		case IC_DIV://7
+			PRINTF_BINOP("/ ");
+			break;
+		default:
+			assert(0);
+	}
+#endif
 	Operand op_res=ic->u.binOp.result;
 	Operand op1=ic->u.binOp.op1;
 	Operand op2=ic->u.binOp.op2;
 	int res_id, op1_id, op2_id;
 	bool op1_cons=(op1->kind==OP_CONSTANT)?true:false;
 	bool op2_cons=(op2->kind==OP_CONSTANT)?true:false;
-	bool op_var=((op1->kind==OP_VARIABLE||op1->kind==OP_TEMP_VAR)
-		&&(op2->kind==OP_VARIABLE||op2->kind==OP_TEMP_VAR))?true:false;
+	bool op_var=((op1->kind==OP_VARIABLE||op1->kind==OP_TEMP_VAR||op1->kind==OP_GET_ADDR)
+		&&(op2->kind==OP_VARIABLE||op2->kind==OP_TEMP_VAR||op2->kind==OP_GET_ADDR))?true:false;
 	res_id=getReg(op_res,fp);
 	if(op1_cons){
 		op2_id=getReg(op2,fp);
@@ -403,7 +430,10 @@ void MipsCodeAddSubMulDiv(InterCode ic,FILE *fp){
 			fprintf(fp,"\taddi %s, %s, %d\n",regs[res_id].name,regs[op2_id].name,op1->u.value);
 			break;
 		case IC_SUB:
-			// x = #k - y may have bugs here
+			/*****************************
+			/* Still need implementation *
+			*****************************/
+			// x = #k - y may have bugs here? but who knows!
 			fprintf(fp,"\taddi %s, %s, -%d\n",regs[res_id].name,regs[op2_id].name,op1->u.value);
 			fprintf(fp,"\tneg %s\n",regs[res_id].name);
 			break;
@@ -412,6 +442,7 @@ void MipsCodeAddSubMulDiv(InterCode ic,FILE *fp){
 			/* Still need implementation *
 			*****************************/
 			// LOAD TO REGS FIRST
+
 			break;
 		case IC_DIV:
 			/*****************************
@@ -482,26 +513,6 @@ void MipsCodeAddSubMulDiv(InterCode ic,FILE *fp){
 
 void MipsCodeLabel(InterCode ic,FILE *fp){
 	fprintf(fp, "label%d:\n", ic->u.sinOp.op->u.var_no);
-}
-
-void MipsCodeFunction(InterCode ic,FILE *fp){
-	/*****************************
-	/* Still need implementation *
-	*****************************/
-	// sp-=4, store ret addr
-	int frame_sz=tempVarNum<<2;
-#ifdef DEBUG
-	printf("to print function,\n");
-#endif
-	offset=0;//for a new func set offset = 0
-	fprintf(fp, "%s:\n",ic->u.sinOp.op->u.name);
-	fputs("\tsubu $sp, $sp, 4\n", fp);
-	fputs("\tsw $fp, 0($sp)\n", fp);
-	fputs("\tmove $fp, $sp\n", fp);
-	fprintf(fp, "\tsubu $sp, $sp, %d\n", frame_sz);
-#ifdef DEBUG
-	printf("end print function.\n");
-#endif
 }
 
 void MipsCodeGoto(InterCode ic,FILE *fp){
@@ -597,9 +608,29 @@ void MipsCodeIfgoto(InterCode ic,FILE *fp){
 	}
 }
 
+void MipsCodeFunction(InterCode ic,FILE *fp){
+	/*****************************
+	/* May need implementation   *
+	*****************************/
+	// sp-=4, store ret addr
+	int frame_sz=tempVarNum<<2;
+#ifdef DEBUG
+	printf("to print function,\n");
+#endif
+	offset=0;//for a new func set offset = 0
+	fprintf(fp, "%s:\n",ic->u.sinOp.op->u.name);
+	fputs("\tsubu $sp, $sp, 4\n", fp);
+	fputs("\tsw $fp, 0($sp)\n", fp);
+	fputs("\tmove $fp, $sp\n", fp);
+	fprintf(fp, "\tsubu $sp, $sp, %d\n", frame_sz);
+#ifdef DEBUG
+	printf("end print function.\n");
+#endif
+}
+
 void MipsCodeReturn(InterCode ic,FILE *fp){
 	/*****************************
-	/* Still need implementation *
+	/* May need implementation   *
 	*****************************/
 	Operand op=ic->u.sinOp.op;
 	int frame_sz=tempVarNum<<2;
@@ -620,13 +651,16 @@ void MipsCodeReturn(InterCode ic,FILE *fp){
 
 void MipsCodeDec(InterCode ic,FILE *fp){
 	/*****************************
-	/* Still need implementation *
+	/* May need implementation   *
 	*****************************/
+	printf("Enter MipsCodeDec!\n");
+	int id=getReg(ic->u.dec.op, fp);
+	fprintf(fp, "li %s, %d\n",regs[id].name, ic->u.dec.size);
 }
 
 void MipsCodeArg(InterCode ic,FILE *fp){
 	/*****************************
-	/* Still need implementation *
+	/* May need implementation   *
 	*****************************/
 	printf("Enter MipsCodeArg!\n");
 	int t_id=getReg(ic->u.sinOp.op,fp);
@@ -652,22 +686,46 @@ void MipsCodeArg(InterCode ic,FILE *fp){
 	++cur_arg;
 }
 
-			// Stack Frame //
-			// ........... //
-			// Parameter 6 //
-			// Parameter 5 //
-			// Return addr //
-			//  Temp var 1 //
-			//  Temp var 2 //
-			//  .......... //
-// Because we use global reg alloc strategy, 
-// so we don't need to save reg
+// Stack Frame //
+			// Saved Reg t0 //  -
+			// Saved Reg t1 //   |>only save
+			// Saved Reg .. //   | temp var in use 
+			// Saved Reg t9 //  -
+			// Saved Reg s0 //  -
+			// Saved Reg s1 //   |>save all
+			// Saved Reg .. //   |
+			// Saved Reg s7 //  -
+			// Parameter n  //
+			// ...........  //
+			// Parameter 6  //
+			// Parameter 5  //
+			// Return addr  //
+			//  Temp var 1  //
+			//  Temp var 2  //
+			//  ..........  //
+// organize stack just like showed above
 void MipsCodeCall(InterCode ic,FILE *fp){
 	/*****************************
-	/* Still need implementation *
+	/* May need implementation  *
 	*****************************/
-	// WRONG WRONG WRONG
 	printf("Enter MipsCodeCall\n");
+	int temp_save_sz=0;
+	bool flag[10];
+	for(int i=8;i<18;i++){
+		if(regs[i].var!=NULL){
+			temp_save_sz+=4;
+			fprintf(fp, "\tsw %s, -%d($sp)\n", regs[i].name, temp_save_sz);
+			flag[i-8]=true;
+		}
+		else{
+			flag[i-8]=false;
+		}
+	}
+	for(int i=18;i<26;i++){
+		temp_save_sz+=4;
+		fprintf(fp, "\tsw %s, -%d($sp)\n", regs[i].name, temp_save_sz);
+	}
+	fprintf(fp, "\taddi $sp, $sp, -%d\n", temp_save_sz);
 	int dec_sp=(cur_arg-4>0)?((cur_arg-4)<<2):0;
 	dec_sp+=4;//for $ra
 	fprintf(fp, "\taddi $sp, $sp, -%d\n", dec_sp);
@@ -692,6 +750,19 @@ void MipsCodeCall(InterCode ic,FILE *fp){
 	fputs("\tlw $ra, 0($sp)\n", fp);
 	fprintf(fp, "\taddi $sp, $sp, %d\n", dec_sp);
 
+	int cur_save_sz=temp_save_sz;
+	for(int i=8;i<18;i++){
+		if(flag[i-8]){
+			cur_save_sz-=4;
+			fprintf(fp, "\tlw %s, %d($sp)\n", regs[i].name, cur_save_sz);
+		}
+	}
+	for(int i=18;i<26;i++){
+		cur_save_sz-=4;
+		fprintf(fp, "\tlw %s, %d($sp)\n", regs[i].name, cur_save_sz);
+	}
+	fprintf(fp, "\taddi $sp, $sp, %d\n", temp_save_sz);
+
 	//re init
 	cur_arg=0;
 	while(arg_head!=NULL){
@@ -705,7 +776,7 @@ void MipsCodeCall(InterCode ic,FILE *fp){
 
 void MipsCodeParam(InterCode ic,FILE *fp){
 	/*****************************
-	/* Still need implementation *
+	/* May need implementation   *
 	*****************************/
 	printf("Enter mips code param\n");
 	Operand op=ic->u.sinOp.op;
