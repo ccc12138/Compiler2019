@@ -18,6 +18,7 @@ extern char* regsNameArr[];
 typedef struct VarDesc_* VarDesc;
 typedef struct RegDesc_* RegDesc;
 typedef struct BasicBlock_* BasicBlock;
+typedef struct ArgList_* ArgList;
 
 struct VarDesc_{//Var Descripter
 	int reg;//register match
@@ -33,6 +34,11 @@ struct RegDesc_ {//Register Descripter
 struct BasicBlock_{
 	InterCode first_ic;
 	InterCode last_ic;
+};
+
+struct ArgList_{
+	int reg_id;
+	ArgList next;
 };
 
 void PrintMips(FILE *fp);
