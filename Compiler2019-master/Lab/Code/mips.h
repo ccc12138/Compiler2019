@@ -37,6 +37,7 @@ struct BasicBlock_{
 };
 
 struct ArgList_{
+	Operand op;
 	int reg_id;
 	ArgList next;
 };

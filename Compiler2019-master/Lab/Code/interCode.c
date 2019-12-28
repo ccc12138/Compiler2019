@@ -63,6 +63,63 @@ bool DeleteCode(InterCode node){
 	}
 	return true;
 }
+void PrintfOCode(InterCode ic){
+		switch(ic->kind){
+			case IC_LABEL://1
+				PRINTF_SINOP("LABEL ");
+				printf(": ");
+				break;//2
+			case IC_FUNCTION:
+				PRINTF_SINOP("FUNCTION ");
+				printf(": ");
+				break;
+			case IC_ASSIGN://3,8,9,10
+				PRINTF_ASSIGN(":= ");
+				break;
+			case IC_ADD://4
+				PRINTF_BINOP("+ ");
+				break;
+			case IC_SUB://5
+				PRINTF_BINOP("- ");
+				break;
+			case IC_MUL://6
+				PRINTF_BINOP("* ");
+				break;
+			case IC_DIV://7
+				PRINTF_BINOP("/ ");
+				break;
+			case IC_GOTO://11
+				PRINTF_SINOP("GOTO ");
+				break;
+			case IC_IFGOTO://12
+				PRINTF_TRIOP();
+				break;
+			case IC_RETURN://13
+				PRINTF_SINOP("RETURN ");
+				break;
+			case IC_DEC://14
+				PRINTF_DEC();
+				break;
+			case IC_ARG://15
+				PRINTF_SINOP("ARG ");
+				break;
+			case IC_CALL://16
+				PRINTF_ASSIGN(":= CALL ");
+				break;
+			case IC_PARAM://17
+				PRINTF_SINOP("PARAM ");
+				break;
+			case IC_READ://18
+				PRINTF_SINOP("READ ");
+				break;
+			case IC_WRITE://19
+				PRINTF_SINOP("WRITE ");
+				break;
+			default:// impossible to reach here
+				assert(0);
+		}
+		printf("\n");
+}
 
 void PrintCode(FILE *fp){
 	assert(codeHead!=NULL&&codeTail!=NULL);
@@ -127,7 +184,6 @@ void PrintCode(FILE *fp){
 	}while(ic!=codeHead);
 	return;
 }
-
 void PrintOperand(Operand op, FILE* fp){
 	assert(op!=NULL&&fp!=NULL);
 	char tempStr[STRLEN];

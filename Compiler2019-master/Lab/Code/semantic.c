@@ -435,7 +435,8 @@ Type MultiArray(treeNode *root,int i,Type b){
 	return Array;
 }
 
-void add_funpara(FieldList head){
+int add_funpara(FieldList head){
+	int i=0;
 	FieldList p = head;
 	while(p!=NULL){
 		struct item* a = create_new();
@@ -445,7 +446,9 @@ void add_funpara(FieldList head){
 		// printf("func para add_item:ID:%s----type:%d\n",a->var_name,a->var_type->kind);
 		add_item(a);
 		p = p->tail;
+		i++;
 	}
+	return i;
 	//printf("add_funpara-----------------\n");
 }
 
@@ -468,7 +471,7 @@ Function FunDec(treeNode* root, Type fun_type, int isDef){
 		root->branch=1;
 		func->para=VarList(root->childp->right->right,isDef);
 		//printf("func->para\n");
-		add_funpara(func->para);
+		func->para_num=add_funpara(func->para);
 		return func;
 	}
 	else if(cnEq(3)&&strcmp(firc(),"ID")==0&&strcmp(secc(),"LP")==0

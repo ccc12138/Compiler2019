@@ -1,5 +1,7 @@
 #include "translate.h"
-
+extern InterCode codeHead;
+extern InterCode codeTail;
+extern unsigned labelNum;
 // DEBUG macro is defined in syntaxTree.h
 
 /* some useful functions */
@@ -92,6 +94,7 @@ void translate_Program(treeNode* root){
 		default:
 			assert(0);
 	}
+	// PrintfCode();
 	return;
 }
 
@@ -547,7 +550,7 @@ void translate_Exp(treeNode* root, Operand* place){
 	char *Exp[15];
 	Exp[1] = "Exp ASSIGNOP Exp";
 	Exp[2] = "Exp AND OR RELOP Exp, NOT Exp";
-	Exp[3] = "Exp + = * / Exp";
+	Exp[3] = "Exp + - * / Exp";
 	Exp[4] = "LP Exp RP";
 	Exp[5] = "- Exp";
 	Exp[6] = "ID LP Args RP";
@@ -563,24 +566,38 @@ void translate_Exp(treeNode* root, Operand* place){
 		case 1:{
 			// Exp ASSIGNOP Exp
 #ifdef DEBUG
-#endif
-			Operand v_t;
-			if ( root->childp->childnum != 1 ){
-				// An array
-				v_t=new_Temp();
-				translate_Exp(root->childp, &v_t);
-			}
-			else{
-				v_t = look_Up(root->childp->childp->data.strd);
-			}
+#endif			
 			Operand t1 = new_Temp();
 			translate_Exp(root->childp->right->right, &t1);
-			
+			if ( t1->kind == OP_CONSTANT ){
+				Operand t1_ = new_Temp();
+				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
+				newcode -> kind = IC_ASSIGN;
+				newcode -> u.assign.right = t1;
+				newcode -> u.assign.left = t1_;
+				InsertCode(newcode);
+				t1 = t1_;
+			}
 			InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
 			newcode -> first_code = false;
 			newcode -> kind = IC_ASSIGN;
 			newcode -> u.assign.right = t1;
-			newcode -> u.assign.left = v_t;
+			Operand v_t=new_Temp();
+			if ( root->childp->childnum != 1 ){
+				// An array
+				translate_Exp(root->childp, &v_t);
+				codeTail-> u.assign.right = codeTail-> u.assign.right->u.addr;
+				Operand t_ = (Operand)malloc(sizeof(struct Operand_));
+				memset(t_,0,sizeof(struct Operand_));
+				t_->kind=OP_TEMP_VAR_ADDR;
+				t_->u.addr=v_t;
+				newcode -> u.assign.left = t_;
+			}
+			else{
+				v_t = look_Up(root->childp->childp->data.strd);
+				newcode -> u.assign.left = v_t;
+			}
 /* ----------------------------------------------------------------------- */
 			assert ( v_t->kind != OP_CONSTANT );
 			if ( v_t->kind == OP_VARIABLE || v_t->kind == OP_VAR_ADDR || v_t->kind == OP_GET_ADDR ){
@@ -701,7 +718,32 @@ void translate_Exp(treeNode* root, Operand* place){
 			Operand t2 = new_Temp();
 			translate_Exp(root->childp,&t1);
 			translate_Exp(root->childp->right->right,&t2);
-			if ( place != NULL )
+			if (t1->kind==OP_CONSTANT&&t2->kind==OP_CONSTANT&&place != NULL)
+			{
+				int res=0;
+				if ( strcmp(secc(),"PLUS")==0 ){
+					res=t1->u.value+t2->u.value;
+				}
+				if ( strcmp(secc(),"MINUS")==0 ){
+					res=t1->u.value-t2->u.value;
+				}
+				if ( strcmp(secc(),"STAR")==0 ){
+					res=t1->u.value*t2->u.value;
+				}
+				if ( strcmp(secc(),"DIV")==0 ){
+					res=t1->u.value/t2->u.value;
+				}
+				Operand con = malloc( sizeof( struct Operand_ ));
+				con->kind=OP_CONSTANT;
+				con->u.value=res;
+				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
+				newcode -> u.assign.left = *place;
+				newcode -> u.assign.right = con;
+				newcode->def_tbitv = newcode->def_tbitv | (1<<((*place)->u.var_no));
+				InsertCode(newcode);
+			}
+			else if ( place != NULL )
 			{
 				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
 				newcode -> first_code = false;
@@ -716,10 +758,65 @@ void translate_Exp(treeNode* root, Operand* place){
 				}
 				if ( strcmp(secc(),"STAR")==0 ){
 					newcode -> kind = IC_MUL;
+					if ( t1 -> kind == OP_CONSTANT ){
+						Operand t1_ = new_Temp();
+						InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+						newcode__ -> first_code = false;
+						newcode__ -> kind = IC_ASSIGN;
+						newcode__ -> u.assign.right = t1;
+						newcode__ -> u.assign.left = t1_;
+/* ----------------------------------------------------------------------- */
+						newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t1_->u.var_no));
+/* ----------------------------------------------------------------------- */
+						InsertCode(newcode__);
+						newcode -> u.binOp.op1 = t1_;	
+						
+					}
+					if ( t2 -> kind == OP_CONSTANT ){
+						Operand t2_ = new_Temp();
+						InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+						newcode__ -> first_code = false;
+						newcode__ -> kind = IC_ASSIGN;
+						newcode__ -> u.assign.right = t2;
+						newcode__ -> u.assign.left = t2_;
+/* ----------------------------------------------------------------------- */
+						newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t2_->u.var_no));
+/* ----------------------------------------------------------------------- */
+						InsertCode(newcode__);
+						newcode -> u.binOp.op2 = t2_;	
+					}
 				}
 				if ( strcmp(secc(),"DIV")==0 ){
 					newcode -> kind = IC_DIV;
+					if ( t1 -> kind == OP_CONSTANT ){
+						Operand t1_ = new_Temp();
+						InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+						newcode__ -> first_code = false;
+						newcode__ -> kind = IC_ASSIGN;
+						newcode__ -> u.assign.right = t1;
+						newcode__ -> u.assign.left = t1_;
+/* ----------------------------------------------------------------------- */
+						newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t1_->u.var_no));
+/* ----------------------------------------------------------------------- */
+						InsertCode(newcode__);
+						newcode -> u.binOp.op1 = t1_;	
+						
+					}
+					if ( t2 -> kind == OP_CONSTANT ){
+						Operand t2_ = new_Temp();
+						InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+						newcode__ -> first_code = false;
+						newcode__ -> kind = IC_ASSIGN;
+						newcode__ -> u.assign.right = t2;
+						newcode__ -> u.assign.left = t2_;
+/* ----------------------------------------------------------------------- */
+						newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t2_->u.var_no));
+/* ----------------------------------------------------------------------- */
+						InsertCode(newcode__);
+						newcode -> u.binOp.op2 = t2_;	
+					}
 				}
+
 /* ----------------------------------------------------------------------- */
 				assert ( (*place)->kind != OP_CONSTANT );
 				if ( (*place)->kind == OP_VARIABLE || (*place)->kind == OP_VAR_ADDR || (*place)->kind == OP_GET_ADDR ){
@@ -762,7 +859,17 @@ void translate_Exp(treeNode* root, Operand* place){
 			// - Exp
 			Operand t2 = new_Temp();
 			translate_Exp(root->childp->right,&t2);
-			if ( place != NULL )
+			if ( place != NULL && t2->kind == OP_CONSTANT)
+			{
+				t2->u.value=-t2->u.value;
+				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+				newcode -> first_code = false;
+				newcode -> u.assign.left = *place;
+				newcode -> u.assign.right = t2;
+				newcode->def_tbitv = newcode->def_tbitv | (1<<((*place)->u.var_no));
+				InsertCode(newcode);
+			}
+			if ( place != NULL && t2->kind != OP_CONSTANT)
 			{
 				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
 				newcode -> first_code = false;
@@ -803,6 +910,7 @@ void translate_Exp(treeNode* root, Operand* place){
 			Operand arg_list[MAX_LEN];
 			int size = 0;
 			translate_Args(root->childp->right->right, arg_list, &size);
+			// printf("%d\n",arg_list[0]->kind);
 			if (strcmp(root->childp->data.strd, "write")==0){
 				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
 				newcode -> first_code = false;
@@ -843,6 +951,7 @@ void translate_Exp(treeNode* root, Operand* place){
 					}
 /* ----------------------------------------------------------------------- */
 					InsertCode(newcode);
+					//PrintfOCode(newcode);
 				}
 				struct item* funcp = find_item(root->childp->data.strd, FUNCTION);
 				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
@@ -970,8 +1079,21 @@ Args -> Exp COMMA Args | Exp
 		while(t1->kind==OP_VAR_ADDR)
 			t1 = t1->u.addr;
 	}
-	arg_list[*size] = t1;
-	(*size) ++;
+	if (t1->kind==OP_CONSTANT){
+		Operand t1_ = new_Temp();
+		InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+		newcode__ -> first_code = false;
+		newcode__ -> kind = IC_ASSIGN;
+		newcode__ -> u.assign.right = t1;
+		newcode__ -> u.assign.left = t1_;
+		InsertCode(newcode__);
+		arg_list[*size] = t1_;
+		(*size) ++;
+	}
+	else{
+		arg_list[*size] = t1;
+		(*size) ++;
+	}
 	if ( root -> childnum == 3 )
 	{
 		translate_Args(root->childp->right->right, arg_list, size);
@@ -1010,6 +1132,33 @@ void translate_Cond(treeNode* root, Operand label_true, Operand label_false){
 			newcode -> u.triOp.op2 = t2;
 			newcode -> u.triOp.label = label_true;
 			newcode -> u.triOp.relop = op;
+			if ( t1 -> kind == OP_CONSTANT ){
+				Operand t1_ = new_Temp();
+				InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+				newcode__ -> first_code = false;
+				newcode__ -> kind = IC_ASSIGN;
+				newcode__ -> u.assign.right = t1;
+				newcode__ -> u.assign.left = t1_;
+/* ----------------------------------------------------------------------- */
+				newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t1_->u.var_no));
+/* ----------------------------------------------------------------------- */
+				InsertCode(newcode__);
+				newcode -> u.triOp.op1 = t1_;		
+			}
+			if ( t2 -> kind == OP_CONSTANT ){
+				Operand t2_ = new_Temp();
+				InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+				newcode__ -> first_code = false;
+				newcode__ -> kind = IC_ASSIGN;
+				newcode__ -> u.assign.right = t2;
+				newcode__ -> u.assign.left = t2_;
+/* ----------------------------------------------------------------------- */
+				newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t2_->u.var_no));
+/* ----------------------------------------------------------------------- */
+				InsertCode(newcode__);
+				newcode -> u.triOp.op2 = t2_;	
+			}
+
 /* ----------------------------------------------------------------------- */
 			if ( t1->kind != OP_CONSTANT ){
 				if ( t1->kind == OP_VARIABLE ){
@@ -1155,52 +1304,99 @@ void translate_Array(treeNode* root,  Operand* place){
 /* ----------------------------------------------------------------------- */
 			InsertCode(newcod);
 			int cnt=-1;
+			int cnt_=-1;
 			int cur_size=1;
 			while(p->branch!=10){
 				Operand t1=new_Temp();
 				translate_Exp(p->childp->right->right,&t1);
-				Operand t2=(Operand)malloc(sizeof(struct Operand_));
-				memset(t2,0,sizeof(struct Operand_));
-				t2->kind=OP_CONSTANT;
+				Operand t2_=(Operand)malloc(sizeof(struct Operand_));
+				memset(t2_,0,sizeof(struct Operand_));
+				t2_->kind=OP_CONSTANT;
 				if(cnt==-1)
 					cur_size=1;
 				else
 					cur_size=cur_size*size[cnt];
-				t2->u.value = typesize*cur_size;
-				Operand t3=new_Temp();
-				InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
-				newcode -> first_code = false;
-				newcode -> u.binOp.result = t3;
-				newcode -> u.binOp.op1 = t1;
-				newcode -> u.binOp.op2 = t2;
-				newcode -> kind = IC_MUL;
+				t2_->u.value = typesize*cur_size;
+
+				Operand t2=new_Temp();
+				InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+				newcode__ -> first_code = false;
+				newcode__ -> kind = IC_ASSIGN;
+				newcode__ -> u.assign.right = t2_;
+				newcode__ -> u.assign.left = t2;
 /* ----------------------------------------------------------------------- */
-				assert ( t3->kind == OP_TEMP_VAR );
-				newcode->def_tbitv = newcode->def_tbitv | (1<<(t3->u.var_no));
-				if ( t1->kind != OP_CONSTANT ){
-					if ( t1->kind == OP_VARIABLE ){
-						newcode->use_vbitv = newcode->use_vbitv | (1<<(t1->u.var_no));
-					}
-					else{
-						assert ( t1->kind == OP_TEMP_VAR );
-						newcode->use_tbitv = newcode->use_tbitv | (1<<(t1->u.var_no));
-					}
+				newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t2->u.var_no));
+/* ----------------------------------------------------------------------- */
+				InsertCode(newcode__);
+
+				Operand t3;
+				if (t1->kind==OP_CONSTANT&&t2->kind==OP_CONSTANT)
+				{
+					t1->u.value=t1->u.value*t2->u.value;
+					t3=t1;
 				}
-/* ----------------------------------------------------------------------- */
-				InsertCode(newcode);
+				else{
+					t3=new_Temp();
+					InterCode newcode = malloc ( sizeof ( struct InterCode_ ) );
+					newcode -> first_code = false;
+					newcode -> u.binOp.result = t3;
+					newcode -> u.binOp.op1 = t1;
+					newcode -> u.binOp.op2 = t2;
+					newcode -> kind = IC_MUL;
+					if ( t1 -> kind == OP_CONSTANT ){
+						Operand t1_ = new_Temp();
+						InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+						newcode__ -> first_code = false;
+						newcode__ -> kind = IC_ASSIGN;
+						newcode__ -> u.assign.right = t1;
+						newcode__ -> u.assign.left = t1_;
+	/* ----------------------------------------------------------------------- */
+						newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t1_->u.var_no));
+	/* ----------------------------------------------------------------------- */
+						InsertCode(newcode__);
+						newcode -> u.binOp.op1 = t1_;	
+					}
+					if ( t2 -> kind == OP_CONSTANT ){
+						Operand t2_ = new_Temp();
+						InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+						newcode__ -> first_code = false;
+						newcode__ -> kind = IC_ASSIGN;
+						newcode__ -> u.assign.right = t2;
+						newcode__ -> u.assign.left = t2_;
+	/* ----------------------------------------------------------------------- */
+						newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t2_->u.var_no));
+	/* ----------------------------------------------------------------------- */
+						InsertCode(newcode__);
+						newcode -> u.binOp.op2 = t2_;	
+					}
+	/* ----------------------------------------------------------------------- */
+					assert ( t3->kind == OP_TEMP_VAR );
+					newcode->def_tbitv = newcode->def_tbitv | (1<<(t3->u.var_no));
+					if ( t1->kind != OP_CONSTANT ){
+						if ( t1->kind == OP_VARIABLE ){
+							newcode->use_vbitv = newcode->use_vbitv | (1<<(t1->u.var_no));
+						}
+						else{
+							assert ( t1->kind == OP_TEMP_VAR );
+							newcode->use_tbitv = newcode->use_tbitv | (1<<(t1->u.var_no));
+						}
+					}
+	/* ----------------------------------------------------------------------- */
+					InsertCode(newcode);
+				}
 
 				InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
-				newcode -> first_code = false;
+				newcode_ -> first_code = false;
 				newcode_ -> u.binOp.result = bias;
 				newcode_ -> u.binOp.op1 = bias;
 				newcode_ -> u.binOp.op2 = t3;
 				newcode_ -> kind = IC_ADD;
 /* ----------------------------------------------------------------------- */
 				assert ( bias->kind == OP_TEMP_VAR );
-				newcode->def_tbitv = newcode->def_tbitv | (1<<(bias->u.var_no));
-				newcode->use_tbitv = newcode->use_tbitv | (1<<(bias->u.var_no));
-				assert ( t3->kind == OP_TEMP_VAR );
-				newcode->use_tbitv = newcode->use_tbitv | (1<<(t3->u.var_no));
+				newcode_->def_tbitv = newcode_->def_tbitv | (1<<(bias->u.var_no));
+				newcode_->use_tbitv = newcode_->use_tbitv | (1<<(bias->u.var_no));
+				if ( t3->kind == OP_TEMP_VAR )
+					newcode_->use_tbitv = newcode_->use_tbitv | (1<<(t3->u.var_no));
 /* ----------------------------------------------------------------------- */
 				InsertCode(newcode_);
 				p = p->childp;
@@ -1209,38 +1405,70 @@ void translate_Array(treeNode* root,  Operand* place){
 			}
 
 			Operand t4=(Operand)malloc(sizeof(struct Operand_));
+			Operand t4_;
 			translate_Exp(p,&t4);
-			if (t4->kind==OP_VARIABLE)
+			if (t4->kind==OP_VARIABLE){
+				cnt_ ++;
 				t4->kind=OP_GET_ADDR;
-			while(t4->kind==OP_VAR_ADDR)
-				t4 = t4->u.addr;
+				t4_ = new_Temp();
+				InterCode newcode__ = malloc ( sizeof ( struct InterCode_ ) );
+				newcode__ -> first_code = false;
+				newcode__ -> kind = IC_ASSIGN;
+				newcode__ -> u.assign.right = t4;
+				newcode__ -> u.assign.left = t4_;
+/* ----------------------------------------------------------------------- */
+				newcode__->def_tbitv = newcode__->def_tbitv | (1<<(t4_->u.var_no));
+/* ----------------------------------------------------------------------- */
+				InsertCode(newcode__);
+			}
+			else{
+				t4_ = t4;
+				while(t4_->kind==OP_VAR_ADDR){
+					cnt_ ++;
+					t4_ = t4_->u.addr;
+				}
+			}
 
 			Operand t5=new_Temp();
 			InterCode newcode_ = malloc ( sizeof ( struct InterCode_ ) );
 			newcode_ -> first_code = false;
 			newcode_ -> u.binOp.result = t5;
-			newcode_ -> u.binOp.op1 = bias;
-			newcode_ -> u.binOp.op2 = t4;
-			newcode_ -> kind = IC_ADD;
+			newcode_ -> u.binOp.op1 = t4_;
+			newcode_ -> u.binOp.op2 = bias;
+			newcode_ -> kind = IC_SUB;
 /* ----------------------------------------------------------------------- */
 			assert ( t5->kind == OP_TEMP_VAR );
 			newcode_->def_tbitv = newcode_->def_tbitv | (1<<(t5->u.var_no));
 			assert ( bias->kind == OP_TEMP_VAR );
 			newcode_->use_tbitv = newcode_->use_tbitv | (1<<(bias->u.var_no));
 
-			assert ( t4->kind == OP_GET_ADDR || t4->kind == OP_VARIABLE );
-			newcode_->use_vbitv = newcode_->use_vbitv | (1<<(t4->u.var_no));
+			assert ( t4_->kind == OP_GET_ADDR || t4_->kind == OP_TEMP_VAR || t4_->kind == OP_VARIABLE );
+			newcode_->use_vbitv = newcode_->use_vbitv | (1<<(t4_->u.var_no));
 /* ----------------------------------------------------------------------- */
-			InsertCode(newcode_);	
+			InsertCode(newcode_);
+
 			// PrintfCode();
 			if( place != NULL ){
-				Operand t6=(Operand)malloc(sizeof(struct Operand_));
-				memset(t6,0,sizeof(struct Operand_));
-				t6->kind = OP_TEMP_VAR_ADDR;
-				t6->u.addr = (Operand)malloc(sizeof(struct Operand_));
-				t6->u.addr->kind = OP_TEMP_VAR;
-				t6->u.addr->u.var_no = t5->u.var_no;
-				(*place) = t6;
+				if ( cnt == cnt_ ){
+					// printf("%d\n",t5->kind);
+					Operand t5_n = (Operand)malloc(sizeof(struct Operand_));
+					t5_n->kind = OP_TEMP_VAR_ADDR;
+					t5_n->u.addr = t5;
+					InterCode newcode___ = malloc ( sizeof ( struct InterCode_ ) );
+					newcode___ -> first_code = false;
+					newcode___ -> kind = IC_ASSIGN;
+					newcode___ -> u.assign.right = t5_n;
+					newcode___ -> u.assign.left = *place;
+/* ----------------------------------------------------------------------- */
+					newcode___->use_tbitv = newcode___->use_tbitv | (1<<(t5_n->u.var_no));
+/* ----------------------------------------------------------------------- */
+					InsertCode(newcode___);
+					// printf("here\n");
+				}
+				else{
+					// printf("%d %d\n",cnt,cnt_);
+					assert(0);
+				}
 				// PrintfCode();
 			}
 		}

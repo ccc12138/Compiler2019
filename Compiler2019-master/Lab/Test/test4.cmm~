@@ -7,16 +7,11 @@ int change(int x,int y)
 
 int hanoi(int n,int a,int b,int c)
 {
-    if(n == 1)
-    {
-        change(a, c);
-    }
-    else
-    {
-        hanoi(n-1, a, c, b);
-        change(a, c); 
-        hanoi(n-1, b, a, c);
-    }
+	write(n);
+	write(a);
+	write(b);
+	write(c);
+
     return 0;
 }
 int main()

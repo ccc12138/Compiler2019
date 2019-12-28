@@ -131,6 +131,7 @@ bool InsertCode(InterCode node);
 bool InsertCode_func(char * func_name);
 bool InsertCode_label(Operand label);
 bool DeleteCode(InterCode node);
+void PrintfOCode(InterCode ic);
 void PrintCode(FILE* fp);// fp should comes from main.c
 void PrintOperand(Operand op, FILE* fp);// fp should comes from PrintCode
 void PrintfCode();
